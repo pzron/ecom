@@ -50,12 +50,14 @@ export function Navbar() {
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           </div>
 
-          <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 rounded-full">
-            <ShoppingCart className="w-5 h-5" />
+          <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 rounded-full" asChild>
+            <Link href="/cart">
+              <ShoppingCart className="w-5 h-5" />
+            </Link>
           </Button>
           
-          <Button className="hidden md:flex bg-primary hover:bg-primary/90 text-white rounded-full px-6 font-medium shadow-[0_0_15px_rgba(168,85,247,0.5)] transition-all hover:shadow-[0_0_25px_rgba(168,85,247,0.7)]">
-            Sign In
+          <Button className="hidden md:flex bg-primary hover:bg-primary/90 text-white rounded-full px-6 font-medium shadow-[0_0_15px_rgba(168,85,247,0.5)] transition-all hover:shadow-[0_0_25px_rgba(168,85,247,0.7)]" asChild>
+            <Link href="/signup">Sign In</Link>
           </Button>
 
           {/* Mobile Menu */}
