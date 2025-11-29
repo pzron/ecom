@@ -4,8 +4,9 @@ import { ArrowRight, Box, Star, Headset, Globe, Sparkles, Zap, Shield, Truck } f
 import { Link } from "wouter";
 import { Canvas } from "@react-three/fiber";
 import { Float, OrbitControls, Environment } from "@react-three/drei";
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useRef, useState, useEffect } from "react";
 import * as THREE from "three";
+import { WebGLErrorBoundary, Default3DFallback } from "./3d/webgl-check";
 
 function FloatingCube({ position, color, size = 0.5, rotationSpeed = 1 }: { 
   position: [number, number, number]; 
@@ -54,31 +55,52 @@ function FloatingSphere({ position, color, size = 0.3 }: {
 }
 
 function HeroScene() {
+  const [hasWebGL, setHasWebGL] = useState(true);
+
+  useEffect(() => {
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      setHasWebGL(!!gl);
+    } catch (e) {
+      setHasWebGL(false);
+    }
+  }, []);
+
+  if (!hasWebGL) {
+    return <Default3DFallback className="absolute inset-0" />;
+  }
+
   return (
-    <Canvas camera={{ position: [0, 0, 6], fov: 50 }}>
-      <ambientLight intensity={0.3} />
-      <spotLight position={[10, 10, 10]} intensity={0.8} />
-      <pointLight position={[-10, -10, -10]} intensity={0.3} color="#a855f7" />
-      
-      <Suspense fallback={null}>
-        <FloatingCube position={[-2.5, 1, 0]} color="#a855f7" size={0.6} />
-        <FloatingCube position={[2.5, -0.5, -1]} color="#ec4899" size={0.5} rotationSpeed={1.5} />
-        <FloatingSphere position={[-1.5, -1.5, 0.5]} color="#06b6d4" size={0.35} />
-        <FloatingSphere position={[1.5, 1.5, -0.5]} color="#f59e0b" size={0.25} />
-        <FloatingCube position={[0, 2, -2]} color="#10b981" size={0.4} rotationSpeed={0.5} />
+    <WebGLErrorBoundary fallback={<Default3DFallback className="absolute inset-0" />}>
+      <Canvas 
+        camera={{ position: [0, 0, 6], fov: 50 }}
+        gl={{ failIfMajorPerformanceCaveat: false }}
+      >
+        <ambientLight intensity={0.3} />
+        <spotLight position={[10, 10, 10]} intensity={0.8} />
+        <pointLight position={[-10, -10, -10]} intensity={0.3} color="#a855f7" />
         
-        <Environment preset="city" />
-      </Suspense>
-      
-      <OrbitControls 
-        enableZoom={false} 
-        enablePan={false}
-        autoRotate 
-        autoRotateSpeed={0.5}
-        maxPolarAngle={Math.PI / 2}
-        minPolarAngle={Math.PI / 3}
-      />
-    </Canvas>
+        <Suspense fallback={null}>
+          <FloatingCube position={[-2.5, 1, 0]} color="#a855f7" size={0.6} />
+          <FloatingCube position={[2.5, -0.5, -1]} color="#ec4899" size={0.5} rotationSpeed={1.5} />
+          <FloatingSphere position={[-1.5, -1.5, 0.5]} color="#06b6d4" size={0.35} />
+          <FloatingSphere position={[1.5, 1.5, -0.5]} color="#f59e0b" size={0.25} />
+          <FloatingCube position={[0, 2, -2]} color="#10b981" size={0.4} rotationSpeed={0.5} />
+          
+          <Environment preset="city" />
+        </Suspense>
+        
+        <OrbitControls 
+          enableZoom={false} 
+          enablePan={false}
+          autoRotate 
+          autoRotateSpeed={0.5}
+          maxPolarAngle={Math.PI / 2}
+          minPolarAngle={Math.PI / 3}
+        />
+      </Canvas>
+    </WebGLErrorBoundary>
   );
 }
 

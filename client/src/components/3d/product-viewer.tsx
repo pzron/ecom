@@ -1,24 +1,18 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { 
   OrbitControls, 
-  Stage, 
-  PresentationControls, 
   Float, 
   Environment,
-  ContactShadows,
   Sparkles,
   MeshReflectorMaterial,
-  useEnvironment,
-  Lightformer,
-  AccumulativeShadows,
-  RandomizedLight,
   Center
 } from "@react-three/drei";
 import { Suspense, useRef, useState, useCallback, useEffect } from "react";
-import { Loader, RotateCw, ZoomIn, ZoomOut, Layers, Maximize, Play, Pause, Eye, Sun, Moon } from "lucide-react";
+import { RotateCw, ZoomIn, ZoomOut, Layers, Maximize, Play, Pause, Eye, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import * as THREE from "three";
 import { motion, AnimatePresence } from "framer-motion";
+import { WebGLErrorBoundary, Default3DFallback, useWebGLSupport } from "./webgl-check";
 
 function GlowingSphere({ position, color, intensity = 1 }: { position: [number, number, number]; color: string; intensity?: number }) {
   const meshRef = useRef<THREE.Mesh>(null);
@@ -312,44 +306,50 @@ export function ProductViewer({
         </Button>
       </motion.div>
       
-      <Canvas
-        shadows
-        dpr={[1, 2]}
-        camera={{ position: [0, 1, 5], fov: 45 }}
-        gl={{ 
-          antialias: true,
-          toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: isDarkMode ? 1 : 1.5
-        }}
-      >
-        <color attach="background" args={[isDarkMode ? '#0a0a0f' : '#1a1a2e']} />
-        <fog attach="fog" args={[isDarkMode ? '#0a0a0f' : '#1a1a2e', 5, 20]} />
-        
-        <Suspense fallback={<LoadingFallback />}>
-          <CinematicLighting isDarkMode={isDarkMode} />
+      <WebGLErrorBoundary fallback={<Default3DFallback />}>
+        <Canvas
+          shadows
+          dpr={[1, 2]}
+          camera={{ position: [0, 1, 5], fov: 45 }}
+          gl={{ 
+            antialias: true,
+            toneMapping: THREE.ACESFilmicToneMapping,
+            toneMappingExposure: isDarkMode ? 1 : 1.5,
+            failIfMajorPerformanceCaveat: false
+          }}
+          onCreated={({ gl }) => {
+            gl.setClearColor('#0a0a0f');
+          }}
+        >
+          <color attach="background" args={[isDarkMode ? '#0a0a0f' : '#1a1a2e']} />
+          <fog attach="fog" args={[isDarkMode ? '#0a0a0f' : '#1a1a2e', 5, 20]} />
           
-          <Center>
-            <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-              <PremiumProduct 
-                color={color} 
-                isExploded={isExploded}
-                productType={productType}
-              />
-            </Float>
-          </Center>
-          
-          {showFloor && <ReflectiveFloor />}
-          {showParticles && <FloatingParticles />}
-          
-          <Environment preset="city" background={false} />
-          
-          <CameraController 
-            autoRotate={isAutoRotate} 
-            zoom={zoom}
-            onZoomChange={setZoom}
-          />
-        </Suspense>
-      </Canvas>
+          <Suspense fallback={<LoadingFallback />}>
+            <CinematicLighting isDarkMode={isDarkMode} />
+            
+            <Center>
+              <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+                <PremiumProduct 
+                  color={color} 
+                  isExploded={isExploded}
+                  productType={productType}
+                />
+              </Float>
+            </Center>
+            
+            {showFloor && <ReflectiveFloor />}
+            {showParticles && <FloatingParticles />}
+            
+            <Environment preset="city" background={false} />
+            
+            <CameraController 
+              autoRotate={isAutoRotate} 
+              zoom={zoom}
+              onZoomChange={setZoom}
+            />
+          </Suspense>
+        </Canvas>
+      </WebGLErrorBoundary>
       
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
