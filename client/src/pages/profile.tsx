@@ -7,7 +7,9 @@ import {
   User, Package, Heart, Award, Settings, LogOut, MapPin, CreditCard, Clock,
   ChevronRight, Edit2, Trash2, Plus, Bell, Shield, 
   Mail, Phone, Calendar, Truck, MapPinCheck, RotateCcw, Eye,
-  Lock, Download, Check, AlertCircle, CheckCircle, Circle
+  Lock, Download, Check, AlertCircle, CheckCircle, Circle, Smartphone,
+  Fingerprint, Key, Zap, Trash, HardDrive, Users, Activity, Download as DownloadIcon,
+  Eye as EyeIcon, EyeOff, Wifi, WifiOff, FileText, BarChart3, DollarSign
 } from "lucide-react";
 import { useAuthStore } from "@/stores/auth";
 import { useState } from "react";
@@ -19,6 +21,12 @@ export default function ProfilePage() {
   const [editMode, setEditMode] = useState(false);
   const [affiliateStatus, setAffiliateStatus] = useState<"none" | "pending" | "approved">("none");
   const [showAffiliateModal, setShowAffiliateModal] = useState(false);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [loginData, setLoginData] = useState([
+    { device: "Chrome on Windows", date: "Today, 2:30 PM", location: "New York, USA", status: "current" },
+    { device: "Safari on iPhone", date: "Yesterday, 10:15 AM", location: "New York, USA", status: "active" },
+    { device: "Mobile App", date: "3 days ago", location: "Boston, USA", status: "inactive" },
+  ]);
 
   if (!isAuthenticated) {
     return (
@@ -40,6 +48,7 @@ export default function ProfilePage() {
     { id: "overview", icon: User, label: "Overview" },
     { id: "orders", icon: Package, label: "Orders" },
     { id: "tracking", icon: Truck, label: "Order Tracking" },
+    { id: "activity", icon: Activity, label: "Activity" },
     { id: "wishlist", icon: Heart, label: "Wishlist" },
     { id: "affiliate", icon: Award, label: "Affiliate Program" },
     { id: "addresses", icon: MapPin, label: "Addresses" },
@@ -54,13 +63,26 @@ export default function ProfilePage() {
   ];
 
   const trackingDetails = [
-    { id: "ORD-2024-001", stage: "in_transit", stages: [
-      { name: "Order Confirmed", done: true, date: "Nov 30, 10:00 AM" },
-      { name: "Shipped", done: true, date: "Nov 30, 2:30 PM" },
-      { name: "In Transit", done: true, date: "Dec 1, 5:00 AM" },
-      { name: "Out for Delivery", done: false, date: "Expected Dec 2" },
-      { name: "Delivered", done: false, date: "Est. Dec 2" },
-    ], location: "NYC Distribution Center", coordinates: "40.7128, -74.0060" }
+    { 
+      id: "ORD-2024-001", 
+      stage: "in_transit", 
+      stages: [
+        { name: "Order Confirmed", done: true, date: "Nov 30, 10:00 AM" },
+        { name: "Shipped", done: true, date: "Nov 30, 2:30 PM" },
+        { name: "In Transit", done: true, date: "Dec 1, 5:00 AM" },
+        { name: "Out for Delivery", done: false, date: "Expected Dec 2" },
+        { name: "Delivered", done: false, date: "Est. Dec 2" },
+      ], 
+      location: "NYC Distribution Center", 
+      coordinates: "40.7128, -74.0060" 
+    }
+  ];
+
+  const activities = [
+    { type: "order", title: "Order Placed", desc: "Order ORD-2024-001 confirmed", time: "Today, 10:00 AM", icon: Package },
+    { type: "payment", title: "Payment Processed", desc: "$2,053.76 charged to Visa", time: "Today, 10:05 AM", icon: CreditCard },
+    { type: "account", title: "Profile Updated", desc: "Email address changed", time: "Nov 28, 3:20 PM", icon: User },
+    { type: "wishlist", title: "Item Added to Wishlist", desc: "PlayStation 5 Pro", time: "Nov 25, 2:15 PM", icon: Heart },
   ];
 
   const wishlistItems = [
@@ -86,6 +108,19 @@ export default function ProfilePage() {
       case "pending": return <Circle className="w-5 h-5 text-yellow-400" />;
       default: return <Circle className="w-5 h-5 text-gray-400" />;
     }
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
   };
 
   return (
@@ -180,42 +215,63 @@ export default function ProfilePage() {
               </motion.div>
             )}
 
-            {/* Order Tracking */}
+            {/* Order Tracking with Animations */}
             {activeNav === "tracking" && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                 <div className="bg-gradient-to-br from-white/10 via-white/5 to-transparent border border-white/10 rounded-2xl backdrop-blur-xl p-6">
                   <h2 className="text-2xl font-bold text-white mb-6">Order Tracking</h2>
                   {trackingDetails.map((order) => (
-                    <motion.div key={order.id} className="space-y-6">
-                      <div className="flex items-center justify-between">
+                    <motion.div key={order.id} className="space-y-6" variants={containerVariants} initial="hidden" animate="visible">
+                      <motion.div variants={itemVariants} className="flex items-center justify-between">
                         <div><p className="font-bold text-white">{order.id}</p>
                           <p className="text-sm text-muted-foreground mt-1">{order.location}</p></div>
                         <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">In Transit</Badge>
-                      </div>
+                      </motion.div>
                       
-                      <div className="space-y-3">
+                      <motion.div className="space-y-3" variants={containerVariants} initial="hidden" animate="visible">
                         {order.stages.map((stage, i) => (
-                          <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }} className="flex gap-4">
+                          <motion.div 
+                            key={i} 
+                            variants={itemVariants}
+                            className="flex gap-4"
+                            whileHover={{ x: 5 }}
+                          >
                             <div className="flex flex-col items-center">
-                              <motion.div className={`w-8 h-8 rounded-full flex items-center justify-center ${stage.done ? "bg-green-500/20 border border-green-500/30" : "bg-white/5 border border-white/10"}`}>
+                              <motion.div 
+                                className={`w-8 h-8 rounded-full flex items-center justify-center ${stage.done ? "bg-green-500/20 border border-green-500/30" : "bg-white/5 border border-white/10"}`}
+                                animate={!stage.done ? { scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] } : {}}
+                                transition={{ repeat: Infinity, duration: 2 }}
+                              >
                                 {stage.done ? <CheckCircle className="w-5 h-5 text-green-400" /> : <Circle className="w-5 h-5 text-white/30" />}
                               </motion.div>
-                              {i < order.stages.length - 1 && <div className={`w-1 h-8 ${stage.done ? "bg-green-500/30" : "bg-white/5"}`} />}
+                              {i < order.stages.length - 1 && (
+                                <motion.div 
+                                  className={`w-1 h-8 ${stage.done ? "bg-green-500/30" : "bg-white/5"}`}
+                                  initial={{ scaleY: 0 }}
+                                  animate={{ scaleY: 1 }}
+                                  transition={{ delay: 0.2 + i * 0.1 }}
+                                />
+                              )}
                             </div>
-                            <div className="pt-1">
+                            <motion.div 
+                              className="pt-1"
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: 0.1 + i * 0.1 }}
+                            >
                               <p className={`font-semibold ${stage.done ? "text-green-400" : "text-muted-foreground"}`}>{stage.name}</p>
                               <p className="text-xs text-muted-foreground">{stage.date}</p>
-                            </div>
+                            </motion.div>
                           </motion.div>
                         ))}
-                      </div>
+                      </motion.div>
                     </motion.div>
                   ))}
                 </div>
               </motion.div>
             )}
 
-            {/* Orders with Shipping/Location/Return Status */}
+            {/* Orders */}
             {activeNav === "orders" && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                 <div className="bg-gradient-to-br from-white/10 via-white/5 to-transparent border border-white/10 rounded-2xl backdrop-blur-xl p-6">
@@ -270,6 +326,29 @@ export default function ProfilePage() {
               </motion.div>
             )}
 
+            {/* Activity */}
+            {activeNav === "activity" && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                <div className="bg-gradient-to-br from-white/10 via-white/5 to-transparent border border-white/10 rounded-2xl backdrop-blur-xl p-6">
+                  <h2 className="text-2xl font-bold text-white mb-6">Activity Log</h2>
+                  <motion.div className="space-y-3" variants={containerVariants} initial="hidden" animate="visible">
+                    {activities.map((activity, i) => (
+                      <motion.div key={i} variants={itemVariants} className="flex gap-4 p-4 bg-white/5 border border-white/10 rounded-lg hover:border-white/20 transition-all">
+                        <div className="p-3 bg-primary/10 rounded-lg h-fit">
+                          <activity.icon className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-white">{activity.title}</p>
+                          <p className="text-sm text-muted-foreground">{activity.desc}</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground whitespace-nowrap pt-1">{activity.time}</p>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+
             {/* Wishlist */}
             {activeNav === "wishlist" && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-br from-white/10 via-white/5 to-transparent border border-white/10 rounded-2xl backdrop-blur-xl p-6">
@@ -290,7 +369,7 @@ export default function ProfilePage() {
               </motion.div>
             )}
 
-            {/* Affiliate Program - Simplified */}
+            {/* Affiliate Program */}
             {activeNav === "affiliate" && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                 <div className="bg-gradient-to-br from-white/10 via-white/5 to-transparent border border-white/10 rounded-2xl backdrop-blur-xl p-6">
@@ -390,36 +469,127 @@ export default function ProfilePage() {
               </motion.div>
             )}
 
-            {/* Settings - Enhanced */}
+            {/* Settings */}
             {activeNav === "settings" && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                 <div className="bg-gradient-to-br from-white/10 via-white/5 to-transparent border border-white/10 rounded-2xl backdrop-blur-xl p-6">
                   <h2 className="text-2xl font-bold text-white mb-6">Settings</h2>
                   
                   <div className="space-y-6">
+                    {/* Security & Privacy - COMPLETE */}
                     <div>
                       <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> Security & Privacy</h3>
                       <div className="space-y-3">
-                        {[
-                          { label: "Change Password", icon: Lock, desc: "Update your password" },
-                          { label: "Two-Factor Authentication", icon: Shield, desc: "Add extra security layer" },
-                          { label: "Login History", icon: Clock, desc: "View recent logins" },
-                          { label: "Privacy Settings", icon: Eye, desc: "Control data sharing" }
-                        ].map((item, i) => (
-                          <motion.button key={i} whileHover={{ scale: 1.02 }} className="w-full flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all">
-                            <div className="flex items-center gap-3">
-                              <item.icon className="w-5 h-5 text-primary" />
-                              <div className="text-left">
-                                <p className="text-white font-semibold text-sm">{item.label}</p>
-                                <p className="text-xs text-muted-foreground">{item.desc}</p>
-                              </div>
+                        {/* Change Password */}
+                        <motion.button whileHover={{ scale: 1.02 }} className="w-full flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all">
+                          <div className="flex items-center gap-3">
+                            <Key className="w-5 h-5 text-primary" />
+                            <div className="text-left">
+                              <p className="text-white font-semibold text-sm">Change Password</p>
+                              <p className="text-xs text-muted-foreground">Update your password regularly</p>
                             </div>
-                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        </motion.button>
+
+                        {/* Two-Factor Authentication */}
+                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
+                          <div className="flex items-center gap-3">
+                            <Smartphone className="w-5 h-5 text-primary" />
+                            <div className="text-left">
+                              <p className="text-white font-semibold text-sm">Two-Factor Authentication</p>
+                              <p className="text-xs text-muted-foreground">Add extra security layer</p>
+                            </div>
+                          </div>
+                          <motion.button onClick={() => setTwoFactorEnabled(!twoFactorEnabled)} className={`w-10 h-6 rounded-full transition-all ${twoFactorEnabled ? "bg-green-500" : "bg-white/10"}`}>
+                            <motion.div className={`w-4 h-4 rounded-full bg-white transition-all ${twoFactorEnabled ? "ml-5" : "ml-1"}`} />
                           </motion.button>
-                        ))}
+                        </div>
+
+                        {/* Login History */}
+                        <motion.div className="border border-white/10 rounded-lg p-4 bg-white/5">
+                          <div className="flex items-center gap-3 mb-4">
+                            <Clock className="w-5 h-5 text-primary" />
+                            <h4 className="text-white font-semibold text-sm">Login History</h4>
+                          </div>
+                          <div className="space-y-2">
+                            {loginData.map((login, i) => (
+                              <div key={i} className="flex items-center justify-between text-sm p-2 bg-black/20 rounded-lg">
+                                <div>
+                                  <p className="text-white font-medium">{login.device}</p>
+                                  <p className="text-xs text-muted-foreground">{login.location} • {login.date}</p>
+                                </div>
+                                <Badge className={login.status === "current" ? "bg-green-500/20 text-green-400 border-green-500/30" : login.status === "active" ? "bg-blue-500/20 text-blue-400 border-blue-500/30" : "bg-gray-500/20 text-gray-400 border-gray-500/30"} >{login.status}</Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+
+                        {/* Fingerprint Login */}
+                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
+                          <div className="flex items-center gap-3">
+                            <Fingerprint className="w-5 h-5 text-primary" />
+                            <div className="text-left">
+                              <p className="text-white font-semibold text-sm">Biometric Login</p>
+                              <p className="text-xs text-muted-foreground">Use fingerprint/face recognition</p>
+                            </div>
+                          </div>
+                          <motion.button className={`w-10 h-6 rounded-full transition-all bg-white/10`}>
+                            <motion.div className={`w-4 h-4 rounded-full bg-white transition-all ml-1`} />
+                          </motion.button>
+                        </div>
+
+                        {/* Privacy Settings */}
+                        <motion.button whileHover={{ scale: 1.02 }} className="w-full flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all">
+                          <div className="flex items-center gap-3">
+                            <EyeIcon className="w-5 h-5 text-primary" />
+                            <div className="text-left">
+                              <p className="text-white font-semibold text-sm">Privacy Settings</p>
+                              <p className="text-xs text-muted-foreground">Control data sharing & visibility</p>
+                            </div>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        </motion.button>
+
+                        {/* Active Sessions */}
+                        <motion.button whileHover={{ scale: 1.02 }} className="w-full flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all">
+                          <div className="flex items-center gap-3">
+                            <Wifi className="w-5 h-5 text-primary" />
+                            <div className="text-left">
+                              <p className="text-white font-semibold text-sm">Active Sessions</p>
+                              <p className="text-xs text-muted-foreground">Manage your connected devices</p>
+                            </div>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        </motion.button>
+
+                        {/* Data Download */}
+                        <motion.button whileHover={{ scale: 1.02 }} className="w-full flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all">
+                          <div className="flex items-center gap-3">
+                            <DownloadIcon className="w-5 h-5 text-primary" />
+                            <div className="text-left">
+                              <p className="text-white font-semibold text-sm">Download Your Data</p>
+                              <p className="text-xs text-muted-foreground">Export your personal data</p>
+                            </div>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        </motion.button>
+
+                        {/* Delete Account */}
+                        <motion.button whileHover={{ scale: 1.02 }} className="w-full flex items-center justify-between p-3 bg-red-500/5 hover:bg-red-500/10 rounded-lg border border-red-500/20 transition-all">
+                          <div className="flex items-center gap-3">
+                            <Trash className="w-5 h-5 text-red-400" />
+                            <div className="text-left">
+                              <p className="text-red-400 font-semibold text-sm">Delete Account</p>
+                              <p className="text-xs text-red-300/70">Permanently delete your account</p>
+                            </div>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-red-400" />
+                        </motion.button>
                       </div>
                     </div>
 
+                    {/* Notifications */}
                     <div className="border-t border-white/10 pt-6">
                       <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2"><Bell className="w-5 h-5 text-primary" /> Notifications</h3>
                       <div className="space-y-3">
@@ -442,13 +612,15 @@ export default function ProfilePage() {
                       </div>
                     </div>
 
+                    {/* Preferences */}
                     <div className="border-t border-white/10 pt-6">
                       <h3 className="text-lg font-semibold text-white mb-4">Preferences</h3>
                       <div className="space-y-3">
                         {[
                           { label: "Email Frequency", value: "Daily" },
                           { label: "Currency", value: "USD" },
-                          { label: "Language", value: "English" }
+                          { label: "Language", value: "English" },
+                          { label: "Theme", value: "Dark" }
                         ].map((item, i) => (
                           <div key={i} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
                             <p className="text-white text-sm font-semibold">{item.label}</p>
