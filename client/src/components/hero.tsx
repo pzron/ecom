@@ -143,27 +143,13 @@ export function Hero() {
 
       <div className="container relative z-10 px-4 flex flex-col items-center text-center">
         <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 backdrop-blur-xl mb-6 shadow-lg shadow-purple-500/10"
-          data-testid="hero-badge"
-        >
-          <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
-          <span className="text-sm font-medium bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
-            AI-Powered • Real-Time 3D • Web3 Ready
-          </span>
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-        </motion.div>
-
-        <motion.div
           style={{ rotateX, rotateY, perspective: 1000 }}
           className="relative"
         >
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+            transition={{ duration: 0.6, delay: 0, ease: "easeOut" }}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-bold tracking-tight text-white mb-4 max-w-4xl leading-tight"
             data-testid="hero-title"
           >
@@ -185,11 +171,11 @@ export function Hero() {
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-          className="text-base md:text-lg text-white/60 mb-8 max-w-xl leading-relaxed"
+          transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+          className="text-base md:text-lg text-white/60 mb-8 max-w-2xl leading-relaxed"
           data-testid="hero-description"
         >
-          Experience immersive 3D product visualization, AI-powered recommendations, and seamless Web3 payments.
+          Discover premium products with stunning visuals, personalized recommendations, and checkout in seconds.
         </motion.p>
 
         <motion.div
@@ -231,20 +217,32 @@ export function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-          className="flex flex-wrap justify-center gap-6 mt-10 text-sm text-white/40"
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-12 w-full max-w-2xl"
         >
           {[
-            { icon: Truck, text: "Free Shipping" },
-            { icon: Shield, text: "Secure Payments" },
-            { icon: Zap, text: "Fast Delivery" },
-            { icon: Headset, text: "24/7 Support" },
-          ].map(({ icon: Icon, text }) => (
-            <div key={text} className="flex items-center gap-2">
-              <Icon className="w-4 h-4" />
-              <span>{text}</span>
-            </div>
-          ))}
+            { icon: Truck, text: "Free Shipping", color: "purple" },
+            { icon: Shield, text: "Secure Payments", color: "blue" },
+            { icon: Zap, text: "Fast Delivery", color: "amber" },
+            { icon: Headset, text: "24/7 Support", color: "green" },
+          ].map(({ icon: Icon, text, color }) => {
+            const colorClasses: Record<string, string> = {
+              purple: "from-purple-500/20 to-purple-500/5 border-purple-500/30 text-purple-300",
+              blue: "from-blue-500/20 to-blue-500/5 border-blue-500/30 text-blue-300",
+              amber: "from-amber-500/20 to-amber-500/5 border-amber-500/30 text-amber-300",
+              green: "from-green-500/20 to-green-500/5 border-green-500/30 text-green-300",
+            };
+            return (
+              <motion.div 
+                key={text}
+                whileHover={{ scale: 1.05, y: -5 }}
+                className={`relative p-4 md:p-5 rounded-xl md:rounded-2xl bg-gradient-to-br ${colorClasses[color]} border backdrop-blur-sm flex flex-col items-center gap-2 text-center transition-all`}
+              >
+                <Icon className="w-5 md:w-6 h-5 md:h-6" />
+                <span className="text-xs md:text-sm font-semibold text-white">{text}</span>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </div>
     </div>
