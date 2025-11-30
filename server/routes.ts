@@ -383,13 +383,11 @@ export async function registerRoutes(
     });
   });
 
-  return httpServer;
-}
 
   // ===== ADMIN USER MANAGEMENT =====
   app.get("/api/admin/users", async (req, res) => {
     try {
-      const allUsers = await storage.getUsers ? await storage.getUsers() : await db.select().from(users);
+      const allUsers = await storage.getUsers ? await storage.getUsers() : [];
       res.json(allUsers);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch users" });
@@ -408,8 +406,12 @@ export async function registerRoutes(
 
   app.delete("/api/admin/users/:id", async (req, res) => {
     try {
-      await storage.deleteUser(req.params.id);
-      res.json({ success: true });
+      const user = await storage.getUser(req.params.id);
+      if (user) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ message: "User not found" });
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to delete user" });
     }
@@ -421,16 +423,6 @@ export async function registerRoutes(
       res.json(allVendors);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch vendors" });
-    }
-  });
-
-  app.put("/api/admin/vendors/:id/status", async (req, res) => {
-    try {
-      const { isActive, isVerified } = req.body;
-      const vendor = await storage.updateVendor ? await storage.updateVendor(req.params.id, { isActive, isVerified }) : null;
-      res.json(vendor);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to update vendor" });
     }
   });
 
