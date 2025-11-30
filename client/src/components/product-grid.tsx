@@ -59,13 +59,21 @@ function ProductCard({ product, index }: ProductCardProps) {
       transition={{ duration: 0.4, delay: Math.min(index * 0.03, 0.3) }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      whileHover={{ y: -8, transition: { duration: 0.3 } }}
       className="h-full"
     >
       <Link href={`/product/${product.id}`}>
-        <Card 
-          className={`relative overflow-hidden group cursor-pointer h-full bg-gradient-to-br ${gradient.bg} border-white/10 ${gradient.border} transition-all duration-300 ${gradient.hover} backdrop-blur-sm`}
-          data-testid={`product-card-${product.id}`}
+        <motion.div
+          animate={{ 
+            scale: isHovered ? 1.03 : 1,
+            boxShadow: isHovered ? "0 20px 40px rgba(168, 85, 247, 0.3)" : "0 5px 15px rgba(0, 0, 0, 0.2)"
+          }}
+          transition={{ duration: 0.3 }}
         >
+          <Card 
+            className={`relative overflow-hidden group cursor-pointer h-full bg-gradient-to-br ${gradient.bg} border-white/10 ${gradient.border} transition-all duration-300 ${gradient.hover} backdrop-blur-sm rounded-xl`}
+            data-testid={`product-card-${product.id}`}
+          >
           {/* Gradient overlay on hover */}
           <div className={`absolute inset-0 bg-gradient-to-br ${gradient.badge} opacity-0 group-hover:opacity-5 transition-all duration-300`} />
           
@@ -115,16 +123,16 @@ function ProductCard({ product, index }: ProductCardProps) {
             </motion.div>
 
             {/* Product image */}
-            <div className="aspect-square overflow-hidden bg-gradient-to-br from-gray-900 to-black p-4 flex items-center justify-center relative group/image">
+            <div className="aspect-square overflow-hidden bg-gradient-to-br from-gray-900 to-black p-4 flex items-center justify-center relative group/image rounded-lg">
               <motion.img 
                 src={product.image} 
                 alt={product.name}
-                className="object-contain w-full h-full"
+                className="object-contain w-full h-full rounded-md"
                 animate={{ 
-                  scale: isHovered ? 1.08 : 1,
-                  y: isHovered ? -5 : 0
+                  scale: isHovered ? 1.12 : 1,
+                  y: isHovered ? -8 : 0
                 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.4, type: "spring", stiffness: 200, damping: 20 }}
               />
               
               {/* Hover overlay with CTA */}
@@ -189,7 +197,8 @@ function ProductCard({ product, index }: ProductCardProps) {
               )}
             </div>
           </CardFooter>
-        </Card>
+          </Card>
+        </motion.div>
       </Link>
     </motion.div>
   );
