@@ -6,15 +6,53 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, MoreVertical, Shield, Ban, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
 export default function AdminUsers() {
-  const users = [
-    { name: "Alex Chen", email: "alex@example.com", role: "User", status: "Active", spent: "$45,200" },
-    { name: "Sarah Miller", email: "sarah@vendor.com", role: "Vendor", status: "Verified", spent: "$0" },
-    { name: "Mike Ross", email: "mike@affiliate.com", role: "Affiliate", status: "Pending", spent: "$1,200" },
-    { name: "Jessica Liu", email: "jessica@example.com", role: "User", status: "Banned", spent: "$450" },
-    { name: "David Kim", email: "david@admin.com", role: "Admin", status: "Active", spent: "$0" },
-  ];
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch("/api/admin/users");
+      const data = await res.json();
+      setUsers(data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+      setLoading(false);
+    }
+  };
+
+  const updateUserRole = async (userId: string, newRole: string) => {
+    try {
+      await fetch(`/api/admin/users/${userId}/role`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: newRole })
+      });
+      fetchUsers();
+    } catch (error) {
+      console.error("Failed to update user:", error);
+    }
+  };
+
+  const deleteUser = async (userId: string) => {
+    if (confirm("Are you sure you want to delete this user?")) {
+      try {
+        await fetch(`/api/admin/users/${userId}`, { method: "DELETE" });
+        fetchUsers();
+      } catch (error) {
+        console.error("Failed to delete user:", error);
+      }
+    }
+  };
+
+  if (loading) return <div className="text-white">Loading users...</div>;
 
   return (
     <DashboardLayout role="admin">
@@ -22,18 +60,14 @@ export default function AdminUsers() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-heading font-bold text-white">User Management</h1>
-            <p className="text-muted-foreground">Manage permissions, roles, and account status</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" className="border-white/10">Export List</Button>
-            <Button className="bg-primary hover:bg-primary/90">Add User</Button>
+            <p className="text-muted-foreground">{users.length} total users • Manage roles and permissions</p>
           </div>
         </div>
 
         <Card className="bg-white/5 border-white/10 backdrop-blur-md">
           <CardHeader className="border-b border-white/10 pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-white">All Users</CardTitle>
+              <CardTitle className="text-white">All Users ({users.length})</CardTitle>
               <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input placeholder="Search users..." className="pl-9 bg-black/20 border-white/10" />
@@ -46,13 +80,13 @@ export default function AdminUsers() {
                 <tr>
                   <th className="px-6 py-3 text-left">User</th>
                   <th className="px-6 py-3 text-left">Role</th>
-                  <th className="px-6 py-3 text-left">Status</th>
-                  <th className="px-6 py-3 text-left">Total Spent</th>
+                  <th className="px-6 py-3 text-left">Email</th>
+                  <th className="px-6 py-3 text-left">Verified</th>
                   <th className="px-6 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {users.map((user, i) => (
+                {users.map((user: any, i: number) => (
                   <motion.tr 
                     key={i}
                     initial={{ opacity: 0, y: 10 }}
@@ -62,17 +96,27 @@ export default function AdminUsers() {
                   >
                     <td className="px-6 py-4 flex items-center gap-3">
                       <Avatar className="w-8 h-8 border border-white/10">
-                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} />
-                        <AvatarFallback>{user.name[0]}</AvatarFallback>
+                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} />
+                        <AvatarFallback>{user.username?.[0]?.toUpperCase() || "U"}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <div className="font-medium text-white">{user.name}</div>
-                        <div className="text-xs text-muted-foreground">{user.email}</div>
+                        <div className="font-medium text-white">{user.fullName || user.username}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <Badge variant="outline" className="border-white/10 text-white">
-                        {user.role}
+                      <select 
+                        value={user.role}
+                        onChange={(e) => updateUserRole(user.id, e.target.value)}
+                        className="px-3 py-1 rounded bg-white/10 border border-white/20 text-white text-sm"
+                      >
+                        <option value="customer">Customer</option>
+                        <option value="vendor">Vendor</option>
+                        <option value="affiliate">Affiliate</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </td>
+                    <td className="px-6 py-4">
+                      {user.email}
                       </Badge>
                     </td>
                     <td className="px-6 py-4">

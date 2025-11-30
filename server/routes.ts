@@ -385,3 +385,100 @@ export async function registerRoutes(
 
   return httpServer;
 }
+
+  // ===== ADMIN USER MANAGEMENT =====
+  app.get("/api/admin/users", async (req, res) => {
+    try {
+      const allUsers = await db.select().from(users).orderBy(desc(users.createdAt));
+      res.json(allUsers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.put("/api/admin/users/:id/role", async (req, res) => {
+    try {
+      const { role } = req.body;
+      const [user] = await db.update(users).set({ role }).where(eq(users.id, req.params.id)).returning();
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update user role" });
+    }
+  });
+
+  app.delete("/api/admin/users/:id", async (req, res) => {
+    try {
+      await db.delete(users).where(eq(users.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
+  // ===== ADMIN VENDOR MANAGEMENT =====
+  app.get("/api/admin/vendors", async (req, res) => {
+    try {
+      const allVendors = await db.select().from(vendors).orderBy(desc(vendors.createdAt));
+      res.json(allVendors);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch vendors" });
+    }
+  });
+
+  app.put("/api/admin/vendors/:id/status", async (req, res) => {
+    try {
+      const { isActive, isVerified } = req.body;
+      const [vendor] = await db.update(vendors).set({ isActive, isVerified }).where(eq(vendors.id, req.params.id)).returning();
+      res.json(vendor);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update vendor" });
+    }
+  });
+
+  // ===== VENDOR PRODUCT MANAGEMENT =====
+  app.get("/api/vendor/products", async (req, res) => {
+    try {
+      const { vendorId } = req.query;
+      const vendorProducts = await db.select().from(products).where(eq(products.vendorId, vendorId as string));
+      res.json(vendorProducts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch vendor products" });
+    }
+  });
+
+  app.post("/api/vendor/products", async (req, res) => {
+    try {
+      const product = await storage.createProduct(req.body);
+      res.status(201).json(product);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create product" });
+    }
+  });
+
+  // ===== AFFILIATE MANAGEMENT =====
+  app.get("/api/affiliate/stats", async (req, res) => {
+    try {
+      const { affiliateId } = req.query;
+      const [totalEarnings] = await db.select({ sum: sql<number>`COALESCE(SUM(CAST(amount AS NUMERIC)), 0)` }).from(affiliateTransactions).where(eq(affiliateTransactions.affiliateId, affiliateId as string));
+      const [transactionCount] = await db.select({ count: sql<number>`count(*)` }).from(affiliateTransactions).where(eq(affiliateTransactions.affiliateId, affiliateId as string));
+      
+      res.json({
+        totalEarnings: Number(totalEarnings?.sum || 0),
+        transactionCount: Number(transactionCount?.count || 0)
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch affiliate stats" });
+    }
+  });
+
+  app.get("/api/affiliate/campaigns/:code", async (req, res) => {
+    try {
+      const affiliate = await storage.getAffiliateByCode(req.params.code);
+      if (!affiliate) {
+        return res.status(404).json({ message: "Affiliate not found" });
+      }
+      res.json(affiliate);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch affiliate" });
+    }
+  });
