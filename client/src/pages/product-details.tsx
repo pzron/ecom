@@ -7,7 +7,7 @@ import { products, getProductById } from "@/data/products";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ShoppingCart, Heart, Share2, ShieldCheck, Truck, 
-  RotateCcw, Zap, Box, Cuboid, ScanFace, Check, Star, Minus, Plus, Sparkles, Play, Image
+  RotateCcw, Zap, Box, Cuboid, ScanFace, Check, Star, Minus, Plus, Sparkles, Play, Image, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { useRoute, Link } from "wouter";
 import { useState } from "react";
@@ -497,6 +497,116 @@ export default function ProductDetails() {
               </TabsContent>
             </div>
           </Tabs>
+        </motion.div>
+
+        {/* Similar Products - Auto-scroll Left to Right */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="mt-20"
+        >
+          <h3 className="text-2xl font-heading font-bold text-white mb-8">Similar Products</h3>
+          <div className="relative group">
+            <div className="overflow-hidden rounded-2xl">
+              <motion.div 
+                className="flex gap-4"
+                animate={{ x: ["-100%", "0%"] }}
+                transition={{
+                  duration: 30,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+              >
+                {[...products.filter(p => p.categorySlug === product.categorySlug).slice(0, 8), ...products.filter(p => p.categorySlug === product.categorySlug).slice(0, 8)].map((p, idx) => (
+                  <Link key={`${p.id}-${idx}`} href={`/product/${p.id}`}>
+                    <motion.div 
+                      whileHover={{ y: -8 }}
+                      className="flex-shrink-0 w-48 group/card cursor-pointer"
+                    >
+                      <div className="rounded-xl overflow-hidden border border-white/10 bg-gradient-to-br from-white/5 to-transparent p-3 hover:border-purple-500/30 transition-all">
+                        <div className="aspect-square bg-gradient-to-br from-gray-900 to-black rounded-lg overflow-hidden mb-3 relative">
+                          <img src={p.image} alt={p.name} className="w-full h-full object-contain group-hover/card:scale-110 transition-transform duration-300" />
+                          <div className="absolute top-2 left-2 flex gap-1">
+                            {p.isNew && <Badge className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white border-none text-xs"><Zap className="w-2 h-2 mr-0.5" /> New</Badge>}
+                            {p.isBestseller && <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none text-xs">⭐ Best</Badge>}
+                          </div>
+                        </div>
+                        <p className="text-sm font-semibold text-white line-clamp-2 mb-1">{p.name}</p>
+                        <div className="flex items-center gap-1 mb-2">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className={`w-2.5 h-2.5 ${i < Math.round(p.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-white/20'}`} />
+                            ))}
+                          </div>
+                          <span className="text-xs text-white/50">({p.reviews})</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">${p.price}</span>
+                          {p.originalPrice && <span className="text-xs text-white/40 line-through">${p.originalPrice}</span>}
+                        </div>
+                      </div>
+                    </motion.div>
+                  </Link>
+                ))}
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Top Products - Auto-scroll Right to Left */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="mt-20 pb-20"
+        >
+          <h3 className="text-2xl font-heading font-bold text-white mb-8">Top Products</h3>
+          <div className="relative group">
+            <div className="overflow-hidden rounded-2xl">
+              <motion.div 
+                className="flex gap-4"
+                animate={{ x: ["0%", "-100%"] }}
+                transition={{
+                  duration: 35,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+              >
+                {[...products.filter(p => p.isBestseller).slice(0, 8), ...products.filter(p => p.isBestseller).slice(0, 8)].map((p, idx) => (
+                  <Link key={`${p.id}-${idx}`} href={`/product/${p.id}`}>
+                    <motion.div 
+                      whileHover={{ y: -8 }}
+                      className="flex-shrink-0 w-48 group/card cursor-pointer"
+                    >
+                      <div className="rounded-xl overflow-hidden border border-white/10 bg-gradient-to-br from-white/5 to-transparent p-3 hover:border-pink-500/30 transition-all">
+                        <div className="aspect-square bg-gradient-to-br from-gray-900 to-black rounded-lg overflow-hidden mb-3 relative">
+                          <img src={p.image} alt={p.name} className="w-full h-full object-contain group-hover/card:scale-110 transition-transform duration-300" />
+                          <div className="absolute top-2 left-2 flex gap-1">
+                            {p.isNew && <Badge className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white border-none text-xs"><Zap className="w-2 h-2 mr-0.5" /> New</Badge>}
+                            {p.isBestseller && <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none text-xs">⭐ Top</Badge>}
+                          </div>
+                        </div>
+                        <p className="text-sm font-semibold text-white line-clamp-2 mb-1">{p.name}</p>
+                        <div className="flex items-center gap-1 mb-2">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className={`w-2.5 h-2.5 ${i < Math.round(p.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-white/20'}`} />
+                            ))}
+                          </div>
+                          <span className="text-xs text-white/50">({p.reviews})</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">${p.price}</span>
+                          {p.originalPrice && <span className="text-xs text-white/40 line-through">${p.originalPrice}</span>}
+                        </div>
+                      </div>
+                    </motion.div>
+                  </Link>
+                ))}
+              </motion.div>
+            </div>
+          </div>
         </motion.div>
       </main>
     </div>
