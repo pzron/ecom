@@ -28,7 +28,7 @@ export default function ProductDetailPage() {
   ]);
   const [userPurchased, setUserPurchased] = useState(true);
   const [showReviewForm, setShowReviewForm] = useState(false);
-  const addToCart = useCartStore(state => state.addItem);
+  const addToCart = useCartStore((state: any) => state.addItem);
 
   if (!product) {
     return (
