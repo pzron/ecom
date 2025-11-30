@@ -1,8 +1,8 @@
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { categories, products } from "@/data/products";
-import { Search, Mic, MicOff, Grid, List, Star, ShoppingCart, Heart, X } from "lucide-react";
+import { Search, Mic, MicOff, Grid, List, Star, ShoppingCart, Heart, X, ChevronLeft, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Link, useLocation, useSearch } from "wouter";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -24,6 +24,7 @@ export default function ProductsPage() {
   const [minRating, setMinRating] = useState(0);
   const [sortBy, setSortBy] = useState('featured');
   const [viewMode, setViewMode] = useState('grid');
+  const [showSidebar, setShowSidebar] = useState(true);
   const [, navigate] = useLocation();
   const recognitionRef = useRef<any>(null);
 
@@ -131,6 +132,8 @@ export default function ProductsPage() {
     return products.filter(p => p.categorySlug === slug).length;
   };
 
+  const hasActiveFilters = selectedCategory !== 'all' || priceRange[0] !== 0 || priceRange[1] !== 2000 || minRating > 0;
+
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-white">
       <Navbar />
@@ -140,138 +143,173 @@ export default function ProductsPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-8 flex items-center justify-between"
         >
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-white mb-3">All Products</h1>
-          <p className="text-muted-foreground">Discover our complete collection of 90+ products</p>
+          <div>
+            <h1 className="text-4xl md:text-5xl font-heading font-bold text-white mb-3">All Products</h1>
+            <p className="text-muted-foreground">Discover our complete collection of 90+ products</p>
+          </div>
+          
+          {/* Mobile Sidebar Toggle */}
+          <Button
+            onClick={() => setShowSidebar(!showSidebar)}
+            variant="outline"
+            size="icon"
+            className="hidden md:flex border-white/10 bg-white/5 hover:bg-white/10"
+          >
+            {showSidebar ? <ChevronLeft className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </Button>
         </motion.div>
 
-        <div className="flex gap-8">
-          {/* Left Sidebar - Filters */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="w-64 flex-shrink-0"
-          >
-            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md sticky top-24 space-y-6">
-              <h3 className="text-xl font-bold text-white">Filters</h3>
-
-              {/* Category Filter */}
-              <div>
-                <h4 className="font-semibold text-white mb-4">Category</h4>
-                <div className="space-y-2">
-                  <Button
-                    variant={selectedCategory === "all" ? "default" : "ghost"}
-                    className={`w-full justify-start ${
-                      selectedCategory === "all"
-                        ? "bg-primary text-white"
-                        : "text-white/70 hover:text-white hover:bg-white/10"
-                    }`}
-                    onClick={() => handleCategoryChange("all")}
-                  >
-                    <span>All Products</span>
-                    <span className="ml-auto text-sm font-medium">({getCategoryCount('all')})</span>
-                  </Button>
-                  {categories.map((cat) => (
+        <div className="flex gap-8 relative">
+          {/* Left Sidebar - Filters with Toggle */}
+          <AnimatePresence>
+            {showSidebar && (
+              <motion.div
+                initial={{ opacity: 0, x: -20, width: 0 }}
+                animate={{ opacity: 1, x: 0, width: 'auto' }}
+                exit={{ opacity: 0, x: -20, width: 0 }}
+                transition={{ duration: 0.3 }}
+                className="w-64 flex-shrink-0 hidden md:block"
+              >
+                <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md sticky top-24 space-y-6 max-h-[calc(100vh-120px)] overflow-y-auto">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-white">Filters</h3>
                     <Button
-                      key={cat.id}
-                      variant={selectedCategory === cat.slug ? "default" : "ghost"}
-                      className={`w-full justify-start text-sm ${
-                        selectedCategory === cat.slug
-                          ? "bg-primary text-white"
-                          : "text-white/70 hover:text-white hover:bg-white/10"
-                      }`}
-                      onClick={() => handleCategoryChange(cat.slug)}
-                    >
-                      <span>{cat.name}</span>
-                      <span className="ml-auto text-xs font-medium">({getCategoryCount(cat.slug)})</span>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price Range */}
-              <div className="border-t border-white/10 pt-4">
-                <h4 className="font-semibold text-white mb-4">Price Range</h4>
-                <div className="space-y-4">
-                  <Slider
-                    value={priceRange}
-                    onValueChange={setPriceRange}
-                    min={0}
-                    max={2000}
-                    step={50}
-                    className="w-full"
-                  />
-                  <div className="flex gap-2 text-sm">
-                    <div className="flex-1">
-                      <span className="text-muted-foreground text-xs">Min</span>
-                      <div className="text-white font-semibold">${priceRange[0]}</div>
-                    </div>
-                    <div className="flex-1">
-                      <span className="text-muted-foreground text-xs">Max</span>
-                      <div className="text-white font-semibold">${priceRange[1]}</div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 flex-wrap">
-                    {['Under 5K', '5K-20K', '20K-50K', '50K+'].map((label, idx) => {
-                      const ranges = [[0, 5000], [5000, 20000], [20000, 50000], [50000, 2000000]];
-                      return (
-                        <Button
-                          key={idx}
-                          variant="outline"
-                          size="sm"
-                          className="text-xs bg-white/5 border-white/10 hover:bg-white/10"
-                          onClick={() => setPriceRange(ranges[idx])}
-                        >
-                          {label}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* Rating Filter */}
-              <div className="border-t border-white/10 pt-4">
-                <h4 className="font-semibold text-white mb-4">Rating</h4>
-                <div className="space-y-2">
-                  {[5, 4, 3, 2, 1].map((rating) => (
-                    <Button
-                      key={rating}
+                      onClick={() => setShowSidebar(false)}
                       variant="ghost"
-                      className="w-full justify-start text-sm text-white/70 hover:text-white hover:bg-white/10"
-                      onClick={() => setMinRating(rating)}
+                      size="icon"
+                      className="md:hidden"
                     >
-                      <div className="flex items-center gap-2">
-                        {[...Array(rating)].map((_, i) => (
-                          <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                        ))}
-                        {[...Array(5 - rating)].map((_, i) => (
-                          <Star key={i} className="w-3 h-3 text-white/20" />
-                        ))}
-                      </div>
-                      <span className="ml-auto text-xs">&amp; Up</span>
+                      <X className="w-4 h-4" />
                     </Button>
-                  ))}
-                </div>
-              </div>
+                  </div>
 
-              {/* Reset Button */}
-              {(selectedCategory !== 'all' || priceRange[0] !== 0 || priceRange[1] !== 2000 || minRating > 0) && (
-                <Button
-                  onClick={() => {
-                    setSelectedCategory('all');
-                    setPriceRange([0, 2000]);
-                    setMinRating(0);
-                  }}
-                  className="w-full bg-primary/20 text-primary hover:bg-primary/30 border border-primary/30"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Reset Filters
-                </Button>
-              )}
-            </div>
-          </motion.div>
+                  {/* Category Filter */}
+                  <div>
+                    <h4 className="font-semibold text-white mb-4">Category</h4>
+                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                      <Button
+                        variant={selectedCategory === "all" ? "default" : "ghost"}
+                        className={`w-full justify-start text-sm ${
+                          selectedCategory === "all"
+                            ? "bg-primary text-white"
+                            : "text-white/70 hover:text-white hover:bg-white/10"
+                        }`}
+                        onClick={() => handleCategoryChange("all")}
+                      >
+                        <span>All Products</span>
+                        <span className="ml-auto text-xs font-medium">({getCategoryCount('all')})</span>
+                      </Button>
+                      {categories.map((cat) => (
+                        <Button
+                          key={cat.id}
+                          variant={selectedCategory === cat.slug ? "default" : "ghost"}
+                          className={`w-full justify-start text-sm ${
+                            selectedCategory === cat.slug
+                              ? "bg-primary text-white"
+                              : "text-white/70 hover:text-white hover:bg-white/10"
+                          }`}
+                          onClick={() => handleCategoryChange(cat.slug)}
+                        >
+                          <span>{cat.name}</span>
+                          <span className="ml-auto text-xs font-medium">({getCategoryCount(cat.slug)})</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Price Range */}
+                  <div className="border-t border-white/10 pt-4">
+                    <h4 className="font-semibold text-white mb-4">Price Range</h4>
+                    <div className="space-y-4">
+                      <Slider
+                        value={priceRange}
+                        onValueChange={setPriceRange}
+                        min={0}
+                        max={2000}
+                        step={50}
+                        className="w-full"
+                      />
+                      <div className="flex gap-2 text-sm">
+                        <div className="flex-1">
+                          <span className="text-muted-foreground text-xs">Min</span>
+                          <div className="text-white font-semibold">${priceRange[0]}</div>
+                        </div>
+                        <div className="flex-1">
+                          <span className="text-muted-foreground text-xs">Max</span>
+                          <div className="text-white font-semibold">${priceRange[1]}</div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        {['Under 5K', '5K-20K', '20K-50K', '50K+'].map((label, idx) => {
+                          const ranges = [[0, 5000], [5000, 20000], [20000, 50000], [50000, 2000000]];
+                          return (
+                            <Button
+                              key={idx}
+                              variant="outline"
+                              size="sm"
+                              className="text-xs bg-white/5 border-white/10 hover:bg-white/10"
+                              onClick={() => setPriceRange(ranges[idx])}
+                            >
+                              {label}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Rating Filter */}
+                  <div className="border-t border-white/10 pt-4">
+                    <h4 className="font-semibold text-white mb-4">Rating</h4>
+                    <div className="space-y-2">
+                      <Button
+                        variant={minRating === 0 ? "default" : "ghost"}
+                        className={`w-full justify-start text-sm ${minRating === 0 ? "bg-primary text-white" : "text-white/70 hover:text-white hover:bg-white/10"}`}
+                        onClick={() => setMinRating(0)}
+                      >
+                        <span>All Ratings</span>
+                      </Button>
+                      {[5, 4, 3, 2, 1].map((rating) => (
+                        <Button
+                          key={rating}
+                          variant={minRating === rating ? "default" : "ghost"}
+                          className={`w-full justify-start text-sm ${minRating === rating ? "bg-primary text-white" : "text-white/70 hover:text-white hover:bg-white/10"}`}
+                          onClick={() => setMinRating(rating)}
+                        >
+                          <div className="flex items-center gap-2">
+                            {[...Array(rating)].map((_, i) => (
+                              <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            ))}
+                            {[...Array(5 - rating)].map((_, i) => (
+                              <Star key={i} className="w-3 h-3 text-white/20" />
+                            ))}
+                          </div>
+                          <span className="ml-auto text-xs">&amp; Up</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Reset Button */}
+                  {hasActiveFilters && (
+                    <Button
+                      onClick={() => {
+                        setSelectedCategory('all');
+                        setPriceRange([0, 2000]);
+                        setMinRating(0);
+                      }}
+                      className="w-full bg-primary/20 text-primary hover:bg-primary/30 border border-primary/30"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Reset Filters
+                    </Button>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Right Content */}
           <div className="flex-1 min-w-0">
@@ -302,7 +340,7 @@ export default function ProductsPage() {
                 </div>
               </form>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <div className="text-sm text-muted-foreground">
                   Showing <span className="text-white font-semibold">{sortedProducts.length}</span> products
                 </div>
@@ -339,7 +377,7 @@ export default function ProductsPage() {
               </div>
             </motion.div>
 
-            {/* Products Grid */}
+            {/* Products Grid - 6-7 per line */}
             {sortedProducts.length === 0 ? (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
@@ -366,13 +404,13 @@ export default function ProductsPage() {
                 </Button>
               </motion.div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-7 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 auto-rows-max">
                 {sortedProducts.map((product, i) => (
                   <motion.div
                     key={product.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.03 }}
+                    transition={{ delay: i * 0.02 }}
                   >
                     <Link href={`/product/${product.id}`}>
                       <Card className="glass-card border-white/10 bg-white/5 overflow-hidden group hover:border-primary/50 transition-all duration-300 cursor-pointer h-full flex flex-col">
@@ -402,8 +440,8 @@ export default function ProductsPage() {
                         <CardFooter className="p-3 flex flex-col items-start gap-2 flex-1 justify-between">
                           <div className="w-full">
                             <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs font-medium text-primary/80 uppercase tracking-wider">{product.category}</span>
-                              <span className="text-xs text-green-400 font-medium">In Stock</span>
+                              <span className="text-xs font-medium text-primary/80 uppercase tracking-wider line-clamp-1">{product.category}</span>
+                              <span className="text-xs text-green-400 font-medium whitespace-nowrap">In Stock</span>
                             </div>
                             
                             <h3 className="font-heading font-bold text-white text-xs line-clamp-2 group-hover:text-primary transition-colors mb-2">
