@@ -136,7 +136,7 @@ export default function CartPage() {
                   <div className="text-xs font-bold text-muted-foreground uppercase text-right">Total</div>
                 </div>
 
-                <div className="max-h-[600px] overflow-y-auto">
+                <div className="hide-scrollbar max-h-[400px] overflow-y-auto">
                   {cartItems.map((item, i) => (
                     <motion.div
                       key={item.id}
@@ -327,7 +327,7 @@ export default function CartPage() {
               animate={{ opacity: 1, x: 0 }}
               className="space-y-4"
             >
-              <div className="sticky top-24 space-y-4 max-h-[calc(100vh-120px)] overflow-y-auto">
+              <div className="space-y-4">
                 {/* Promo Code */}
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
