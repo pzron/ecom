@@ -2,9 +2,9 @@ import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { products } from "@/data/products";
-import { Minus, Plus, Trash2, ArrowRight, ShieldCheck, CreditCard, Wallet, Truck, Gift, Zap, Package, Tag, Check, AlertCircle } from "lucide-react";
+import { Minus, Plus, Trash2, ArrowRight, ShieldCheck, CreditCard, Wallet, Truck, Gift, Zap, Package, Tag, Check, AlertCircle, Clock, MapPin, Shield, RefreshCw } from "lucide-react";
 import { Link } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState([
@@ -14,6 +14,12 @@ export default function CartPage() {
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("card");
+  const [deliveryOption, setDeliveryOption] = useState("standard");
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    setHasAnimated(true);
+  }, []);
 
   const updateQuantity = (index: number, newQty: number) => {
     if (newQty <= 0) {
@@ -42,65 +48,41 @@ export default function CartPage() {
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const discountAmount = (subtotal * discount) / 100;
   const afterDiscount = subtotal - discountAmount;
-  const shipping = afterDiscount > 100 ? 0 : 9.99;
-  const tax = Math.round((afterDiscount + shipping) * 0.08 * 100) / 100;
-  const total = afterDiscount + shipping + tax;
+  const deliveryFee = deliveryOption === "express" ? 14.99 : (afterDiscount > 100 ? 0 : 9.99);
+  const insurance = 4.99;
+  const tax = Math.round((afterDiscount + deliveryFee) * 0.08 * 100) / 100;
+  const total = afterDiscount + deliveryFee + insurance + tax;
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.3,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  };
-
-  // Bucket animation with products dropping
-  const dropSequence = {
-    loop: {
-      transition: {
-        staggerChildren: 0.15,
-        repeatDelay: 1.5,
-        repeat: Infinity,
-      },
-    },
-  };
-
+  // Animation variants - One-time drop animation
   const productDropVariants = (index: number) => ({
     hidden: { opacity: 0, y: -400, x: 0 },
     drop: {
       opacity: 1,
       y: 0,
-      x: (Math.random() - 0.5) * 120,
+      x: (Math.random() - 0.5) * 100,
       transition: {
-        duration: 0.8,
+        duration: 0.7,
+        delay: index * 0.15,
       },
     },
   });
 
-  const bucketBounceVariants = {
-    hidden: { opacity: 0, scale: 0.8, y: 20 },
+  const bucketVariants = {
+    hidden: { opacity: 0, scale: 0.5, y: 30 },
     visible: {
       opacity: 1,
       scale: 1,
       y: 0,
-      transition: { delay: 0.6, duration: 0.4 },
+      transition: {
+        delay: Math.max(cartItems.length * 0.15, 0.6) + 0.2,
+        duration: 0.5,
+      },
     },
     bounce: {
-      y: [0, -8, 0],
+      y: [0, -12, 0],
       transition: {
-        duration: 0.3,
-        delay: 1.2,
-        repeat: Infinity,
-        repeatDelay: 2.5,
+        duration: 0.4,
+        delay: Math.max(cartItems.length * 0.15, 0.6) + 0.7,
       },
     },
   };
@@ -135,189 +117,142 @@ export default function CartPage() {
             </Link>
           </motion.div>
         ) : (
-          <motion.div 
-            className="grid grid-cols-1 xl:grid-cols-4 gap-8"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {/* Left Section - Products & Animation */}
-            <div className="xl:col-span-2 space-y-8">
-              {/* Product Items Table */}
-              <motion.div variants={itemVariants} className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
-                <div className="hidden md:grid grid-cols-12 gap-4 p-4 bg-gradient-to-r from-white/5 to-transparent border-b border-white/10">
-                  <div className="col-span-5 text-xs font-bold text-muted-foreground">PRODUCT</div>
-                  <div className="col-span-2 text-xs font-bold text-muted-foreground">PRICE</div>
-                  <div className="col-span-2 text-xs font-bold text-muted-foreground">QTY</div>
-                  <div className="col-span-2 text-xs font-bold text-muted-foreground">TOTAL</div>
-                  <div className="col-span-1"></div>
-                </div>
-
-                {cartItems.map((item, i) => (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 * i }}
-                    className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border-b border-white/5 hover:bg-white/5 transition-colors items-center group"
-                  >
-                    {/* Product Image & Name */}
-                    <div className="md:col-span-5 flex gap-4 items-start">
-                      <div className="w-20 h-20 bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-2 flex-shrink-0 flex items-center justify-center group-hover:from-white/20 group-hover:to-white/10 transition-colors">
-                        <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-white truncate text-sm md:text-base">{item.name}</h4>
-                        <p className="text-xs text-muted-foreground mt-1">{item.category}</p>
-                      </div>
-                    </div>
-
-                    {/* Price - Hidden on mobile */}
-                    <div className="md:col-span-2 hidden md:block">
-                      <span className="font-semibold text-white">${item.price.toLocaleString()}</span>
-                    </div>
-
-                    {/* Quantity */}
-                    <div className="md:col-span-2">
-                      <div className="flex items-center gap-2 bg-black/40 rounded-lg p-2 border border-white/10 w-fit">
-                        <Button 
-                          size="icon" 
-                          variant="ghost" 
-                          className="h-6 w-6 rounded hover:bg-white/20 text-white p-0"
-                          onClick={() => updateQuantity(i, item.quantity - 1)}
-                        >
-                          <Minus className="w-3 h-3" />
-                        </Button>
-                        <span className="text-white font-bold w-5 text-center text-sm">{item.quantity}</span>
-                        <Button 
-                          size="icon" 
-                          variant="ghost" 
-                          className="h-6 w-6 rounded hover:bg-white/20 text-white p-0"
-                          onClick={() => updateQuantity(i, item.quantity + 1)}
-                        >
-                          <Plus className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Total */}
-                    <div className="md:col-span-2 hidden md:block">
-                      <span className="font-bold text-primary">${(item.price * item.quantity).toLocaleString()}</span>
-                    </div>
-
-                    {/* Delete */}
-                    <div className="md:col-span-1 flex justify-end">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="text-muted-foreground hover:text-red-400 h-8 w-8 hover:bg-red-400/10"
-                        onClick={() => removeItem(i)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
-
-              {/* Delivery Info Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Section - Compact Products */}
+            <div className="lg:col-span-1 space-y-6">
+              {/* Product Items - Compact */}
               <motion.div 
-                variants={itemVariants}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
               >
-                <div className="p-4 rounded-xl bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 hover:border-green-500/40 transition-colors">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Truck className="w-5 h-5 text-green-400" />
-                    <span className="font-semibold text-green-400">Free Delivery</span>
-                  </div>
-                  <p className="text-xs text-green-300/70">On orders over $100</p>
+                <div className="grid grid-cols-4 gap-2 p-3 bg-gradient-to-r from-white/5 to-transparent border-b border-white/10">
+                  <div className="col-span-2 text-xs font-bold text-muted-foreground">ITEM</div>
+                  <div className="text-xs font-bold text-muted-foreground">QTY</div>
+                  <div className="text-xs font-bold text-muted-foreground text-right">TOTAL</div>
                 </div>
-                <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 hover:border-blue-500/40 transition-colors">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Zap className="w-5 h-5 text-blue-400" />
-                    <span className="font-semibold text-blue-400">Express</span>
-                  </div>
-                  <p className="text-xs text-blue-300/70">Arrives in 2-3 days</p>
-                </div>
-              </motion.div>
 
-              {/* Bucket Animation */}
-              <motion.div 
-                variants={itemVariants}
-                className="relative h-96 bg-gradient-to-b from-purple-500/5 to-pink-500/5 border border-white/10 rounded-2xl overflow-hidden flex items-center justify-center"
-              >
-                {/* Animated Background */}
-                <div className="absolute inset-0 bg-gradient-to-t from-purple-500/10 via-transparent to-transparent opacity-50" />
-                
-                {/* Dropping Products */}
-                <motion.div 
-                  className="relative w-full h-full flex items-start justify-center pt-8"
-                  variants={dropSequence}
-                  initial="hidden"
-                  animate="loop"
-                >
+                <div className="max-h-96 overflow-y-auto">
                   {cartItems.map((item, i) => (
                     <motion.div
-                      key={`drop-${item.id}`}
-                      className="absolute"
-                      variants={productDropVariants(i)}
-                      initial="hidden"
-                      animate="drop"
+                      key={item.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.05 * i }}
+                      className="grid grid-cols-4 gap-2 p-3 border-b border-white/5 hover:bg-white/5 transition-colors items-center group"
                     >
-                      <div className="w-20 h-20 bg-white rounded-lg p-2 flex items-center justify-center shadow-2xl shadow-purple-500/30 border border-white">
-                        <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                      {/* Product Image & Name */}
+                      <div className="col-span-2 flex gap-2 items-center min-w-0">
+                        <div className="w-12 h-12 bg-gradient-to-br from-white/10 to-white/5 rounded-lg p-1 flex-shrink-0 flex items-center justify-center group-hover:from-white/20 group-hover:to-white/10 transition-colors">
+                          <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-white truncate text-xs">{item.name}</h4>
+                          <p className="text-xs text-muted-foreground">${item.price}</p>
+                        </div>
+                      </div>
+
+                      {/* Quantity Controls */}
+                      <div className="flex items-center justify-center">
+                        <div className="flex items-center gap-1 bg-black/40 rounded p-1 border border-white/10">
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-5 w-5 rounded hover:bg-white/20 text-white p-0"
+                            onClick={() => updateQuantity(i, item.quantity - 1)}
+                          >
+                            <Minus className="w-2 h-2" />
+                          </Button>
+                          <span className="text-white font-bold w-4 text-center text-xs">{item.quantity}</span>
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-5 w-5 rounded hover:bg-white/20 text-white p-0"
+                            onClick={() => updateQuantity(i, item.quantity + 1)}
+                          >
+                            <Plus className="w-2 h-2" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Total & Delete */}
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="font-bold text-primary text-xs">${(item.price * item.quantity).toLocaleString()}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-muted-foreground hover:text-red-400 h-6 w-6 hover:bg-red-400/10 flex-shrink-0"
+                          onClick={() => removeItem(i)}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
                       </div>
                     </motion.div>
                   ))}
-                </motion.div>
+                </div>
+              </motion.div>
 
-                {/* Bucket Container */}
+              {/* Animation Section - Drop Animation */}
+              {hasAnimated && (
                 <motion.div 
-                  className="absolute bottom-8 flex items-end justify-center w-full pointer-events-none"
-                  variants={bucketBounceVariants}
-                  initial="hidden"
-                  animate={["visible", "bounce"]}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="relative h-80 bg-gradient-to-b from-purple-500/10 to-pink-500/5 border border-white/10 rounded-2xl overflow-hidden flex items-center justify-center"
                 >
-                  <div className="relative w-56 h-40">
-                    {/* Bucket Body */}
-                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-48 h-32 bg-gradient-to-b from-purple-600 to-pink-600 rounded-b-3xl shadow-2xl shadow-purple-500/50 border-4 border-purple-500 flex items-center justify-center overflow-hidden">
-                      {/* Bucket Handle */}
-                      <div className="absolute -top-8 left-6 right-6 h-14 border-4 border-purple-500 rounded-t-full" />
-                      
-                      {/* Shimmer Effect */}
-                      <motion.div 
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                        animate={{ x: [-200, 200] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      />
-                      
-                      {/* Content */}
-                      <div className="text-center z-10 relative">
-                        <motion.div
-                          animate={{ y: [0, -4, 0] }}
-                          transition={{ duration: 1, repeat: Infinity }}
-                        >
-                          <Truck className="w-10 h-10 text-white mx-auto mb-1" />
-                        </motion.div>
-                        <p className="text-white font-bold text-sm">Ready for</p>
-                        <p className="text-white font-bold text-sm">Delivery</p>
+                  {/* Animated Background */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-purple-500/10 via-transparent to-transparent opacity-50" />
+                  
+                  {/* Dropping Products */}
+                  <div className="relative w-full h-full flex items-start justify-center pt-6">
+                    {cartItems.map((item, i) => (
+                      <motion.div
+                        key={`drop-${item.id}`}
+                        variants={productDropVariants(i)}
+                        initial="hidden"
+                        animate="drop"
+                        className="absolute"
+                      >
+                        <div className="w-16 h-16 bg-white rounded-lg p-2 flex items-center justify-center shadow-2xl shadow-purple-500/40 border border-white">
+                          <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Bucket */}
+                  <motion.div 
+                    className="absolute bottom-6 flex items-end justify-center w-full pointer-events-none"
+                    variants={bucketVariants}
+                    initial="hidden"
+                    animate={["visible", "bounce"]}
+                  >
+                    <div className="relative">
+                      {/* Bucket Body */}
+                      <div className="w-40 h-28 bg-gradient-to-b from-purple-600 to-pink-600 rounded-b-3xl shadow-2xl shadow-purple-500/50 border-4 border-purple-500 flex items-center justify-center overflow-hidden">
+                        {/* Bucket Handle */}
+                        <div className="absolute -top-6 left-4 right-4 h-10 border-4 border-purple-500 rounded-t-full" />
+                        
+                        {/* Content */}
+                        <div className="text-center z-10">
+                          <Truck className="w-7 h-7 text-white mx-auto mb-1" />
+                          <p className="text-white font-bold text-xs">Ready for Delivery</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 </motion.div>
-              </motion.div>
+              )}
             </div>
 
-            {/* Right Section - Order Summary */}
-            <motion.div 
-              className="xl:col-span-2"
-              variants={itemVariants}
-            >
+            {/* Right Section - Enhanced Order Summary */}
+            <div className="lg:col-span-2">
               <div className="sticky top-24 space-y-4">
                 {/* Promo Code */}
                 <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
                   className="p-5 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-colors"
-                  whileHover={{ borderColor: "rgba(255,255,255,0.3)" }}
                 >
                   <label className="text-xs font-bold text-muted-foreground mb-3 block">PROMO CODE</label>
                   <div className="flex gap-2">
@@ -347,14 +282,78 @@ export default function CartPage() {
                   )}
                 </motion.div>
 
+                {/* Delivery Options */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                  className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3"
+                >
+                  <h3 className="font-bold text-white flex items-center gap-2">
+                    <Truck className="w-4 h-4 text-blue-400" /> Delivery Options
+                  </h3>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => setDeliveryOption("standard")}
+                      className={`w-full p-3 rounded-lg border transition-all text-left text-sm ${
+                        deliveryOption === "standard"
+                          ? "bg-primary/20 border-primary text-white"
+                          : "bg-white/5 border-white/10 text-muted-foreground hover:border-white/30"
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="font-semibold">Standard Delivery</span>
+                        <span className="text-primary font-bold">{afterDiscount > 100 ? "FREE" : "$9.99"}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">2-5 business days</p>
+                    </button>
+                    <button
+                      onClick={() => setDeliveryOption("express")}
+                      className={`w-full p-3 rounded-lg border transition-all text-left text-sm ${
+                        deliveryOption === "express"
+                          ? "bg-primary/20 border-primary text-white"
+                          : "bg-white/5 border-white/10 text-muted-foreground hover:border-white/30"
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="font-semibold">Express Delivery</span>
+                        <span className="text-secondary font-bold">$14.99</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">Next business day</p>
+                    </button>
+                  </div>
+                </motion.div>
+
+                {/* Insurance & Protection */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3"
+                >
+                  <h3 className="font-bold text-white flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-green-400" /> Buyer Protection
+                  </h3>
+                  <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg bg-black/40 border border-white/10 hover:border-white/20 transition-colors">
+                    <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                    <div className="flex-1">
+                      <div className="text-sm font-semibold text-white">Order Protection Insurance</div>
+                      <p className="text-xs text-muted-foreground">Full coverage for loss/damage</p>
+                    </div>
+                    <span className="text-sm font-bold text-primary">$4.99</span>
+                  </label>
+                </motion.div>
+
                 {/* Order Summary */}
                 <motion.div 
-                  className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md space-y-5"
-                  whileHover={{ borderColor: "rgba(255,255,255,0.2)" }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35 }}
+                  className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md space-y-4"
                 >
                   <h2 className="text-xl font-bold text-white">Order Summary</h2>
 
-                  <div className="space-y-3 pb-5 border-b border-white/10">
+                  <div className="space-y-3 pb-4 border-b border-white/10">
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-muted-foreground">Subtotal</span>
                       <span className="text-white font-semibold">${subtotal.toLocaleString()}</span>
@@ -368,14 +367,19 @@ export default function CartPage() {
                     )}
 
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">Shipping</span>
-                      <span className={shipping === 0 ? "text-green-400 font-semibold" : "text-white font-semibold"}>
-                        {shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}
+                      <span className="text-muted-foreground">Delivery</span>
+                      <span className={deliveryFee === 0 ? "text-green-400 font-semibold" : "text-white font-semibold"}>
+                        {deliveryFee === 0 ? "FREE" : `$${deliveryFee.toFixed(2)}`}
                       </span>
                     </div>
 
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">Estimated Tax</span>
+                      <span className="text-muted-foreground">Insurance</span>
+                      <span className="text-white font-semibold">${insurance.toFixed(2)}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">Tax</span>
                       <span className="text-white font-semibold">${tax.toFixed(2)}</span>
                     </div>
                   </div>
@@ -387,24 +391,22 @@ export default function CartPage() {
                       ${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
-
-                  {/* Estimated Delivery */}
-                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-                    <p className="text-xs text-blue-200">
-                      <span className="font-bold">📦 Estimated Delivery:</span><br />Dec 2-3, 2025
-                    </p>
-                  </div>
                 </motion.div>
 
                 {/* Payment Methods */}
-                <motion.div className="space-y-3">
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="space-y-3"
+                >
                   <p className="text-xs font-bold text-muted-foreground">PAYMENT METHOD</p>
                   <div className="grid grid-cols-2 gap-3">
                     <motion.button
                       onClick={() => setPaymentMethod("card")}
-                      whileHover={{ scale: 1.05 }}
+                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`p-3 rounded-lg border transition-all text-sm font-bold flex items-center justify-center gap-2 ${
+                      className={`p-4 rounded-lg border transition-all text-sm font-bold flex items-center justify-center gap-2 ${
                         paymentMethod === "card"
                           ? "bg-gradient-to-r from-primary to-secondary border-primary text-white shadow-lg shadow-primary/30"
                           : "bg-white/5 border-white/10 text-muted-foreground hover:border-white/30"
@@ -414,9 +416,9 @@ export default function CartPage() {
                     </motion.button>
                     <motion.button
                       onClick={() => setPaymentMethod("crypto")}
-                      whileHover={{ scale: 1.05 }}
+                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`p-3 rounded-lg border transition-all text-sm font-bold flex items-center justify-center gap-2 ${
+                      className={`p-4 rounded-lg border transition-all text-sm font-bold flex items-center justify-center gap-2 ${
                         paymentMethod === "crypto"
                           ? "bg-gradient-to-r from-primary to-secondary border-primary text-white shadow-lg shadow-primary/30"
                           : "bg-white/5 border-white/10 text-muted-foreground hover:border-white/30"
@@ -427,8 +429,24 @@ export default function CartPage() {
                   </div>
                 </motion.div>
 
+                {/* Estimated Delivery */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.45 }}
+                  className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4"
+                >
+                  <p className="text-sm text-blue-200 flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span><span className="font-bold">Estimated Delivery:</span> {deliveryOption === "express" ? "Tomorrow" : "Dec 2-3, 2025"}</span>
+                  </p>
+                </motion.div>
+
                 {/* Checkout Button */}
                 <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -441,27 +459,31 @@ export default function CartPage() {
 
                 {/* Trust Badges */}
                 <motion.div 
-                  className="space-y-2 pt-4 border-t border-white/10"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
+                  transition={{ delay: 0.6 }}
+                  className="grid grid-cols-2 gap-2 text-xs"
                 >
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground hover:text-white transition-colors">
-                    <ShieldCheck className="w-4 h-4 text-green-400" />
-                    SSL Encrypted
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/10">
+                    <ShieldCheck className="w-4 h-4 text-green-400 flex-shrink-0" />
+                    <span className="text-muted-foreground">SSL Encrypted</span>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground hover:text-white transition-colors">
-                    <Check className="w-4 h-4 text-green-400" />
-                    Money-back guarantee
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/10">
+                    <RefreshCw className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                    <span className="text-muted-foreground">30-Day Return</span>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground hover:text-white transition-colors">
-                    <Gift className="w-4 h-4 text-pink-400" />
-                    Free returns 30 days
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/10">
+                    <Check className="w-4 h-4 text-green-400 flex-shrink-0" />
+                    <span className="text-muted-foreground">Money-Back</span>
+                  </div>
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/10">
+                    <Gift className="w-4 h-4 text-pink-400 flex-shrink-0" />
+                    <span className="text-muted-foreground">Gift Cards</span>
                   </div>
                 </motion.div>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
       </main>
     </div>
