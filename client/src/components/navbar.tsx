@@ -112,7 +112,7 @@ export function Navbar() {
           </span>
         </Link>
 
-        <div className="hidden xl:flex items-center gap-6 md:gap-8 ml-8">
+        <div className="hidden lg:flex items-center gap-6 ml-8">
           {[
             { href: "/", label: "Home" },
             { href: "/products", label: "Products" },
@@ -122,7 +122,7 @@ export function Navbar() {
             <Link 
               key={href}
               href={href}
-              className="relative text-xs md:text-sm font-medium text-white/70 hover:text-white transition-colors group"
+              className="relative text-sm font-medium text-white/70 hover:text-white transition-colors group"
               data-testid={`nav-${label.toLowerCase()}`}
             >
               {label}
@@ -131,13 +131,13 @@ export function Navbar() {
           ))}
         </div>
 
-        <div className="flex items-center gap-1.5 md:gap-3 ml-auto flex-shrink-0">
-          <form onSubmit={handleSearch} className="hidden sm:flex relative">
+        <div className="flex items-center gap-1 md:gap-2 lg:gap-3 ml-auto flex-shrink-0">
+          <form onSubmit={handleSearch} className="hidden md:flex relative">
             <Input 
               placeholder="Search..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className={`w-36 md:w-52 lg:w-64 bg-white/5 border-white/10 rounded-full pl-3 md:pl-4 pr-16 md:pr-20 focus:bg-white/10 focus:border-purple-500/50 transition-all text-xs md:text-sm ${isListening ? 'border-purple-500 bg-purple-500/10' : ''}`}
+              className={`w-40 lg:w-56 bg-white/5 border-white/10 rounded-full pl-3 pr-16 focus:bg-white/10 focus:border-purple-500/50 transition-all text-xs md:text-sm ${isListening ? 'border-purple-500 bg-purple-500/10' : ''}`}
               data-testid="search-input"
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -165,28 +165,28 @@ export function Navbar() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="hidden sm:flex h-9 w-9 md:h-10 md:w-10 text-white/70 hover:text-white hover:bg-white/10 rounded-full relative"
+              className="hidden md:flex h-8 w-8 lg:h-10 lg:w-10 text-white/70 hover:text-white hover:bg-white/10 rounded-full relative"
               data-testid="wishlist-button"
             >
-              <Heart className="w-4 md:w-5 h-4 md:h-5" />
+              <Heart className="w-4 h-4" />
             </Button>
           </Link>
 
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-9 w-9 md:h-10 md:w-10 text-white/70 hover:text-white hover:bg-white/10 rounded-full relative"
+            className="h-8 w-8 lg:h-10 lg:w-10 text-white/70 hover:text-white hover:bg-white/10 rounded-full relative"
             onClick={() => setIsOpen(true)}
             data-testid="cart-button"
           >
-            <ShoppingCart className="w-4 md:w-5 h-4 md:h-5" />
+            <ShoppingCart className="w-4 h-4" />
             <AnimatePresence>
               {itemCount > 0 && (
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   exit={{ scale: 0 }}
-                  className="absolute -top-1 -right-1 w-4 h-4 md:w-5 md:h-5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full text-xs font-bold text-white flex items-center justify-center shadow-lg"
+                  className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full text-xs font-bold text-white flex items-center justify-center shadow-lg"
                 >
                   {itemCount > 9 ? "9+" : itemCount}
                 </motion.span>
@@ -199,15 +199,15 @@ export function Navbar() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-9 w-9 md:h-10 md:w-10 text-white/70 hover:text-white hover:bg-white/10 rounded-full"
+                className="h-8 w-8 lg:h-10 lg:w-10 text-white/70 hover:text-white hover:bg-white/10 rounded-full"
                 data-testid="profile-button"
               >
-                <User className="w-4 md:w-5 h-4 md:h-5" />
+                <User className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent 
               align="end" 
-              className="w-40 md:w-48 bg-[#0f0f15]/95 backdrop-blur-xl border-white/10"
+              className="w-48 bg-[#0f0f15]/95 backdrop-blur-xl border-white/10"
             >
               <DropdownMenuItem asChild className="focus:bg-white/10 cursor-pointer">
                 <Link href="/signup" className="flex items-center gap-2 text-white text-sm">
@@ -223,25 +223,16 @@ export function Navbar() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          
-          <Link href="/signup">
-            <Button 
-              className="hidden md:flex h-9 md:h-10 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full px-4 md:px-6 text-sm font-medium shadow-lg shadow-purple-500/25 transition-all hover:shadow-purple-500/40 hover:scale-105"
-              data-testid="signin-button"
-            >
-              Sign In
-            </Button>
-          </Link>
 
           <Sheet>
             <SheetTrigger asChild>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="lg:hidden text-white hover:bg-white/10 rounded-full"
+                className="md:hidden text-white hover:bg-white/10 rounded-full h-8 w-8"
                 data-testid="mobile-menu-button"
               >
-                <Menu className="w-6 h-6" />
+                <Menu className="w-5 h-5" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="bg-[#0a0a0f]/95 backdrop-blur-xl border-l border-white/10 w-72 md:w-80">

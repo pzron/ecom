@@ -114,7 +114,7 @@ export function Hero() {
 
   return (
     <div 
-      className="relative h-[66vh] min-h-[500px] max-h-[700px] flex flex-col items-center justify-center pt-16 overflow-hidden"
+      className="relative h-[50vh] sm:h-[55vh] md:h-[60vh] min-h-[400px] max-h-[600px] flex flex-col items-center justify-center pt-12 md:pt-16 overflow-hidden"
       onMouseMove={(e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         mouseX.set(e.clientX - rect.width / 2);
@@ -181,13 +181,12 @@ export function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
-          className="flex flex-wrap items-center justify-center gap-4"
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          className="flex flex-wrap items-center justify-center gap-3 sm:gap-4"
         >
           <Link href="/products">
             <Button 
-              size="lg" 
-              className="h-12 px-6 text-base rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/30 transition-all duration-300 hover:shadow-purple-500/50 hover:scale-105 font-semibold"
+              className="h-10 md:h-12 px-4 md:px-6 text-sm md:text-base rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/30 transition-all duration-300 hover:shadow-purple-500/50 hover:scale-105 font-semibold"
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               data-testid="explore-products-button"
@@ -204,9 +203,8 @@ export function Hero() {
           
           <Link href="/signup">
             <Button 
-              size="lg" 
               variant="outline" 
-              className="h-12 px-6 text-base rounded-xl border-white/20 bg-white/5 hover:bg-white/10 backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:border-purple-500/30"
+              className="h-10 md:h-12 px-4 md:px-6 text-sm md:text-base rounded-xl border-white/20 bg-white/5 hover:bg-white/10 backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:border-purple-500/30"
               data-testid="get-started-button"
             >
               Get Started Free
@@ -214,36 +212,6 @@ export function Hero() {
           </Link>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-12 w-full max-w-2xl"
-        >
-          {[
-            { icon: Truck, text: "Free Shipping", color: "purple" },
-            { icon: Shield, text: "Secure Payments", color: "blue" },
-            { icon: Zap, text: "Fast Delivery", color: "amber" },
-            { icon: Headset, text: "24/7 Support", color: "green" },
-          ].map(({ icon: Icon, text, color }) => {
-            const colorClasses: Record<string, string> = {
-              purple: "from-purple-500/20 to-purple-500/5 border-purple-500/30 text-purple-300",
-              blue: "from-blue-500/20 to-blue-500/5 border-blue-500/30 text-blue-300",
-              amber: "from-amber-500/20 to-amber-500/5 border-amber-500/30 text-amber-300",
-              green: "from-green-500/20 to-green-500/5 border-green-500/30 text-green-300",
-            };
-            return (
-              <motion.div 
-                key={text}
-                whileHover={{ scale: 1.05, y: -5 }}
-                className={`relative p-4 md:p-5 rounded-xl md:rounded-2xl bg-gradient-to-br ${colorClasses[color]} border backdrop-blur-sm flex flex-col items-center gap-2 text-center transition-all`}
-              >
-                <Icon className="w-5 md:w-6 h-5 md:h-6" />
-                <span className="text-xs md:text-sm font-semibold text-white">{text}</span>
-              </motion.div>
-            );
-          })}
-        </motion.div>
       </div>
     </div>
   );
