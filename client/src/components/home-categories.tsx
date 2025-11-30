@@ -22,7 +22,6 @@ export function HomeCategories() {
 
   return (
     <section className="py-12 px-4 bg-gradient-to-b from-purple-950/10 via-transparent to-pink-950/10 border-b border-white/5 overflow-hidden">
-
       {/* Auto-scrolling horizontal carousel */}
       <div className="w-full overflow-hidden">
         <motion.div

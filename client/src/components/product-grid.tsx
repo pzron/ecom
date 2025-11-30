@@ -206,6 +206,17 @@ export function ProductGrid() {
   return (
     <section className="py-12 px-4 bg-gradient-to-b from-transparent via-purple-950/10 to-transparent">
       <div className="container mx-auto max-w-7xl">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-8"
+        >
+          <h2 className="text-3xl md:text-4xl font-heading font-bold text-white mb-2">
+            Featured Collection
+          </h2>
+          <p className="text-white/60">Explore 272+ premium products across 34 categories</p>
+        </motion.div>
 
         {/* Responsive grid - 4 items per line with variations */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-5">
