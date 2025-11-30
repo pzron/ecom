@@ -70,7 +70,7 @@ export async function createOrderWithCalculations(input: OrderInput) {
         selectedColor: null,
         selectedSize: null,
         vendorId: item.product?.vendorId || null,
-      }))
+      } as any))
     );
 
     // Calculate and create affiliate transaction if applicable
