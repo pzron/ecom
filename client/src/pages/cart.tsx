@@ -95,33 +95,14 @@ export default function CartPage() {
       <Navbar />
       
       <main className="container mx-auto px-4 pt-24 pb-20">
-        {/* Header with Stats */}
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-12"
         >
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="p-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-500/10 border border-purple-500/30">
-              <p className="text-xs text-purple-300 font-bold">ITEMS</p>
-              <p className="text-2xl font-bold text-white mt-1">{cartItems.length}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-gradient-to-br from-pink-500/20 to-pink-500/10 border border-pink-500/30">
-              <p className="text-xs text-pink-300 font-bold">SUBTOTAL</p>
-              <p className="text-2xl font-bold text-white mt-1">${subtotal.toLocaleString()}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/10 border border-blue-500/30">
-              <p className="text-xs text-blue-300 font-bold">LOYALTY POINTS</p>
-              <p className="text-2xl font-bold text-white mt-1">{loyaltyPoints}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-gradient-to-br from-green-500/20 to-green-500/10 border border-green-500/30">
-              <p className="text-xs text-green-300 font-bold">SAVINGS</p>
-              <p className="text-2xl font-bold text-white mt-1">${discountAmount.toLocaleString()}</p>
-            </div>
-          </div>
-
-          <h1 className="text-5xl font-heading font-bold text-white mb-2">Your Cart</h1>
-          <p className="text-muted-foreground">Complete your order in seconds</p>
+          <h1 className="text-4xl font-heading font-bold text-white mb-2">Shopping Cart</h1>
+          <p className="text-muted-foreground text-sm">{cartItems.length} {cartItems.length === 1 ? "item" : "items"} in your cart</p>
         </motion.div>
 
         {cartItems.length === 0 ? (
