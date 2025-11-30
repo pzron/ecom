@@ -487,11 +487,87 @@ export async function registerRoutes(
 
   app.get("/api/affiliate/stats", async (req, res) => {
     try {
-      const { affiliateId } = req.query;
-      const affiliate = await storage.getAffiliate(affiliateId as string);
-      res.json(affiliate || { totalEarnings: 0, transactionCount: 0 });
+      const affiliates = await storage.getAffiliates();
+      res.json(affiliates || []);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch affiliate stats" });
+    }
+  });
+
+  // ===== ROLE MANAGEMENT =====
+  app.get("/api/admin/roles", async (req, res) => {
+    try {
+      const defaultRoles = [
+        { id: "admin", name: "Admin", powers: ["Full Access", "Manage Users", "Manage Products", "View Analytics"] },
+        { id: "vendor", name: "Vendor", powers: ["Manage Own Products", "View Sales", "Manage Orders"] },
+        { id: "affiliate", name: "Affiliate", powers: ["View Campaigns", "Track Earnings", "Share Links"] },
+        { id: "customer", name: "Customer", powers: ["Browse Products", "Make Purchases", "View Orders"] }
+      ];
+      res.json(defaultRoles);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch roles" });
+    }
+  });
+
+  app.post("/api/admin/roles", async (req, res) => {
+    try {
+      const { name, powers } = req.body;
+      const newRole = {
+        id: name.toLowerCase().replace(/\s+/g, "_"),
+        name,
+        powers: powers || ["View Dashboard"]
+      };
+      res.status(201).json(newRole);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create role" });
+    }
+  });
+
+  // ===== VENDOR REQUESTS =====
+  app.get("/api/admin/vendor-requests", async (req, res) => {
+    try {
+      const vendors = await storage.getVendors();
+      const pendingVendors = vendors.filter((v: any) => !v.isVerified);
+      res.json(pendingVendors);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch vendor requests" });
+    }
+  });
+
+  app.put("/api/admin/vendor-requests/:id/approve", async (req, res) => {
+    try {
+      const vendor = await storage.getVendor(req.params.id);
+      if (vendor) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ message: "Vendor not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to approve vendor" });
+    }
+  });
+
+  // ===== AFFILIATE REQUESTS =====
+  app.get("/api/admin/affiliate-requests", async (req, res) => {
+    try {
+      const affiliates = await storage.getAffiliates();
+      const pendingAffiliates = affiliates.filter((a: any) => !a.isVerified);
+      res.json(pendingAffiliates);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch affiliate requests" });
+    }
+  });
+
+  app.put("/api/admin/affiliate-requests/:id/approve", async (req, res) => {
+    try {
+      const affiliate = await storage.getAffiliate(req.params.id);
+      if (affiliate) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ message: "Affiliate not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to approve affiliate" });
     }
   });
 
