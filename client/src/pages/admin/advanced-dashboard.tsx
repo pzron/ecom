@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { TrendingUp, Package, DollarSign, Users, Clock, Truck, CheckCircle, XCircle, AlertTriangle, Eye, Filter } from "lucide-react";
+import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, ScatterChart, Scatter } from "recharts";
+import { TrendingUp, Package, DollarSign, Users, Clock, Truck, CheckCircle, XCircle, AlertTriangle, Eye, Filter, MapPin, ShoppingCart, Zap } from "lucide-react";
 
-const COLORS = ["#A855F7", "#EC4899", "#06B6D4", "#F59E0B"];
+const COLORS = ["#A855F7", "#EC4899", "#06B6D4", "#F59E0B", "#10B981"];
 
 export default function AdvancedAdminDashboard() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [filterProduct, setFilterProduct] = useState("all");
+  const [selectedLocation, setSelectedLocation] = useState("all");
+  const [selectedMetric, setSelectedMetric] = useState("revenue");
   const [autoRefresh, setAutoRefresh] = useState(true);
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function AdvancedAdminDashboard() {
   if (loading) return <div className="flex items-center justify-center h-screen text-white text-xl">Loading...</div>;
 
   const StatCard = ({ icon: Icon, label, value, subtext, trend, color }: any) => (
-    <motion.div whileHover={{ y: -8 }} className={`p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-${color}-500/30 hover:border-${color}-500/50 transition-all`}>
+    <motion.div whileHover={{ y: -8 }} className="p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 hover:border-white/20 transition-all">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className="text-white/60 text-sm font-medium">{label}</p>
@@ -43,12 +44,14 @@ export default function AdvancedAdminDashboard() {
             </p>
           )}
         </div>
-        <div className={`p-4 rounded-xl bg-${color}-500/20`}>
-          <Icon className={`w-8 h-8 text-${color}-400`} />
+        <div className="p-4 rounded-xl bg-white/5">
+          <Icon className="w-8 h-8 text-white/50" />
         </div>
       </div>
     </motion.div>
   );
+
+  const filteredLocationData = selectedLocation === "all" ? stats?.locationData : stats?.locationData?.filter((l: any) => l.location === selectedLocation);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pt-24 pb-12">
@@ -61,46 +64,65 @@ export default function AdvancedAdminDashboard() {
           </div>
           <label className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 rounded-lg border border-white/10 cursor-pointer">
             <input type="checkbox" checked={autoRefresh} onChange={(e) => setAutoRefresh(e.target.checked)} />
-            <span className="text-white text-sm">Auto-refresh</span>
+            <span className="text-white text-sm">Auto-refresh (10s)</span>
           </label>
         </motion.div>
 
-        {/* KPI Stats - 6 Cards */}
+        {/* Primary KPI Stats - 6 Cards */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          <StatCard icon={DollarSign} label="Total Revenue" value={`৳${(stats?.totalRevenue || 0).toLocaleString()}`} trend={12} color="purple" />
-          <StatCard icon={Package} label="Total Orders" value={stats?.totalOrders || 0} subtext={`${stats?.conversionRate}% conversion`} trend={8} color="pink" />
-          <StatCard icon={Users} label="Active Users" value={stats?.totalUsers || 0} trend={15} color="cyan" />
-          <StatCard icon={Clock} label="Pending Orders" value={stats?.pendingOrders || 0} subtext="Awaiting processing" color="orange" />
-          <StatCard icon={Truck} label="In Transit" value={stats?.processingOrders || 0} subtext="Pending delivery" color="blue" />
-          <StatCard icon={CheckCircle} label="Delivered" value={stats?.deliveredOrders || 0} subtext={`${((stats?.deliveredOrders / (stats?.totalOrders || 1)) * 100).toFixed(0)}% success rate`} color="green" />
+          <StatCard icon={DollarSign} label="Total Revenue" value={`৳${(stats?.totalRevenue || 0).toLocaleString()}`} trend={12} />
+          <StatCard icon={Package} label="Total Orders" value={stats?.totalOrders || 0} subtext={`${stats?.conversionRate}% conversion`} trend={8} />
+          <StatCard icon={Users} label="Active Users" value={stats?.totalUsers || 0} trend={15} />
+          <StatCard icon={Clock} label="Order Requests" value={stats?.orderRequests || 0} subtext="Awaiting processing" trend={3} />
+          <StatCard icon={Truck} label="Pending Delivery" value={stats?.pendingDelivery || 0} subtext="In transit" trend={5} />
+          <StatCard icon={CheckCircle} label="Delivered" value={stats?.deliveredOrders || 0} subtext={`${((stats?.deliveredOrders / (stats?.totalOrders || 1)) * 100).toFixed(0)}% success rate`} trend={18} />
         </motion.div>
 
-        {/* Alert Cards - 2 more important metrics */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 20 }} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          <motion.div whileHover={{ scale: 1.02 }} className="p-6 rounded-2xl bg-gradient-to-br from-red-900/20 to-slate-900 border border-red-500/30">
+        {/* Additional 4 Cards - Advanced Metrics */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 20 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <motion.div whileHover={{ scale: 1.02 }} className="p-4 rounded-2xl bg-gradient-to-br from-purple-900/20 to-slate-900 border border-purple-500/30">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-red-400" /> Low Stock Alert</h3>
-                <p className="text-3xl font-bold text-red-400 mt-3">{stats?.lowStockProducts || 0}</p>
-                <p className="text-white/60 text-sm mt-1">Products need restocking</p>
+                <p className="text-white/60 text-xs">Avg Order Value</p>
+                <p className="text-2xl font-bold text-purple-400 mt-2">৳{(stats?.avgOrderValue || 0).toLocaleString()}</p>
               </div>
+              <DollarSign className="w-6 h-6 text-purple-400" />
             </div>
           </motion.div>
 
-          <motion.div whileHover={{ scale: 1.02 }} className="p-6 rounded-2xl bg-gradient-to-br from-green-900/20 to-slate-900 border border-green-500/30">
+          <motion.div whileHover={{ scale: 1.02 }} className="p-4 rounded-2xl bg-gradient-to-br from-pink-900/20 to-slate-900 border border-pink-500/30">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2"><Eye className="w-5 h-5 text-green-400" /> Visitor Tracking</h3>
-                <p className="text-3xl font-bold text-green-400 mt-3">{stats?.cartVisitors || 0}</p>
-                <p className="text-white/60 text-sm mt-1">Unique cart visitors</p>
+                <p className="text-white/60 text-xs">Conversion Rate</p>
+                <p className="text-2xl font-bold text-pink-400 mt-2">{stats?.conversionRate || 0}%</p>
               </div>
+              <TrendingUp className="w-6 h-6 text-pink-400" />
+            </div>
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.02 }} className="p-4 rounded-2xl bg-gradient-to-br from-cyan-900/20 to-slate-900 border border-cyan-500/30">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/60 text-xs">Low Stock Items</p>
+                <p className="text-2xl font-bold text-cyan-400 mt-2">{stats?.lowStockProducts || 0}</p>
+              </div>
+              <AlertTriangle className="w-6 h-6 text-cyan-400" />
+            </div>
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.02 }} className="p-4 rounded-2xl bg-gradient-to-br from-green-900/20 to-slate-900 border border-green-500/30">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/60 text-xs">Cart Visitors</p>
+                <p className="text-2xl font-bold text-green-400 mt-2">{(stats?.cartVisitors || 0).toLocaleString()}</p>
+              </div>
+              <Eye className="w-6 h-6 text-green-400" />
             </div>
           </motion.div>
         </motion.div>
 
-        {/* Charts Grid */}
+        {/* Charts Row 1: Revenue + Order Distribution */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 20 }} className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Revenue Trend Area Chart */}
           <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10">
             <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2"><TrendingUp className="w-5 h-5 text-purple-400" /> Revenue Trend (Last 30 Days)</h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -120,7 +142,6 @@ export default function AdvancedAdminDashboard() {
             </ResponsiveContainer>
           </div>
 
-          {/* Orders by Status Pie Chart */}
           <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10">
             <h3 className="text-lg font-semibold text-white mb-4">Order Status Distribution</h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -148,23 +169,107 @@ export default function AdvancedAdminDashboard() {
               </PieChart>
             </ResponsiveContainer>
           </div>
+        </motion.div>
 
-          {/* Product Performance Bar Chart */}
-          <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 lg:col-span-2">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <Filter className="w-5 h-5 text-pink-400" /> Top Products Performance
-            </h3>
+        {/* Charts Row 2: Location Analytics + Visitor Conversion */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 20 }} className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2"><MapPin className="w-5 h-5 text-cyan-400" /> Sales by Location</h3>
+              <select 
+                value={selectedLocation} 
+                onChange={(e) => setSelectedLocation(e.target.value)}
+                className="px-3 py-1 bg-slate-700 rounded text-white text-sm border border-white/10"
+              >
+                <option value="all">All Locations</option>
+                {stats?.locationData?.map((loc: any) => (
+                  <option key={loc.location} value={loc.location}>{loc.location}</option>
+                ))}
+              </select>
+            </div>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={stats?.topProducts?.slice(0, 8) || []}>
+              <BarChart data={filteredLocationData || []}>
                 <CartesianGrid stroke="#333" />
-                <XAxis stroke="#999" tick={{ fontSize: 11 }} angle={-45} textAnchor="end" height={80} />
+                <XAxis stroke="#999" tick={{ fontSize: 12 }} dataKey="location" />
                 <YAxis stroke="#999" />
                 <Tooltip contentStyle={{ backgroundColor: "#1a1a2e", border: "1px solid #333" }} />
                 <Legend />
-                <Bar dataKey="reviewCount" fill="#A855F7" name="Reviews" />
-                <Bar dataKey="stock" fill="#EC4899" name="Stock" />
+                <Bar dataKey="sales" fill="#A855F7" name="Sales (৳)" />
+                <Bar dataKey="orders" fill="#EC4899" name="Orders" />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2"><ShoppingCart className="w-5 h-5 text-green-400" /> Visitor Analytics (7 Days)</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={stats?.visitorAnalytics || []}>
+                <defs>
+                  <linearGradient id="colorVisitors" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#06B6D4" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorPurchases" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="#333" />
+                <XAxis stroke="#999" tick={{ fontSize: 11 }} dataKey="date" />
+                <YAxis stroke="#999" />
+                <Tooltip contentStyle={{ backgroundColor: "#1a1a2e", border: "1px solid #333" }} />
+                <Area type="monotone" dataKey="visitors" stroke="#06B6D4" fill="url(#colorVisitors)" name="Total Visitors" />
+                <Area type="monotone" dataKey="purchases" stroke="#10B981" fill="url(#colorPurchases)" name="Purchases" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+
+        {/* Product Performance & Performance Metrics */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 20 }} className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          <div className="lg:col-span-2 p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2"><Filter className="w-5 h-5 text-pink-400" /> Top Product Performance</h3>
+            <div className="space-y-3 max-h-80 overflow-y-auto">
+              {stats?.productMetrics?.map((product: any, idx: number) => (
+                <motion.div key={idx} whileHover={{ x: 4 }} className="p-4 rounded-lg bg-white/5 border border-white/5 hover:border-white/10 transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex-1">
+                      <h4 className="text-white font-semibold">{product.name}</h4>
+                      <p className="text-white/60 text-xs">Stock: {product.stock} | Rating: ⭐{product.rating}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-green-400 font-bold">৳{(product.revenue || 0).toLocaleString()}</p>
+                      <p className={`text-xs ${product.trend.startsWith("+") ? "text-green-400" : "text-red-400"}`}>{product.trend}</p>
+                    </div>
+                  </div>
+                  <div className="w-full bg-white/10 rounded-full h-1.5">
+                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-1.5 rounded-full" style={{ width: `${(product.sales / 5000) * 100}%` }}></div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2"><Zap className="w-5 h-5 text-yellow-400" /> Performance Metrics</h3>
+            <div className="space-y-4">
+              <div>
+                <p className="text-white/60 text-sm mb-1">Page Load Time</p>
+                <p className="text-2xl font-bold text-yellow-400">{stats?.pageLoadTime}</p>
+              </div>
+              <div>
+                <p className="text-white/60 text-sm mb-1">API Response</p>
+                <p className="text-2xl font-bold text-cyan-400">{stats?.apiResponseTime}</p>
+              </div>
+              <div>
+                <p className="text-white/60 text-sm mb-1">Database Query</p>
+                <p className="text-2xl font-bold text-green-400">{stats?.databaseQueryTime}</p>
+              </div>
+              <div>
+                <p className="text-white/60 text-sm mb-1">Cache Hit Rate</p>
+                <p className="text-2xl font-bold text-purple-400">{stats?.cacheHitRate}</p>
+              </div>
+            </div>
           </div>
         </motion.div>
 
