@@ -10,7 +10,7 @@ import { isValidEmail, isValidPhone, validatePassword, connectWeb3Wallet } from 
 
 export default function SignUpPage() {
   const [, navigate] = useLocation();
-  const { signup, login, loginWithGoogle, loginWithWeb3 } = useAuthStore();
+  const { signup, login, loginWithGoogle, loginWithWeb3, sendOTP, verifyOTP, googleVerifyAndCreateAccount, web3VerifyAndCreateAccount } = useAuthStore();
   const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,6 +20,9 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [otpStep, setOtpStep] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [verificationMethod, setVerificationMethod] = useState<'email' | 'phone'>('email');
 
   const passwordValidation = validatePassword(password);
 
@@ -33,8 +36,8 @@ export default function SignUpPage() {
       newErrors.email = emailValidation.error || 'Invalid email';
     }
 
-    // Validate phone if provided
-    if (phone && !isLogin) {
+    // Validate phone if provided and using phone verification
+    if (!isLogin && verificationMethod === 'phone' && phone) {
       const phoneValidation = isValidPhone(phone);
       if (!phoneValidation.valid) {
         newErrors.phone = phoneValidation.error || 'Invalid phone';
@@ -57,11 +60,22 @@ export default function SignUpPage() {
     setTimeout(() => {
       if (isLogin) {
         login(email, password);
+        navigate("/");
+      } else if (!otpStep) {
+        // Send OTP for verification
+        sendOTP(email, verificationMethod, phone);
+        setOtpStep(true);
+        setIsLoading(false);
       } else {
-        signup(email, password, `${firstName} ${lastName}`);
+        // Verify OTP and create account
+        if (verifyOTP(email, otpCode, password, `${firstName} ${lastName}`)) {
+          setIsLoading(false);
+          navigate("/");
+        } else {
+          setErrors({ otp: 'Invalid OTP. Please try again.' });
+          setIsLoading(false);
+        }
       }
-      setIsLoading(false);
-      navigate("/");
     }, 600);
   };
 
@@ -144,31 +158,92 @@ export default function SignUpPage() {
 
           {/* Form */}
           <motion.form onSubmit={handleSubmit} className="space-y-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-            {!isLogin && (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-white/60 font-medium">First Name</Label>
-                  <input 
-                    type="text" 
-                    placeholder="John" 
-                    value={firstName} 
-                    onChange={(e) => setFirstName(e.target.value)} 
-                    required 
-                    className="w-full bg-white/[0.05] border border-white/[0.08] rounded-lg px-3 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:border-primary/50 focus:bg-white/[0.08] transition-all text-sm"
-                  />
+            {/* OTP Verification Step */}
+            {!isLogin && otpStep && (
+              <div className="space-y-4 p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+                <div className="text-center mb-4">
+                  <p className="text-sm text-white/60">Verification code sent to</p>
+                  <p className="text-white font-semibold">{verificationMethod === 'email' ? email : phone}</p>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-white/60 font-medium">Last Name</Label>
+                  <Label className="text-xs text-white/60 font-medium">Enter OTP Code</Label>
                   <input 
                     type="text" 
-                    placeholder="Doe" 
-                    value={lastName} 
-                    onChange={(e) => setLastName(e.target.value)} 
+                    placeholder="000000" 
+                    value={otpCode} 
+                    onChange={(e) => {
+                      setOtpCode(e.target.value.slice(0, 6));
+                      if (errors.otp) setErrors({ ...errors, otp: '' });
+                    }} 
+                    maxLength="6"
                     required 
-                    className="w-full bg-white/[0.05] border border-white/[0.08] rounded-lg px-3 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:border-primary/50 focus:bg-white/[0.08] transition-all text-sm"
+                    className={`w-full bg-white/[0.05] border rounded-lg px-3 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:bg-white/[0.08] transition-all text-sm font-mono text-center text-lg tracking-widest ${
+                      errors.otp ? 'border-red-500/50 focus:border-red-500' : 'border-white/[0.08] focus:border-primary/50'
+                    }`}
                   />
+                  {errors.otp && <p className="text-xs text-red-400">{errors.otp}</p>}
                 </div>
+                <Button 
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    setOtpStep(false);
+                    setOtpCode("");
+                    setErrors({});
+                  }}
+                  className="w-full text-xs text-white/60 hover:text-white"
+                >
+                  Change verification method
+                </Button>
               </div>
+            )}
+
+            {!isLogin && !otpStep && (
+              <>
+                <div>
+                  <Label className="text-xs text-white/60 font-medium mb-2 block">Verification Method</Label>
+                  <div className="flex gap-2">
+                    {(['email', 'phone'] as const).map((method) => (
+                      <button
+                        key={method}
+                        type="button"
+                        onClick={() => setVerificationMethod(method)}
+                        className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                          verificationMethod === method
+                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                            : 'bg-white/[0.05] border border-white/[0.08] text-white/60 hover:text-white'
+                        }`}
+                      >
+                        {method === 'email' ? '📧 Email' : '📱 Phone'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-white/60 font-medium">First Name</Label>
+                    <input 
+                      type="text" 
+                      placeholder="John" 
+                      value={firstName} 
+                      onChange={(e) => setFirstName(e.target.value)} 
+                      required 
+                      className="w-full bg-white/[0.05] border border-white/[0.08] rounded-lg px-3 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:border-primary/50 focus:bg-white/[0.08] transition-all text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-white/60 font-medium">Last Name</Label>
+                    <input 
+                      type="text" 
+                      placeholder="Doe" 
+                      value={lastName} 
+                      onChange={(e) => setLastName(e.target.value)} 
+                      required 
+                      className="w-full bg-white/[0.05] border border-white/[0.08] rounded-lg px-3 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:border-primary/50 focus:bg-white/[0.08] transition-all text-sm"
+                    />
+                  </div>
+                </div>
+              </>
             )}
 
             {/* Email */}
@@ -190,7 +265,7 @@ export default function SignUpPage() {
               {errors.email && <p className="text-xs text-red-400">{errors.email}</p>}
             </div>
 
-            {!isLogin && (
+            {!isLogin && !otpStep && verificationMethod === 'phone' && (
               <div className="space-y-1.5">
                 <Label className="text-xs text-white/60 font-medium">Phone Number</Label>
                 <input 
@@ -201,6 +276,7 @@ export default function SignUpPage() {
                     setPhone(e.target.value);
                     if (errors.phone) setErrors({ ...errors, phone: '' });
                   }} 
+                  required
                   className={`w-full bg-white/[0.05] border rounded-lg px-3 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:bg-white/[0.08] transition-all text-sm ${
                     errors.phone ? 'border-red-500/50 focus:border-red-500' : 'border-white/[0.08] focus:border-primary/50'
                   }`}
@@ -264,7 +340,7 @@ export default function SignUpPage() {
             {/* Submit Button */}
             <motion.button 
               type="submit" 
-              disabled={isLoading || (!isLogin && !passwordValidation.valid)} 
+              disabled={isLoading || (!isLogin && !otpStep && !passwordValidation.valid) || (otpStep && otpCode.length !== 6)} 
               whileHover={{ scale: 1.01 }} 
               whileTap={{ scale: 0.99 }} 
               className="w-full h-11 bg-gradient-to-r from-primary to-secondary hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-semibold flex items-center justify-center gap-2 mt-6 transition-all text-sm"
@@ -274,7 +350,7 @@ export default function SignUpPage() {
               ) : (
                 <>
                   <ArrowRight className="w-4 h-4" />
-                  {isLogin ? "Sign In" : "Create Account"}
+                  {isLogin ? "Sign In" : (otpStep ? "Verify & Create Account" : "Send OTP")}
                 </>
               )}
             </motion.button>

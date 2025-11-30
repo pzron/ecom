@@ -32,6 +32,11 @@ interface AuthStore {
   updateUser: (data: Partial<User>) => void;
   submitAffiliateApplication: (formData: any) => void;
   approveAffiliateApplication: () => void;
+  // OTP Verification
+  sendOTP: (email: string, method: 'email' | 'phone', phone?: string) => { success: boolean; otp: string };
+  verifyOTP: (email: string, otp: string, password: string, name: string) => boolean;
+  googleVerifyAndCreateAccount: (idToken: string) => { success: boolean; message: string };
+  web3VerifyAndCreateAccount: (signature: string, message: string, walletAddress: string) => { success: boolean; message: string };
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -40,7 +45,6 @@ export const useAuthStore = create<AuthStore>()(
       user: null,
       isAuthenticated: false,
       login: (email: string, password: string) => {
-        // Real authentication would validate against backend
         set({
           user: {
             id: Math.random().toString(36).substr(2, 9),
@@ -67,13 +71,6 @@ export const useAuthStore = create<AuthStore>()(
         });
       },
       loginWithGoogle: (name: string, email: string, avatar: string) => {
-        // Real Google OAuth flow:
-        // 1. Load Google Sign-In SDK
-        // 2. User clicks Google button
-        // 3. Google popup opens, user authenticates
-        // 4. Google returns ID token
-        // 5. Send ID token to backend for verification
-        // 6. Backend verifies token and returns user data
         set({
           user: {
             id: Math.random().toString(36).substr(2, 9),
@@ -87,15 +84,6 @@ export const useAuthStore = create<AuthStore>()(
         });
       },
       loginWithWeb3: (walletAddress: string, name: string) => {
-        // Real Web3 authentication flow:
-        // 1. User clicks Web3 button
-        // 2. MetaMask/wallet extension opens
-        // 3. User confirms wallet connection
-        // 4. Wallet provider returns connected address
-        // 5. Generate message for user to sign with wallet
-        // 6. User signs message in wallet
-        // 7. Send signed message to backend for verification
-        // 8. Backend verifies signature and creates session
         set({
           user: {
             id: Math.random().toString(36).substr(2, 9),
@@ -140,6 +128,45 @@ export const useAuthStore = create<AuthStore>()(
             affiliateApprovedAt: new Date().toISOString(),
           } : null,
         }));
+      },
+      // OTP Verification Flow
+      sendOTP: (email: string, method: 'email' | 'phone', phone?: string) => {
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        // In production: Send via SendGrid/Resend (email) or Twilio (SMS)
+        console.log(`OTP sent to ${method === 'email' ? email : phone}: ${otp}`);
+        // Store OTP temporarily (in production: store in database with expiry)
+        (window as any).__otpStore = { otp, email, timestamp: Date.now() };
+        return { success: true, otp };
+      },
+      verifyOTP: (email: string, otp: string, password: string, name: string) => {
+        // Verify OTP
+        const stored = (window as any).__otpStore;
+        if (!stored || stored.otp !== otp || stored.email !== email) {
+          return false;
+        }
+        // OTP verified - create account
+        set({
+          user: {
+            id: Math.random().toString(36).substr(2, 9),
+            email,
+            name,
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
+            role: 'customer',
+            authMethod: 'email',
+          },
+          isAuthenticated: true,
+        });
+        return true;
+      },
+      googleVerifyAndCreateAccount: (idToken: string) => {
+        // In production: Verify idToken with Google API
+        // For demo: Assume verification succeeds
+        return { success: true, message: 'Google account verified and approved' };
+      },
+      web3VerifyAndCreateAccount: (signature: string, message: string, walletAddress: string) => {
+        // In production: Verify signature with ethers.js
+        // For demo: Assume verification succeeds
+        return { success: true, message: 'Web3 wallet verified and approved' };
       },
     }),
     {
