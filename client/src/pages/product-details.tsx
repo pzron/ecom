@@ -7,7 +7,7 @@ import { products, getProductById } from "@/data/products";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ShoppingCart, Heart, Share2, ShieldCheck, Truck, 
-  RotateCcw, Zap, Box, Cuboid, ScanFace, Check, Star, Minus, Plus, Sparkles
+  RotateCcw, Zap, Box, Cuboid, ScanFace, Check, Star, Minus, Plus, Sparkles, Play, Image
 } from "lucide-react";
 import { useRoute, Link } from "wouter";
 import { useState } from "react";
@@ -22,6 +22,8 @@ export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [showVideo, setShowVideo] = useState(false);
+  const [hasPurchased] = useState(false);
   
   const { addItem } = useCart();
 
@@ -72,12 +74,32 @@ export default function ProductDetails() {
               animate={{ opacity: 1, y: 0 }}
               className="h-[500px] lg:h-[600px] w-full rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-transparent backdrop-blur-sm overflow-hidden relative shadow-2xl shadow-purple-500/10"
             >
-              <ProductViewer 
-                color={selectedColor} 
-                productType={product.model3dType || "box"}
-              />
+              {showVideo ? (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-black to-gray-900">
+                  <video 
+                    controls 
+                    className="w-full h-full object-cover"
+                    src="https://videos.pexels.com/video-files/4388331/4388331-sd_small.mp4"
+                  />
+                </div>
+              ) : (
+                <ProductViewer 
+                  color={selectedColor} 
+                  productType={product.model3dType || "box"}
+                />
+              )}
               
               <div className="absolute top-4 right-4 flex flex-col gap-2">
+                <Button 
+                  size="icon" 
+                  variant="secondary" 
+                  className={`rounded-full backdrop-blur-xl border ${showVideo ? 'bg-pink-500/30 border-pink-500/50' : 'bg-white/10 hover:bg-white/20 border-white/10'}`}
+                  onClick={() => setShowVideo(!showVideo)}
+                  title={showVideo ? "View Product" : "View Video"}
+                  data-testid="video-button"
+                >
+                  {showVideo ? <Image className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                </Button>
                 <Button 
                   size="icon" 
                   variant="secondary" 
@@ -139,31 +161,17 @@ export default function ProductDetails() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex gap-2">
-                  {product.isNew && (
-                    <Badge className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white border-none">
-                      New Arrival
-                    </Badge>
-                  )}
-                  {product.isBestseller && (
-                    <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none">
-                      Bestseller
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex">
-                    {[1,2,3,4,5].map(s => (
-                      <Star 
-                        key={s} 
-                        className={`w-4 h-4 ${s <= Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-white/20'}`} 
-                      />
-                    ))}
-                  </div>
-                  <span className="font-semibold text-white">{product.rating}</span>
-                  <span className="text-white/40 text-sm">({product.reviews} reviews)</span>
-                </div>
+              <div className="flex items-center gap-2 mb-3">
+                {product.isNew && (
+                  <Badge className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white border-none">
+                    New Arrival
+                  </Badge>
+                )}
+                {product.isBestseller && (
+                  <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none">
+                    Bestseller
+                  </Badge>
+                )}
               </div>
               
               <h1 className="text-3xl md:text-4xl font-heading font-bold text-white mb-4 leading-tight" data-testid="product-name">
@@ -415,23 +423,52 @@ export default function ProductDetails() {
               </TabsContent>
               <TabsContent value="specifications" className="mt-0 space-y-6">
                 <h3 className="text-2xl font-heading font-bold text-white">Technical Specifications</h3>
-                {product.specifications ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Object.entries(product.specifications).map(([key, value]) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {product.specifications && Object.keys(product.specifications).length > 0 ? (
+                    Object.entries(product.specifications).map(([key, value]) => (
                       <div key={key} className="flex justify-between p-4 rounded-xl bg-white/5 border border-white/10">
                         <span className="text-white/50">{key}</span>
                         <span className="text-white font-medium">{value}</span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-white/50">Specifications coming soon...</p>
-                )}
+                    ))
+                  ) : (
+                    <>
+                      <div className="flex justify-between p-4 rounded-xl bg-white/5 border border-white/10">
+                        <span className="text-white/50">Category</span>
+                        <span className="text-white font-medium">{product.category}</span>
+                      </div>
+                      <div className="flex justify-between p-4 rounded-xl bg-white/5 border border-white/10">
+                        <span className="text-white/50">SKU</span>
+                        <span className="text-white font-medium">{product.id}</span>
+                      </div>
+                      <div className="flex justify-between p-4 rounded-xl bg-white/5 border border-white/10">
+                        <span className="text-white/50">Vendor</span>
+                        <span className="text-white font-medium">{product.vendorName || "NexCommerce"}</span>
+                      </div>
+                      <div className="flex justify-between p-4 rounded-xl bg-white/5 border border-white/10">
+                        <span className="text-white/50">Rating</span>
+                        <span className="text-white font-medium">{product.rating} / 5.0</span>
+                      </div>
+                      <div className="flex justify-between p-4 rounded-xl bg-white/5 border border-white/10">
+                        <span className="text-white/50">Stock Status</span>
+                        <span className="text-green-400 font-medium">{product.inStock ? `${product.stock} available` : "Out of Stock"}</span>
+                      </div>
+                      <div className="flex justify-between p-4 rounded-xl bg-white/5 border border-white/10">
+                        <span className="text-white/50">Colors</span>
+                        <span className="text-white font-medium">{product.colors?.length || 1} options</span>
+                      </div>
+                    </>
+                  )}
+                </div>
               </TabsContent>
               <TabsContent value="reviews" className="mt-0 space-y-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-2xl font-heading font-bold text-white">Customer Reviews</h3>
-                  <Button className="bg-gradient-to-r from-purple-500 to-pink-500">Write a Review</Button>
+                  {hasPurchased ? (
+                    <Button className="bg-gradient-to-r from-purple-500 to-pink-500">Write a Review</Button>
+                  ) : (
+                    <div className="text-sm text-white/50 italic">Only purchasers can write reviews</div>
+                  )}
                 </div>
                 <div className="flex items-center gap-8 p-6 rounded-2xl bg-white/5 border border-white/10">
                   <div className="text-center">
