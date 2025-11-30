@@ -29,612 +29,171 @@ export interface Product {
   model3dType?: "box" | "sphere" | "torus" | "cylinder";
   vendorName?: string;
   tags?: string[];
+  badgeColor?: string;
 }
 
-export const products: Product[] = [
-  {
-    id: "e1",
-    name: "iPhone 15 Pro Max",
-    slug: "iphone-15-pro-max",
-    category: "Electronics",
-    categorySlug: "electronics",
-    price: 1199,
-    originalPrice: 1299,
-    rating: 4.9,
-    reviews: 2847,
-    image: "https://public.readdy.ai/ai/img_res/3ecb9515515c5565557f3118f811827c.jpg",
-    images: [
-      "https://public.readdy.ai/ai/img_res/3ecb9515515c5565557f3118f811827c.jpg",
-      "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400",
-    ],
-    colors: [
-      { name: "Natural Titanium", value: "#C4B5A5" },
-      { name: "Blue Titanium", value: "#4A5568" },
-      { name: "White Titanium", value: "#E8E8E8" },
-      { name: "Black Titanium", value: "#1A1A1A" }
-    ],
-    sizes: ["128GB", "256GB", "512GB", "1TB"],
-    shortDescription: "Titanium design. A17 Pro chip. Action button. 48MP camera system.",
-    description: "iPhone 15 Pro Max features a strong and lightweight titanium design with a 6.7-inch Super Retina XDR display. Powered by the A17 Pro chip, it delivers unprecedented performance for gaming and creative workflows.",
-    specifications: {
-      "Display": "6.7-inch Super Retina XDR",
-      "Chip": "A17 Pro",
-      "Camera": "48MP Main + 12MP Ultra Wide + 12MP Telephoto",
-      "Battery": "Up to 29 hours video playback",
-      "Storage": "128GB - 1TB"
-    },
-    isNew: true,
-    isFeatured: true,
-    inStock: true,
-    stock: 50,
-    has3D: true,
-    model3dType: "box",
-    vendorName: "Apple Store",
-    tags: ["smartphone", "5g", "titanium", "pro camera"]
-  },
-  {
-    id: "e2",
-    name: "Samsung Galaxy S24 Ultra",
-    slug: "samsung-galaxy-s24-ultra",
-    category: "Electronics",
-    categorySlug: "electronics",
-    price: 1299,
-    originalPrice: 1399,
-    rating: 4.8,
-    reviews: 1923,
-    image: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=400",
-    colors: [
-      { name: "Titanium Black", value: "#1A1A1A" },
-      { name: "Titanium Gray", value: "#6B7280" },
-      { name: "Titanium Violet", value: "#8B5CF6" },
-      { name: "Titanium Yellow", value: "#F59E0B" }
-    ],
-    sizes: ["256GB", "512GB", "1TB"],
-    shortDescription: "AI-powered productivity with Galaxy AI and S Pen.",
-    isFeatured: true,
-    inStock: true,
-    has3D: true,
-    model3dType: "box",
-    vendorName: "Samsung Electronics"
-  },
-  {
-    id: "e3",
-    name: 'MacBook Pro 16" M3 Max',
-    slug: "macbook-pro-16-m3-max",
-    category: "Electronics",
-    categorySlug: "electronics",
-    price: 2499,
-    originalPrice: 2799,
-    rating: 4.9,
-    reviews: 1456,
-    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400",
-    colors: [
-      { name: "Space Black", value: "#1A1A1A" },
-      { name: "Silver", value: "#C0C0C0" }
-    ],
-    sizes: ["36GB RAM", "48GB RAM", "128GB RAM"],
-    shortDescription: "Unprecedented power with M3 Max chip for creative pros.",
-    isBestseller: true,
-    isFeatured: true,
-    inStock: true,
-    has3D: true,
-    model3dType: "box",
-    vendorName: "Apple Store"
-  },
-  {
-    id: "e4",
-    name: "Sony WH-1000XM5",
-    slug: "sony-wh-1000xm5",
-    category: "Electronics",
-    categorySlug: "electronics",
-    price: 349,
-    originalPrice: 399,
-    rating: 4.7,
-    reviews: 3421,
-    image: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=400",
-    colors: [
-      { name: "Black", value: "#1A1A1A" },
-      { name: "Silver", value: "#C0C0C0" },
-      { name: "Midnight Blue", value: "#1E3A5F" }
-    ],
-    shortDescription: "Industry-leading noise cancellation with crystal clear audio.",
-    inStock: true,
-    has3D: true,
-    model3dType: "sphere",
-    vendorName: "Sony Electronics"
-  },
-  {
-    id: "e5",
-    name: "Apple Watch Ultra 2",
-    slug: "apple-watch-ultra-2",
-    category: "Electronics",
-    categorySlug: "electronics",
-    price: 799,
-    originalPrice: 899,
-    rating: 4.8,
-    reviews: 1876,
-    image: "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=400",
-    colors: [
-      { name: "Titanium", value: "#B8B8B8" },
-      { name: "Orange Alpine", value: "#F97316" },
-      { name: "Blue Ocean", value: "#3B82F6" }
-    ],
-    sizes: ["49mm"],
-    shortDescription: "The most rugged and capable Apple Watch ever.",
-    isNew: true,
-    isFeatured: true,
-    inStock: true,
-    has3D: true,
-    model3dType: "torus",
-    vendorName: "Apple Store"
-  },
-  {
-    id: "f1",
-    name: "Premium Leather Jacket",
-    slug: "premium-leather-jacket",
-    category: "Fashion",
-    categorySlug: "fashion",
-    price: 299,
-    originalPrice: 399,
-    rating: 4.6,
-    reviews: 543,
-    image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400",
-    colors: [
-      { name: "Black", value: "#1A1A1A" },
-      { name: "Brown", value: "#8B4513" },
-      { name: "Cognac", value: "#9A6324" }
-    ],
-    sizes: ["S", "M", "L", "XL", "XXL"],
-    shortDescription: "Handcrafted Italian leather with premium finishing.",
-    isFeatured: true,
-    inStock: true,
-    vendorName: "LuxeWear"
-  },
-  {
-    id: "f2",
-    name: "Designer Sneakers",
-    slug: "designer-sneakers",
-    category: "Fashion",
-    categorySlug: "fashion",
-    price: 189,
-    originalPrice: 249,
-    rating: 4.5,
-    reviews: 892,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400",
-    colors: [
-      { name: "White", value: "#FFFFFF" },
-      { name: "Black", value: "#1A1A1A" },
-      { name: "Red", value: "#EF4444" }
-    ],
-    sizes: ["7", "8", "9", "10", "11", "12"],
-    shortDescription: "Premium comfort meets street style.",
-    isNew: true,
-    inStock: true,
-    has3D: true,
-    model3dType: "box",
-    vendorName: "StreetStyle Co"
-  },
-  {
-    id: "f3",
-    name: "Silk Evening Dress",
-    slug: "silk-evening-dress",
-    category: "Fashion",
-    categorySlug: "fashion",
-    price: 459,
-    originalPrice: 599,
-    rating: 4.8,
-    reviews: 324,
-    image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400",
-    colors: [
-      { name: "Midnight Blue", value: "#1E3A5F" },
-      { name: "Burgundy", value: "#800020" },
-      { name: "Emerald", value: "#50C878" }
-    ],
-    sizes: ["XS", "S", "M", "L"],
-    shortDescription: "Elegant silk dress for special occasions.",
-    isFeatured: true,
-    inStock: true,
-    vendorName: "Elegance Boutique"
-  },
-  {
-    id: "h1",
-    name: "Smart Home Hub Pro",
-    slug: "smart-home-hub-pro",
-    category: "Home",
-    categorySlug: "home",
-    price: 249,
-    originalPrice: 299,
-    rating: 4.7,
-    reviews: 1234,
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
-    colors: [
-      { name: "Charcoal", value: "#374151" },
-      { name: "Chalk", value: "#F5F5F4" }
-    ],
-    shortDescription: "Control your entire home with voice and AI assistance.",
-    isFeatured: true,
-    inStock: true,
-    has3D: true,
-    model3dType: "cylinder",
-    vendorName: "SmartLiving"
-  },
-  {
-    id: "h2",
-    name: "Artisan Coffee Maker",
-    slug: "artisan-coffee-maker",
-    category: "Home",
-    categorySlug: "home",
-    price: 599,
-    originalPrice: 749,
-    rating: 4.9,
-    reviews: 567,
-    image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400",
-    colors: [
-      { name: "Brushed Steel", value: "#9CA3AF" },
-      { name: "Empire Red", value: "#DC2626" },
-      { name: "Matte Black", value: "#1F2937" }
-    ],
-    shortDescription: "Professional barista quality in your home.",
-    isBestseller: true,
-    inStock: true,
-    has3D: true,
-    model3dType: "cylinder",
-    vendorName: "BrewMaster"
-  },
-  {
-    id: "h3",
-    name: "Ergonomic Office Chair",
-    slug: "ergonomic-office-chair",
-    category: "Home",
-    categorySlug: "home",
-    price: 899,
-    originalPrice: 1099,
-    rating: 4.7,
-    reviews: 789,
-    image: "https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=400",
-    colors: [
-      { name: "Graphite", value: "#374151" },
-      { name: "Ocean Blue", value: "#0EA5E9" }
-    ],
-    shortDescription: "Premium ergonomic design for all-day comfort.",
-    isNew: true,
-    inStock: true,
-    vendorName: "ErgoWorks"
-  },
-  {
-    id: "s1",
-    name: "Pro Fitness Smartwatch",
-    slug: "pro-fitness-smartwatch",
-    category: "Sports",
-    categorySlug: "sports",
-    price: 299,
-    originalPrice: 349,
-    rating: 4.6,
-    reviews: 2341,
-    image: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=400",
-    colors: [
-      { name: "Black", value: "#1A1A1A" },
-      { name: "Blue", value: "#3B82F6" },
-      { name: "Green", value: "#10B981" }
-    ],
-    shortDescription: "Track every workout with precision GPS and heart rate monitoring.",
-    isNew: true,
-    isFeatured: true,
-    inStock: true,
-    has3D: true,
-    model3dType: "torus",
-    vendorName: "FitTech"
-  },
-  {
-    id: "s2",
-    name: "Premium Yoga Mat",
-    slug: "premium-yoga-mat",
-    category: "Sports",
-    categorySlug: "sports",
-    price: 89,
-    originalPrice: 119,
-    rating: 4.8,
-    reviews: 1567,
-    image: "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=400",
-    colors: [
-      { name: "Sage Green", value: "#9CAF88" },
-      { name: "Lavender", value: "#E6E6FA" },
-      { name: "Charcoal", value: "#36454F" }
-    ],
-    shortDescription: "Eco-friendly, non-slip yoga mat with premium cushioning.",
-    isBestseller: true,
-    inStock: true,
-    vendorName: "ZenFit"
-  },
-  {
-    id: "s3",
-    name: "Carbon Fiber Tennis Racket",
-    slug: "carbon-fiber-tennis-racket",
-    category: "Sports",
-    categorySlug: "sports",
-    price: 279,
-    originalPrice: 349,
-    rating: 4.7,
-    reviews: 432,
-    image: "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=400",
-    colors: [
-      { name: "Black/Gold", value: "#1A1A1A" },
-      { name: "White/Blue", value: "#FFFFFF" }
-    ],
-    shortDescription: "Professional-grade carbon fiber racket for power and control.",
-    inStock: true,
-    vendorName: "ProSport"
-  },
-  {
-    id: "b1",
-    name: "Luxury Skincare Set",
-    slug: "luxury-skincare-set",
-    category: "Beauty",
-    categorySlug: "beauty",
-    price: 189,
-    originalPrice: 249,
-    rating: 4.8,
-    reviews: 1567,
-    image: "https://images.unsplash.com/photo-1570194065650-d99fb4b38b15?w=400",
-    shortDescription: "Complete anti-aging routine with premium ingredients.",
-    isBestseller: true,
-    inStock: true,
-    vendorName: "GlowLab"
-  },
-  {
-    id: "b2",
-    name: "Professional Makeup Palette",
-    slug: "professional-makeup-palette",
-    category: "Beauty",
-    categorySlug: "beauty",
-    price: 79,
-    originalPrice: 99,
-    rating: 4.6,
-    reviews: 2341,
-    image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=400",
-    shortDescription: "48 highly pigmented shades for endless looks.",
-    isNew: true,
-    isFeatured: true,
-    inStock: true,
-    vendorName: "BeautyPro"
-  },
-  {
-    id: "b3",
-    name: "Luxury Perfume Collection",
-    slug: "luxury-perfume-collection",
-    category: "Beauty",
-    categorySlug: "beauty",
-    price: 299,
-    originalPrice: 399,
-    rating: 4.9,
-    reviews: 876,
-    image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400",
-    shortDescription: "Set of 5 exclusive fragrances from top designers.",
-    isFeatured: true,
-    inStock: true,
-    vendorName: "FragranceWorld"
-  },
-  {
-    id: "g1",
-    name: "PlayStation 5 Pro",
-    slug: "playstation-5-pro",
-    category: "Gaming",
-    categorySlug: "gaming",
-    price: 699,
-    originalPrice: 799,
-    rating: 4.9,
-    reviews: 4521,
-    image: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400",
-    colors: [
-      { name: "White", value: "#FFFFFF" },
-      { name: "Midnight Black", value: "#1A1A1A" }
-    ],
-    shortDescription: "Next-gen gaming with 8K support and ray tracing.",
-    isNew: true,
-    isFeatured: true,
-    inStock: true,
-    has3D: true,
-    model3dType: "box",
-    vendorName: "GameZone"
-  },
-  {
-    id: "g2",
-    name: "Gaming Mechanical Keyboard",
-    slug: "gaming-mechanical-keyboard",
-    category: "Gaming",
-    categorySlug: "gaming",
-    price: 179,
-    originalPrice: 219,
-    rating: 4.7,
-    reviews: 2134,
-    image: "https://images.unsplash.com/photo-1595225476474-87563907a212?w=400",
-    colors: [
-      { name: "RGB Black", value: "#1A1A1A" },
-      { name: "White", value: "#FFFFFF" }
-    ],
-    shortDescription: "Cherry MX switches with customizable RGB lighting.",
-    isBestseller: true,
-    inStock: true,
-    vendorName: "GameGear"
-  },
-  {
-    id: "g3",
-    name: "Ultra Gaming Monitor 32\"",
-    slug: "ultra-gaming-monitor-32",
-    category: "Gaming",
-    categorySlug: "gaming",
-    price: 799,
-    originalPrice: 999,
-    rating: 4.8,
-    reviews: 1245,
-    image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400",
-    colors: [
-      { name: "Black", value: "#1A1A1A" }
-    ],
-    shortDescription: "4K 144Hz gaming monitor with 1ms response time.",
-    isFeatured: true,
-    inStock: true,
-    vendorName: "TechDisplay"
-  },
-  {
-    id: "j1",
-    name: "Diamond Stud Earrings",
-    slug: "diamond-stud-earrings",
-    category: "Jewelry",
-    categorySlug: "jewelry",
-    price: 1499,
-    originalPrice: 1899,
-    rating: 4.9,
-    reviews: 543,
-    image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400",
-    shortDescription: "1 carat total weight, VS clarity, 14K white gold.",
-    isFeatured: true,
-    inStock: true,
-    vendorName: "LuxeJewels"
-  },
-  {
-    id: "j2",
-    name: "Swiss Automatic Watch",
-    slug: "swiss-automatic-watch",
-    category: "Jewelry",
-    categorySlug: "jewelry",
-    price: 2999,
-    originalPrice: 3499,
-    rating: 4.9,
-    reviews: 321,
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400",
-    colors: [
-      { name: "Silver/Blue", value: "#C0C0C0" },
-      { name: "Rose Gold/Black", value: "#B76E79" }
-    ],
-    shortDescription: "Swiss-made automatic movement with sapphire crystal.",
-    isNew: true,
-    isBestseller: true,
-    inStock: true,
-    vendorName: "TimePiece"
-  },
-  {
-    id: "bk1",
-    name: "Bestseller Book Collection",
-    slug: "bestseller-book-collection",
-    category: "Books",
-    categorySlug: "books",
-    price: 89,
-    originalPrice: 129,
-    rating: 4.7,
-    reviews: 1234,
-    image: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400",
-    shortDescription: "Top 5 bestselling fiction novels of 2024.",
-    isBestseller: true,
-    inStock: true,
-    vendorName: "BookWorld"
-  },
-  {
-    id: "bk2",
-    name: "Premium Audiobook Subscription",
-    slug: "premium-audiobook-subscription",
-    category: "Books",
-    categorySlug: "books",
-    price: 149,
-    rating: 4.8,
-    reviews: 876,
-    image: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=400",
-    shortDescription: "12-month unlimited access to 500,000+ audiobooks.",
-    isNew: true,
-    isFeatured: true,
-    inStock: true,
-    vendorName: "AudioReads"
-  },
-  {
-    id: "k1",
-    name: "Kids Educational Tablet",
-    slug: "kids-educational-tablet",
-    category: "Kids",
-    categorySlug: "kids",
-    price: 199,
-    originalPrice: 249,
-    rating: 4.6,
-    reviews: 1567,
-    image: "https://images.unsplash.com/photo-1544652478-6653e09f18a2?w=400",
-    colors: [
-      { name: "Blue", value: "#3B82F6" },
-      { name: "Pink", value: "#EC4899" },
-      { name: "Green", value: "#10B981" }
-    ],
-    shortDescription: "Fun and educational tablet with parental controls.",
-    isFeatured: true,
-    inStock: true,
-    vendorName: "KidsTech"
-  },
-  {
-    id: "k2",
-    name: "STEM Building Blocks Set",
-    slug: "stem-building-blocks-set",
-    category: "Kids",
-    categorySlug: "kids",
-    price: 79,
-    originalPrice: 99,
-    rating: 4.8,
-    reviews: 2341,
-    image: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=400",
-    shortDescription: "1000+ pieces for endless creative building.",
-    isBestseller: true,
-    inStock: true,
-    vendorName: "SmartPlay"
-  },
-  {
-    id: "a1",
-    name: "Smart Car Dashboard Camera",
-    slug: "smart-car-dashboard-camera",
-    category: "Automotive",
-    categorySlug: "automotive",
-    price: 199,
-    originalPrice: 249,
-    rating: 4.7,
-    reviews: 1234,
-    image: "https://images.unsplash.com/photo-1617469767053-d3b523a0b982?w=400",
-    shortDescription: "4K recording with night vision and GPS tracking.",
-    isNew: true,
-    isFeatured: true,
-    inStock: true,
-    vendorName: "AutoTech"
-  },
-  {
-    id: "a2",
-    name: "Wireless Car Charger Mount",
-    slug: "wireless-car-charger-mount",
-    category: "Automotive",
-    categorySlug: "automotive",
-    price: 59,
-    originalPrice: 79,
-    rating: 4.5,
-    reviews: 876,
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
-    shortDescription: "15W fast charging with automatic clamping.",
-    isBestseller: true,
-    inStock: true,
-    vendorName: "ChargeDrive"
+// Color palettes for diverse styling
+const colorPalettes = [
+  { bg: "from-purple-600 to-indigo-600", accent: "purple", text: "text-purple-300" },
+  { bg: "from-pink-600 to-rose-600", accent: "pink", text: "text-pink-300" },
+  { bg: "from-cyan-600 to-blue-600", accent: "cyan", text: "text-cyan-300" },
+  { bg: "from-emerald-600 to-teal-600", accent: "emerald", text: "text-emerald-300" },
+  { bg: "from-amber-600 to-orange-600", accent: "amber", text: "text-amber-300" },
+  { bg: "from-red-600 to-pink-600", accent: "red", text: "text-red-300" },
+  { bg: "from-green-600 to-emerald-600", accent: "green", text: "text-green-300" },
+  { bg: "from-yellow-600 to-amber-600", accent: "yellow", text: "text-yellow-300" },
+  { bg: "from-blue-600 to-cyan-600", accent: "blue", text: "text-blue-300" },
+  { bg: "from-violet-600 to-purple-600", accent: "violet", text: "text-violet-300" },
+];
+
+const categories = [
+  { name: "Electronics", slug: "electronics" },
+  { name: "Fashion", slug: "fashion" },
+  { name: "Beauty", slug: "beauty" },
+  { name: "Home & Living", slug: "home" },
+  { name: "Sports & Fitness", slug: "sports" },
+  { name: "Gaming", slug: "gaming" },
+  { name: "Jewelry & Watches", slug: "jewelry" },
+  { name: "Books & Media", slug: "books" },
+  { name: "Kids & Toys", slug: "kids" },
+  { name: "Automotive", slug: "automotive" },
+];
+
+const productNames = [
+  // Electronics
+  "Wireless Earbuds Pro", "USB-C Hub 7-in-1", "Portable SSD 1TB", "Smart Watch Series",
+  "Bluetooth Speaker", "4K Webcam", "Mechanical Keyboard", "Gaming Mouse",
+  "Phone Stand Adjustable", "Laptop Cooler", "USB Hub 3.0", "Monitor Lamp",
+  "Wireless Charger", "Power Bank 20000mAh", "HDMI Cable 2M", "Phone Mount",
+  "Desk Organizer", "Cable Manager", "Screen Protector", "Phone Case Armor",
+  
+  // Fashion
+  "Casual Cotton T-Shirt", "Slim Fit Jeans", "Crew Neck Sweater", "Polo Shirt",
+  "Denim Jacket", "Chino Pants", "Hoodie Sweatshirt", "V-Neck Cardigan",
+  "Oxford Button Down", "Cargo Pants", "Henley Shirt", "Fleece Jacket",
+  "Graphic Tee", "Linen Shirt", "Thermal Base Layer", "Mock Neck Top",
+  "Bomber Jacket", "Sweatpants", "Sports Shorts", "Beach Shirt",
+  
+  // Beauty
+  "Facial Cleanser", "Moisturizer Cream", "Serum Essence", "Face Mask Sheet",
+  "Lip Balm", "Sunscreen SPF50", "Night Cream", "Eye Patches",
+  "Toner Solution", "Makeup Primer", "Setting Spray", "Foundation",
+  "Concealer Palette", "Blush Powder", "Eyeshadow", "Mascara",
+  "Eyeliner Pen", "Lipstick", "Lip Gloss", "Makeup Brush Set",
+  
+  // Home & Living
+  "LED Desk Lamp", "Table Clock", "Picture Frame", "Wall Clock",
+  "Throw Pillow", "Floor Mat", "Area Rug", "Bed Sheet Set",
+  "Comforter", "Pillow", "Duvet Cover", "Curtains",
+  "Blinds", "Door Mat", "Wall Decoration", "Shelf",
+  "Storage Box", "Organizer Rack", "Mirror", "Vase",
+  
+  // Sports & Fitness
+  "Yoga Mat Non-Slip", "Resistance Bands", "Dumbbell Set", "Kettlebell",
+  "Pull-up Bar", "Ab Wheel", "Foam Roller", "Jump Rope",
+  "Hand Grips", "Wrist Wraps", "Gym Gloves", "Sweatband",
+  "Sports Water Bottle", "Towel Microfiber", "Gym Bag", "Shin Guards",
+  "Boxing Gloves", "Speed Bag", "Medicine Ball", "Balance Ball",
+  
+  // Gaming
+  "Gaming Headset", "Controller Pad", "Gaming Chair", "Desk Mount",
+  "Mousepad Large", "Game Console", "Graphics Card", "SSD NVMe",
+  "Cooling Fan", "RGB Light Strip", "Cable Clips", "Controller Charger",
+  "Gaming Desk", "Monitor Arm", "Keyboard Wrist Rest", "Mic Stand",
+  "Pop Filter", "XLR Cable", "Boom Arm", "Stream Deck",
+  
+  // Jewelry & Watches
+  "Gold Chain Necklace", "Silver Bracelet", "Diamond Ring", "Pearl Earrings",
+  "Analog Watch", "Smart Watch", "Leather Strap", "Beaded Bracelet",
+  "Pendant Necklace", "Cuff Bracelet", "Hoop Earrings", "Stud Earrings",
+  "Anklet Chain", "Body Chain", "Ring Set", "Locket Pendant",
+  "Tennis Bracelet", "Charm Bracelet", "Signet Ring", "Cross Necklace",
+  
+  // Books & Media
+  "Fiction Novel", "Self-Help Book", "Biography", "Science Book",
+  "Comic Book Series", "Travel Guide", "Cookbook", "Art Book",
+  "History Book", "Mystery Novel", "Romance Novel", "Fantasy Novel",
+  "Thriller", "Children's Book", "Educational Book", "Poetry Collection",
+  "Business Book", "Philosophy", "Psychology", "True Crime",
+  
+  // Kids & Toys
+  "Action Figure", "LEGO Set", "Puzzle Game", "Board Game",
+  "Plush Toy", "Building Blocks", "Toy Car", "Doll",
+  "Toy Robot", "Kite", "Ball Set", "Skateboard",
+  "Scooter", "Bicycle", "Roller Skates", "Helmet",
+  "Toy Gun", "Water Gun", "Bubble Maker", "Toy Train",
+  
+  // Automotive
+  "Car Phone Mount", "Dash Cam", "Car Charger", "USB Adapter",
+  "Car Air Freshener", "Floor Mats", "Seat Covers", "Steering Cover",
+  "Dashboard Cover", "Window Shade", "License Plate", "Bumper Guard",
+  "Door Protector", "Paint Protector", "Car Vacuum", "Air Compressor",
+  "Jump Starter", "Tool Kit", "Oil Drain", "Tire Gauge",
+];
+
+const images = [
+  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
+  "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400",
+  "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400",
+  "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400",
+  "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400",
+  "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400",
+  "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400",
+  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
+  "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400",
+  "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400",
+];
+
+function generateProducts(): Product[] {
+  const generatedProducts: Product[] = [];
+  let productId = 0;
+
+  for (const category of categories) {
+    for (let i = 0; i < 35; i++) {
+      productId++;
+      const palette = colorPalettes[(productId - 1) % colorPalettes.length];
+      const productName = productNames[(productId - 1) % productNames.length];
+      const basePrice = Math.floor(Math.random() * 2900) + 9;
+      const hasDiscount = Math.random() > 0.6;
+      
+      generatedProducts.push({
+        id: `p${productId}`,
+        name: `${productName} ${i + 1}`,
+        slug: `${productName.toLowerCase().replace(/\s+/g, "-")}-${i + 1}`,
+        category: category.name,
+        categorySlug: category.slug,
+        price: basePrice,
+        originalPrice: hasDiscount ? basePrice + Math.floor(Math.random() * 300) + 50 : undefined,
+        rating: Number((Math.random() * 2 + 3.5).toFixed(1)),
+        reviews: Math.floor(Math.random() * 5000) + 10,
+        image: images[productId % images.length],
+        colors: [
+          { name: "Standard", value: palette.accent },
+          { name: "Dark", value: "#1a1a2e" },
+          { name: "Light", value: "#e8e8f0" },
+        ],
+        sizes: ["S", "M", "L", "XL"],
+        shortDescription: `Premium ${productName.toLowerCase()} with modern design`,
+        inStock: Math.random() > 0.1,
+        stock: Math.floor(Math.random() * 100) + 1,
+        isNew: Math.random() > 0.85,
+        isBestseller: Math.random() > 0.92,
+        isFeatured: Math.random() > 0.95,
+        vendorName: ["NexStore", "Premium Shop", "Quality Goods", "Elite Traders"][Math.floor(Math.random() * 4)],
+        tags: [category.slug, "trending", "quality"],
+        badgeColor: palette.accent,
+      });
+    }
   }
-];
 
-export const categories = [
-  { id: "electronics", name: "Electronics", slug: "electronics", icon: "Smartphone", image: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=300" },
-  { id: "fashion", name: "Fashion", slug: "fashion", icon: "Shirt", image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=300" },
-  { id: "beauty", name: "Beauty", slug: "beauty", icon: "Sparkles", image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300" },
-  { id: "home", name: "Home & Living", slug: "home", icon: "Home", image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300" },
-  { id: "sports", name: "Sports & Fitness", slug: "sports", icon: "Dumbbell", image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=300" },
-  { id: "gaming", name: "Gaming", slug: "gaming", icon: "Gamepad2", image: "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=300" },
-  { id: "jewelry", name: "Jewelry & Watches", slug: "jewelry", icon: "Watch", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300" },
-  { id: "books", name: "Books & Media", slug: "books", icon: "Book", image: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=300" },
-  { id: "kids", name: "Kids & Toys", slug: "kids", icon: "Baby", image: "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=300" },
-  { id: "automotive", name: "Automotive", slug: "automotive", icon: "Car", image: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=300" },
-  { id: "outdoor", name: "Outdoor & Garden", slug: "outdoor", icon: "TreePine", image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=300" },
-  { id: "health", name: "Health & Wellness", slug: "health", icon: "Heart", image: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=300" },
-];
+  return generatedProducts;
+}
 
-export const featuredProducts = products.filter(p => p.isFeatured);
-export const newArrivals = products.filter(p => p.isNew);
-export const bestsellers = products.filter(p => p.isBestseller);
+export const products: Product[] = generateProducts();
+
+export const featuredProducts = products.filter(p => p.isFeatured).slice(0, 12);
+export const newArrivals = products.filter(p => p.isNew).slice(0, 12);
+export const bestsellers = products.filter(p => p.isBestseller).slice(0, 12);
 
 export function getProductById(id: string): Product | undefined {
   return products.find(p => p.id === id);
@@ -644,17 +203,9 @@ export function getProductBySlug(slug: string): Product | undefined {
   return products.find(p => p.slug === slug);
 }
 
-export function getProductsByCategory(categorySlug: string): Product[] {
-  return products.filter(p => p.categorySlug === categorySlug);
-}
-
 export function searchProducts(query: string): Product[] {
-  const lowerQuery = query.toLowerCase();
   return products.filter(p => 
-    p.name.toLowerCase().includes(lowerQuery) ||
-    p.category.toLowerCase().includes(lowerQuery) ||
-    p.tags?.some(t => t.toLowerCase().includes(lowerQuery))
+    p.name.toLowerCase().includes(query.toLowerCase()) ||
+    p.tags?.some(t => t.toLowerCase().includes(query.toLowerCase()))
   );
 }
-
-export { products as PRODUCTS };
