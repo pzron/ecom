@@ -6,13 +6,14 @@ import { Timer, Zap, Tag, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Footer } from "@/components/layout/footer";
 
 export default function DealsPage() {
   // Filter products with discounts
   const dealProducts = products.filter(p => p.originalPrice && p.originalPrice > p.price);
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-white pb-20">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-white">
       <Navbar />
       
       <main className="container mx-auto px-4 pt-24">
@@ -111,6 +112,7 @@ export default function DealsPage() {
           ))}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

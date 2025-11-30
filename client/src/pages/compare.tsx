@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { products } from "@/data/products";
 import { useState } from "react";
 import { ArrowRightLeft, Check, X } from "lucide-react";
+import { Footer } from "@/components/layout/footer";
 
 export default function ComparePage() {
   const [leftId, setLeftId] = useState(products[0].id);
@@ -14,7 +15,7 @@ export default function ComparePage() {
   const rightProduct = products.find(p => p.id === rightId) || products[1];
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-white pb-20">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-white">
       <Navbar />
       
       <main className="container mx-auto px-4 pt-24">
@@ -111,6 +112,7 @@ export default function ComparePage() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

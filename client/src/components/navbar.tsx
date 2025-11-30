@@ -1,17 +1,26 @@
-import { Link } from "wouter";
-import { Search, ShoppingCart, User, Menu, Heart, Bell, Sparkles } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { Search, ShoppingCart, User, Menu, Heart, Sparkles, Mic, MicOff, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useCart } from "@/hooks/use-cart";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isListening, setIsListening] = useState(false);
+  const [, navigate] = useLocation();
   const { getItemCount, setIsOpen } = useCart();
   const itemCount = getItemCount();
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,6 +30,61 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const startVoiceSearch = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Voice search is not supported in your browser. Please use Chrome or Edge.');
+      return;
+    }
+
+    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    recognitionRef.current = new SpeechRecognition();
+    recognitionRef.current.continuous = false;
+    recognitionRef.current.interimResults = true;
+    recognitionRef.current.lang = 'en-US';
+
+    let finalTranscript = '';
+
+    recognitionRef.current.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognitionRef.current.onresult = (event: any) => {
+      const transcript = Array.from(event.results)
+        .map((result: any) => result[0])
+        .map((result: any) => result.transcript)
+        .join('');
+      finalTranscript = transcript;
+      setSearchQuery(transcript);
+    };
+
+    recognitionRef.current.onerror = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current.onend = () => {
+      setIsListening(false);
+      if (finalTranscript.trim()) {
+        navigate(`/products?search=${encodeURIComponent(finalTranscript)}`);
+      }
+    };
+
+    recognitionRef.current.start();
+  };
+
+  const stopVoiceSearch = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    setIsListening(false);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
+    }
+  };
 
   return (
     <nav
@@ -68,20 +132,34 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <motion.div 
-            className="hidden md:flex relative"
-            initial={{ opacity: 0, width: 0 }}
-            animate={{ opacity: 1, width: "auto" }}
-          >
+          <form onSubmit={handleSearch} className="hidden md:flex relative">
             <Input 
               placeholder="Search products..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-52 lg:w-64 bg-white/5 border-white/10 rounded-full pl-4 pr-10 focus:bg-white/10 focus:border-purple-500/50 transition-all text-sm"
+              className={`w-52 lg:w-64 bg-white/5 border-white/10 rounded-full pl-4 pr-20 focus:bg-white/10 focus:border-purple-500/50 transition-all text-sm ${isListening ? 'border-purple-500 bg-purple-500/10' : ''}`}
               data-testid="search-input"
             />
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-          </motion.div>
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className={`h-7 w-7 rounded-full ${isListening ? 'text-purple-400 bg-purple-500/20' : 'text-white/40 hover:text-white hover:bg-white/10'}`}
+                onClick={isListening ? stopVoiceSearch : startVoiceSearch}
+              >
+                {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+              </Button>
+              <Button
+                type="submit"
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 rounded-full text-white/40 hover:text-white hover:bg-white/10"
+              >
+                <Search className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          </form>
 
           <Link href="/wishlist">
             <Button 
@@ -116,16 +194,35 @@ export function Navbar() {
             </AnimatePresence>
           </Button>
 
-          <Link href="/profile">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="hidden sm:flex text-white/70 hover:text-white hover:bg-white/10 rounded-full"
-              data-testid="profile-button"
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="hidden sm:flex text-white/70 hover:text-white hover:bg-white/10 rounded-full"
+                data-testid="profile-button"
+              >
+                <User className="w-5 h-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              align="end" 
+              className="w-48 bg-[#0f0f15]/95 backdrop-blur-xl border-white/10"
             >
-              <User className="w-5 h-5" />
-            </Button>
-          </Link>
+              <DropdownMenuItem asChild className="focus:bg-white/10 cursor-pointer">
+                <Link href="/signup" className="flex items-center gap-2 text-white">
+                  <LogIn className="w-4 h-4" />
+                  Login
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="focus:bg-white/10 cursor-pointer">
+                <Link href="/signup" className="flex items-center gap-2 text-white">
+                  <UserPlus className="w-4 h-4" />
+                  Register
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           
           <Link href="/signup">
             <Button 
@@ -149,13 +246,26 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="bg-[#0a0a0f]/95 backdrop-blur-xl border-l border-white/10 w-80">
               <div className="flex flex-col gap-6 mt-8">
-                <div className="relative">
+                <form onSubmit={handleSearch} className="relative">
                   <Input 
                     placeholder="Search products..." 
-                    className="w-full bg-white/5 border-white/10 rounded-full pl-4 pr-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={`w-full bg-white/5 border-white/10 rounded-full pl-4 pr-16 ${isListening ? 'border-purple-500 bg-purple-500/10' : ''}`}
                   />
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                </div>
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className={`h-7 w-7 rounded-full ${isListening ? 'text-purple-400' : 'text-white/40'}`}
+                      onClick={isListening ? stopVoiceSearch : startVoiceSearch}
+                    >
+                      {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+                    </Button>
+                    <Search className="w-4 h-4 text-white/40" />
+                  </div>
+                </form>
                 
                 <div className="h-px bg-white/10" />
                 
@@ -165,7 +275,6 @@ export function Navbar() {
                   { href: "/deals", label: "Deals" },
                   { href: "/compare", label: "Compare" },
                   { href: "/wishlist", label: "Wishlist" },
-                  { href: "/profile", label: "Profile" },
                 ].map(({ href, label }) => (
                   <Link 
                     key={href}
@@ -178,21 +287,22 @@ export function Navbar() {
                 
                 <div className="h-px bg-white/10" />
                 
-                <div className="text-xs text-white/40 uppercase tracking-wider">Portals</div>
+                <div className="text-xs text-white/40 uppercase tracking-wider">Account</div>
                 
-                {[
-                  { href: "/admin", label: "Admin Dashboard" },
-                  { href: "/affiliate/dashboard", label: "Affiliate Portal" },
-                  { href: "/vendor/dashboard", label: "Vendor Portal" },
-                ].map(({ href, label }) => (
-                  <Link 
-                    key={href}
-                    href={href}
-                    className="text-sm font-medium text-white/50 hover:text-white transition-colors"
-                  >
-                    {label}
-                  </Link>
-                ))}
+                <Link 
+                  href="/signup"
+                  className="text-sm font-medium text-white/50 hover:text-white transition-colors flex items-center gap-2"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Login
+                </Link>
+                <Link 
+                  href="/signup"
+                  className="text-sm font-medium text-white/50 hover:text-white transition-colors flex items-center gap-2"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  Register
+                </Link>
                 
                 <Link href="/signup" className="mt-4">
                   <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full font-medium">
