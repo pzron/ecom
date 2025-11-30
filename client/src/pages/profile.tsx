@@ -5,9 +5,8 @@ import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import {
   User, Package, Heart, Award, Settings, LogOut, MapPin, CreditCard, Clock,
-  ChevronRight, Edit2, Trash2, Plus, Bell, Shield, Download,
-  Star, TrendingUp, Share2, Copy, Check, Zap, Lock, Mail,
-  Phone, Home, DollarSign, Calendar, Percent, Gift, BarChart3, Trophy
+  ChevronRight, Edit2, Trash2, Plus, Bell, Shield,
+  Star, Lock, Mail, Phone, Calendar
 } from "lucide-react";
 import { useAuthStore } from "@/stores/auth";
 import { useState } from "react";
@@ -17,7 +16,6 @@ export default function ProfilePage() {
   const { user, logout, isAuthenticated } = useAuthStore();
   const [activeNav, setActiveNav] = useState("overview");
   const [editMode, setEditMode] = useState(false);
-  const [copyRef, setCopyRef] = useState(false);
 
   if (!isAuthenticated) {
     return (
@@ -81,17 +79,7 @@ export default function ProfilePage() {
                 <img src={user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`} alt="User" className="w-full h-full rounded-full border-4 border-slate-900" />
               </motion.div>
               <h2 className="text-2xl font-bold text-white mb-1">{user?.name || "User"}</h2>
-              <p className="text-muted-foreground text-sm mb-4">{user?.email}</p>
-              <div className="space-y-2 mb-4">
-                <Badge className="bg-gradient-to-r from-primary to-secondary border-0 mx-1 text-sm py-2">⭐ Platinum Member</Badge>
-                <Badge className="bg-green-500/20 text-green-400 border border-green-500/30 mx-1 text-sm py-2">✓ Verified</Badge>
-              </div>
-              <div className="space-y-1 bg-black/30 rounded-lg p-3">
-                <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
-                  <motion.div initial={{ width: 0 }} animate={{ width: "75%" }} transition={{ duration: 1, delay: 0.3 }} className="h-full bg-gradient-to-r from-primary to-secondary" />
-                </div>
-                <p className="text-xs text-muted-foreground font-semibold">2,450 / 5,000 XP to Diamond Tier</p>
-              </div>
+              <p className="text-muted-foreground text-sm">{user?.email}</p>
             </div>
 
             {/* Navigation */}
@@ -119,37 +107,6 @@ export default function ProfilePage() {
                 Log Out
               </motion.button>
             </nav>
-
-            {/* Quick Stats */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-md space-y-4">
-              <h3 className="font-bold text-white text-base flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-primary" />
-                Quick Stats
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-2 bg-black/30 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Package className="w-4 h-4 text-blue-400" />
-                    <span className="text-muted-foreground text-sm">Total Orders</span>
-                  </div>
-                  <span className="font-bold text-white text-lg">12</span>
-                </div>
-                <div className="flex items-center justify-between p-2 bg-black/30 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-green-400" />
-                    <span className="text-muted-foreground text-sm">Total Spent</span>
-                  </div>
-                  <span className="font-bold text-white text-lg">$15.2K</span>
-                </div>
-                <div className="flex items-center justify-between p-2 bg-black/30 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-yellow-400" />
-                    <span className="text-muted-foreground text-sm">Loyalty Points</span>
-                  </div>
-                  <span className="font-bold text-primary text-lg">2,450</span>
-                </div>
-              </div>
-            </motion.div>
           </motion.div>
 
           {/* Main Content */}
@@ -158,79 +115,44 @@ export default function ProfilePage() {
               {/* Overview */}
               {activeNav === "overview" && (
                 <div className="p-6 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-br from-purple-500/20 to-purple-500/5 border border-purple-500/30 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-purple-200">Status</span>
-                        <Trophy className="w-5 h-5 text-purple-400" />
-                      </div>
-                      <p className="text-2xl font-bold text-white">Platinum</p>
-                      <p className="text-xs text-purple-300 mt-1">Member Tier</p>
-                    </motion.div>
-
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 border border-blue-500/30 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-blue-200">Loyalty Points</span>
-                        <Star className="w-5 h-5 text-blue-400" />
-                      </div>
-                      <p className="text-2xl font-bold text-white">2,450</p>
-                      <p className="text-xs text-blue-300 mt-1">+2,550 to Diamond</p>
-                    </motion.div>
-
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-gradient-to-br from-green-500/20 to-green-500/5 border border-green-500/30 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-green-200">Referral Link</span>
-                        <Share2 className="w-5 h-5 text-green-400" />
-                      </div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <code className="text-xs bg-black/40 text-primary px-2 py-1 rounded flex-1 overflow-hidden text-ellipsis">nex-ref-{user?.id?.substring(0, 8)}</code>
-                        <motion.button whileHover={{ scale: 1.1 }} onClick={() => setCopyRef(true)} className="p-1.5 hover:bg-white/10 rounded-lg transition-all">
-                          {copyRef ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-primary" />}
-                        </motion.button>
-                      </div>
-                    </motion.div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-2xl font-bold text-white">Personal Information</h2>
+                    <motion.button whileHover={{ scale: 1.1 }} onClick={() => setEditMode(!editMode)} className="p-2 hover:bg-white/10 rounded-lg transition-all">
+                      <Edit2 className="w-5 h-5 text-primary" />
+                    </motion.button>
                   </div>
 
-                  <div className="border-t border-white/10 pt-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-2xl font-bold text-white">Personal Information</h2>
-                      <motion.button whileHover={{ scale: 1.1 }} onClick={() => setEditMode(!editMode)} className="p-2 hover:bg-white/10 rounded-lg transition-all">
-                        <Edit2 className="w-5 h-5 text-primary" />
-                      </motion.button>
+                  {editMode ? (
+                    <div className="space-y-4">
+                      <div><label className="text-sm font-semibold text-white mb-2 block">Full Name</label>
+                        <input type="text" defaultValue={user?.name} className="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-2 text-white placeholder:text-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" /></div>
+                      <div><label className="text-sm font-semibold text-white mb-2 block">Email</label>
+                        <input type="email" defaultValue={user?.email} className="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-2 text-white placeholder:text-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" /></div>
+                      <div><label className="text-sm font-semibold text-white mb-2 block">Phone</label>
+                        <input type="tel" defaultValue="+1 (555) 000-0000" className="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-2 text-white placeholder:text-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" /></div>
+                      <div className="flex gap-2"><Button onClick={() => setEditMode(false)} className="flex-1 bg-primary hover:bg-primary/90">Save</Button>
+                        <Button onClick={() => setEditMode(false)} variant="outline" className="flex-1">Cancel</Button></div>
                     </div>
-
-                    {editMode ? (
-                      <div className="space-y-4">
-                        <div><label className="text-sm font-semibold text-white mb-2 block">Full Name</label>
-                          <input type="text" defaultValue={user?.name} className="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-2 text-white placeholder:text-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" /></div>
-                        <div><label className="text-sm font-semibold text-white mb-2 block">Email</label>
-                          <input type="email" defaultValue={user?.email} className="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-2 text-white placeholder:text-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" /></div>
-                        <div><label className="text-sm font-semibold text-white mb-2 block">Phone</label>
-                          <input type="tel" defaultValue="+1 (555) 000-0000" className="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-2 text-white placeholder:text-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" /></div>
-                        <div className="flex gap-2"><Button onClick={() => setEditMode(false)} className="flex-1 bg-primary hover:bg-primary/90">Save</Button>
-                          <Button onClick={() => setEditMode(false)} variant="outline" className="flex-1">Cancel</Button></div>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {[
-                          { icon: User, label: "Name", value: user?.name },
-                          { icon: Mail, label: "Email", value: user?.email },
-                          { icon: Phone, label: "Phone", value: "+1 (555) 000-0000" },
-                          { icon: Calendar, label: "Member Since", value: "Jan 2024" },
-                        ].map((item, i) => (
-                          <div key={i} className="p-4 bg-black/40 rounded-lg border border-white/10">
-                            <div className="flex items-center gap-3 mb-2"><item.icon className="w-5 h-5 text-primary" />
-                              <span className="text-xs text-muted-foreground">{item.label}</span></div>
-                            <p className="text-white font-semibold">{item.value}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[
+                        { icon: User, label: "Name", value: user?.name },
+                        { icon: Mail, label: "Email", value: user?.email },
+                        { icon: Phone, label: "Phone", value: "+1 (555) 000-0000" },
+                        { icon: Calendar, label: "Member Since", value: "Jan 2024" },
+                      ].map((item, i) => (
+                        <div key={i} className="p-4 bg-black/40 rounded-lg border border-white/10">
+                          <div className="flex items-center gap-3 mb-2"><item.icon className="w-5 h-5 text-primary" />
+                            <span className="text-xs text-muted-foreground">{item.label}</span></div>
+                          <p className="text-white font-semibold">{item.value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* Orders with Invoice */}
+              {/* Orders */}
               {activeNav === "orders" && (
                 <div className="p-6 space-y-4">
                   <h2 className="text-2xl font-bold text-white mb-6">Order History</h2>
@@ -245,14 +167,8 @@ export default function ProfilePage() {
                           <p className="text-sm text-muted-foreground mb-2">{order.date}</p>
                           <p className="text-xs text-muted-foreground">{order.itemsList.join(", ")}</p>
                         </div>
-                        <div className="flex items-center gap-4">
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-primary">{order.total}</p>
-                          </div>
-                          <motion.button whileHover={{ scale: 1.05 }} className="px-4 py-2 bg-primary/10 border border-primary/30 text-primary rounded-lg hover:bg-primary/20 transition-all text-sm font-semibold flex items-center gap-2">
-                            <Download className="w-4 h-4" />
-                            Invoice
-                          </motion.button>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-primary">{order.total}</p>
                         </div>
                       </div>
                     </motion.div>
@@ -296,28 +212,16 @@ export default function ProfilePage() {
                     </motion.div>
 
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-gradient-to-br from-green-500/20 to-green-500/5 border border-green-500/30 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2"><span className="text-sm text-green-200">Total Earnings</span><DollarSign className="w-5 h-5 text-green-400" /></div>
+                      <div className="flex items-center justify-between mb-2"><span className="text-sm text-green-200">Total Earnings</span><Star className="w-5 h-5 text-green-400" /></div>
                       <p className="text-3xl font-bold text-white">$1,240</p>
                       <p className="text-xs text-green-300 mt-2">Lifetime Earnings</p>
                     </motion.div>
 
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-gradient-to-br from-purple-500/20 to-purple-500/5 border border-purple-500/30 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2"><span className="text-sm text-purple-200">Commission Rate</span><Percent className="w-5 h-5 text-purple-400" /></div>
+                      <div className="flex items-center justify-between mb-2"><span className="text-sm text-purple-200">Commission Rate</span><Package className="w-5 h-5 text-purple-400" /></div>
                       <p className="text-3xl font-bold text-white">5%</p>
                       <p className="text-xs text-purple-300 mt-2">Per Referral Sale</p>
                     </motion.div>
-                  </div>
-
-                  <div className="bg-black/40 border border-white/10 rounded-lg p-6">
-                    <h3 className="text-lg font-bold text-white mb-4">Your Referral Link</h3>
-                    <div className="flex items-center gap-2 mb-4">
-                      <input type="text" readOnly value={`https://nexcommerce.com/ref/${user?.id?.substring(0, 12)}`} className="flex-1 bg-black/40 border border-white/20 rounded-lg px-4 py-3 text-primary text-sm focus:outline-none" />
-                      <motion.button whileHover={{ scale: 1.05 }} className="px-4 py-3 bg-primary/10 border border-primary/30 text-primary rounded-lg hover:bg-primary/20 transition-all font-semibold flex items-center gap-2">
-                        <Copy className="w-4 h-4" />
-                        Copy
-                      </motion.button>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Share your link to earn 5% commission on every purchase</p>
                   </div>
 
                   <div>
