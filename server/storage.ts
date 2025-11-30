@@ -378,33 +378,63 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(settings);
   }
 
-  async getDashboardStats(): Promise<{
-    totalProducts: number;
-    totalOrders: number;
-    totalUsers: number;
-    totalRevenue: number;
-    recentOrders: Order[];
-    topProducts: Product[];
-  }> {
-    const [productCount] = await db.select({ count: sql<number>`count(*)` }).from(products).where(eq(products.isActive, true));
-    const [orderCount] = await db.select({ count: sql<number>`count(*)` }).from(orders);
-    const [userCount] = await db.select({ count: sql<number>`count(*)` }).from(users);
-    const [revenue] = await db.select({ sum: sql<number>`COALESCE(SUM(CAST(total AS NUMERIC)), 0)` }).from(orders).where(eq(orders.paymentStatus, 'paid'));
-    
-    const recentOrders = await db.select().from(orders).orderBy(desc(orders.createdAt)).limit(5);
-    const topProducts = await db.select().from(products)
-      .where(eq(products.isActive, true))
-      .orderBy(desc(products.reviewCount))
-      .limit(5);
-    
-    return {
-      totalProducts: Number(productCount?.count || 0),
-      totalOrders: Number(orderCount?.count || 0),
-      totalUsers: Number(userCount?.count || 0),
-      totalRevenue: Number(revenue?.sum || 0),
-      recentOrders,
-      topProducts
-    };
+  async getDashboardStats(): Promise<any> {
+    try {
+      const [productCount] = await db.select({ count: sql<number>`count(*)` }).from(products).where(eq(products.isActive, true));
+      const [orderCount] = await db.select({ count: sql<number>`count(*)` }).from(orders);
+      const [userCount] = await db.select({ count: sql<number>`count(*)` }).from(users);
+      const [revenue] = await db.select({ sum: sql<number>`COALESCE(SUM(CAST(total AS NUMERIC)), 0)` }).from(orders).where(eq(orders.paymentStatus, 'paid'));
+      
+      const [pending] = await db.select({ count: sql<number>`count(*)` }).from(orders).where(eq(orders.status, 'pending'));
+      const [processing] = await db.select({ count: sql<number>`count(*)` }).from(orders).where(eq(orders.status, 'processing'));
+      const [delivered] = await db.select({ count: sql<number>`count(*)` }).from(orders).where(eq(orders.status, 'delivered'));
+      const [cancelled] = await db.select({ count: sql<number>`count(*)` }).from(orders).where(eq(orders.status, 'cancelled'));
+      const [lowStock] = await db.select({ count: sql<number>`count(*)` }).from(products).where(sql`stock < 10`);
+      
+      const recentOrders = await db.select().from(orders).orderBy(desc(orders.createdAt)).limit(10);
+      const topProducts = await db.select().from(products)
+        .where(eq(products.isActive, true))
+        .orderBy(desc(products.rating))
+        .limit(8);
+      
+      const revenueTrend = await db.select({
+        date: sql`CAST(${orders.createdAt} AS DATE)`,
+        revenue: sql<number>`COALESCE(SUM(CAST(${orders.total} AS NUMERIC)), 0)`,
+        count: sql<number>`COUNT(*)`
+      }).from(orders).groupBy(sql`CAST(${orders.createdAt} AS DATE)`).orderBy(desc(sql`CAST(${orders.createdAt} AS DATE)`)).limit(30);
+      
+      const cartCount = await db.select({ count: sql<number>`count(DISTINCT session_id)` }).from(cartItems);
+      const conversionRate = (Number(orderCount?.count || 0) / (Number(cartCount[0]?.count || 1))) * 100;
+      
+      return {
+        totalProducts: Number(productCount?.count || 0),
+        totalOrders: Number(orderCount?.count || 0),
+        totalUsers: Number(userCount?.count || 0),
+        totalRevenue: Number(revenue?.sum || 0),
+        pendingOrders: Number(pending?.count || 0),
+        processingOrders: Number(processing?.count || 0),
+        deliveredOrders: Number(delivered?.count || 0),
+        cancelledOrders: Number(cancelled?.count || 0),
+        lowStockProducts: Number(lowStock?.count || 0),
+        cartVisitors: Number(cartCount[0]?.count || 0),
+        conversionRate: conversionRate.toFixed(2),
+        recentOrders,
+        topProducts,
+        revenueTrend: revenueTrend.map(r => ({
+          date: r.date,
+          revenue: Number(r.revenue || 0),
+          orders: Number(r.count || 0)
+        }))
+      };
+    } catch (error) {
+      console.error("Dashboard stats error:", error);
+      return {
+        totalProducts: 0, totalOrders: 0, totalUsers: 0, totalRevenue: 0,
+        pendingOrders: 0, processingOrders: 0, deliveredOrders: 0, cancelledOrders: 0,
+        lowStockProducts: 0, cartVisitors: 0, conversionRate: 0,
+        recentOrders: [], topProducts: [], revenueTrend: []
+      };
+    }
   }
 }
 
