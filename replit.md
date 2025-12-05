@@ -42,6 +42,7 @@ NexCommerce is a cutting-edge AI-driven e-commerce platform with advanced 3D pro
 - **Product Reviews** - Purchase-verified review system with 1-5 star ratings
 - **Wishlist** - Save products for later
 - **Product Comparison** - Compare specifications side-by-side
+- **Combo Packages** - 55+ combo deals with basket-styled product visualization, category filters, savings display
 
 ### 6. Dashboard & Analytics
 - **Advanced Admin Dashboard** - 10+ KPI cards, location-based analytics, visitor conversion tracking
