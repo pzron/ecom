@@ -197,14 +197,13 @@ function ComboCard({ combo, index, viewMode }: ComboCardProps) {
   const { addItem } = useCart();
 
   const handleAddToCart = () => {
-    combo.products.forEach(product => {
-      addItem({
-        id: product.id,
-        name: product.name,
-        price: product.originalPrice,
-        image: product.image,
-      }, 1);
-    });
+    addItem({
+      id: combo.id,
+      name: `${combo.name} (${combo.products.length} items)`,
+      price: combo.comboPrice,
+      originalPrice: combo.originalPrice,
+      image: combo.products[0]?.image || "",
+    }, 1);
   };
 
   if (viewMode === "list") {
