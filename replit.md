@@ -44,7 +44,18 @@ NexCommerce is a cutting-edge AI-driven e-commerce platform with advanced 3D pro
 - **Product Comparison** - Compare specifications side-by-side
 - **Combo Packages** - 55+ combo deals with basket-styled product visualization, category filters, savings display
 
-### 6. Dashboard & Analytics
+### 6. Combo Packages System (NEW)
+- **Redesigned Combo Page** - Clean hero section with animated 3D baskets
+- **React Three Fiber 3D** - Realistic woven basket visualization with product animations
+- **WebGL Fallback** - Graceful SVG fallback for non-WebGL environments
+- **Custom Combo Builder** - Users create personalized bundles at /combo/builder
+- **Admin Controls** - Minimum ৳2000 price, 3-8 products, category restrictions
+- **Tiered Discounts** - 10% (3-4 items), 15% (5-6 items), 20% (7-8 items)
+- **Product Page Integration** - Related combos displayed on individual product pages
+- **Category Filtering** - Filter combos and products by category
+- **55+ Pre-built Combos** - Curated combo packages across all categories
+
+### 7. Dashboard & Analytics
 - **Advanced Admin Dashboard** - 10+ KPI cards, location-based analytics, visitor conversion tracking
 - **Real-Time KPI Cards**: Revenue, Orders, Users, Order Requests, Pending Delivery, Avg Order Value, Conversion Rate, Low Stock, Cart Visitors, Performance Metrics
 - **Location Analytics** - Sales breakdown by 6 cities (Dhaka, Chittagong, Sylhet, Khulna, Rajshahi, Barisal) with conversion rates
@@ -55,7 +66,7 @@ NexCommerce is a cutting-edge AI-driven e-commerce platform with advanced 3D pro
 - **Vendor Portal** - Sales overview, inventory tracking, order management
 - **Affiliate Hub** - Gamified progression, earnings tracking, leaderboards
 
-### 7. Complete Store Management Role System (8 Roles)
+### 8. Complete Store Management Role System (8 Roles)
 **Role Hierarchy with 14 Permissions:**
 - **Admin** - Full system control, user management, role assignments, analytics
 - **Manager** - Team management, sales oversight, inventory control, schedules, reports
@@ -72,7 +83,7 @@ NexCommerce is a cutting-edge AI-driven e-commerce platform with advanced 3D pro
 - Stockkeeper Portal: 5 pages (Dashboard, Inventory, Receiving, Transfers, Stock Alerts)
 - Office Portal: 5 pages (Dashboard, Documents, Reports, Customer Support, Communications)
 
-### 8. UI/UX Excellence
+### 9. UI/UX Excellence
 - **Dark Futuristic Theme** - Slate background with purple/pink gradients
 - **Glass-Morphism** - Frosted glass effects with backdrop blur
 - **Responsive Design** - 6-7 column product grid, mobile-optimized
