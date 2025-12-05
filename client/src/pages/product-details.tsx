@@ -7,11 +7,13 @@ import { products, getProductById } from "@/data/products";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ShoppingCart, Heart, Share2, ShieldCheck, Truck, 
-  RotateCcw, Zap, Box, Cuboid, ScanFace, Check, Star, Minus, Plus, Sparkles, Play, Image, ChevronLeft, ChevronRight
+  RotateCcw, Zap, Box, Cuboid, ScanFace, Check, Star, Minus, Plus, Sparkles, Play, Image, ChevronLeft, ChevronRight,
+  Gift, ShoppingBasket, Percent
 } from "lucide-react";
 import { useRoute, Link } from "wouter";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useCart } from "@/hooks/use-cart";
+import { getRelatedCombos, hasAvailableCombos } from "@/lib/combo-utils";
 
 export default function ProductDetails() {
   const [match, params] = useRoute("/product/:id");
@@ -26,6 +28,9 @@ export default function ProductDetails() {
   const [hasPurchased] = useState(false);
   
   const { addItem } = useCart();
+  
+  const relatedCombos = useMemo(() => getRelatedCombos(product.id, 4), [product.id]);
+  const hasCombos = relatedCombos.length > 0;
 
   const handleAddToCart = () => {
     setIsAddingToCart(true);
@@ -496,6 +501,106 @@ export default function ProductDetails() {
             </div>
           </Tabs>
         </motion.div>
+
+        {/* Available Combo Packages */}
+        {hasCombos && (
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.65 }}
+            className="mt-12 md:mt-20"
+          >
+            <div className="flex items-center justify-between mb-6 md:mb-8">
+              <h3 className="text-xl md:text-2xl font-heading font-bold text-white flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30">
+                  <ShoppingBasket className="w-5 h-5 text-purple-400" />
+                </div>
+                Available in Combo Packages
+              </h3>
+              <Link href="/combo">
+                <span className="text-purple-400 hover:text-purple-300 text-sm font-medium flex items-center gap-1 cursor-pointer">
+                  View All Combos
+                  <ChevronRight className="w-4 h-4" />
+                </span>
+              </Link>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {relatedCombos.map((combo, idx) => (
+                <motion.div
+                  key={combo.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.7 + idx * 0.1 }}
+                  className="bg-gradient-to-br from-slate-900/90 to-slate-800/80 rounded-2xl border border-white/10 overflow-hidden hover:border-purple-500/50 transition-all group"
+                >
+                  <div className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        {combo.badge && (
+                          <Badge className={`bg-gradient-to-r ${combo.badgeColor} text-white border-0 text-xs mb-2`}>
+                            {combo.badge}
+                          </Badge>
+                        )}
+                        <h4 className="text-white font-semibold text-sm line-clamp-1 group-hover:text-purple-300 transition-colors">
+                          {combo.name}
+                        </h4>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="flex -space-x-2">
+                        {combo.products.slice(0, 4).map((p, i) => (
+                          <img
+                            key={p.id}
+                            src={p.image}
+                            alt={p.name}
+                            className="w-8 h-8 rounded-lg border-2 border-slate-800 object-cover"
+                            style={{ zIndex: 4 - i }}
+                          />
+                        ))}
+                        {combo.products.length > 4 && (
+                          <div className="w-8 h-8 rounded-lg border-2 border-slate-800 bg-purple-500/30 flex items-center justify-center text-xs text-purple-300 font-bold">
+                            +{combo.products.length - 4}
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-white/50 text-xs">{combo.products.length} items</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <span className="text-white/40 text-xs line-through block">৳{combo.originalPrice.toLocaleString()}</span>
+                        <span className="text-lg font-bold text-white">৳{combo.comboPrice.toLocaleString()}</span>
+                      </div>
+                      <div className="bg-green-500/20 text-green-400 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                        <Percent className="w-3 h-3" />
+                        {combo.savingsPercent}% OFF
+                      </div>
+                    </div>
+                    
+                    <Button
+                      onClick={() => {
+                        addItem({
+                          id: combo.id,
+                          name: `${combo.name} (${combo.products.length} items)`,
+                          price: combo.comboPrice,
+                          originalPrice: combo.originalPrice,
+                          image: combo.products[0]?.image || "",
+                        }, 1);
+                      }}
+                      size="sm"
+                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold"
+                    >
+                      <Gift className="w-4 h-4 mr-1" />
+                      Add Combo
+                    </Button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Similar Products - Auto-scroll Left to Right */}
         <motion.div 
