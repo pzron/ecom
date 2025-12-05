@@ -1,6 +1,5 @@
 import { Navbar } from "@/components/navbar";
 import { Hero } from "@/components/hero";
-import { HomeCategories } from "@/components/home-categories";
 import { ProductGrid } from "@/components/product-grid";
 import { Footer } from "@/components/layout/footer";
 
@@ -10,7 +9,6 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        <HomeCategories />
         <ProductGrid />
       </main>
       <Footer />

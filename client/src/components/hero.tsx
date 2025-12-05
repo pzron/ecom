@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { motion, useMotionValue, useTransform } from "framer-motion";
-import { ArrowRight, Sparkles, Zap, Shield, Truck, Headset } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, OrbitControls, Environment } from "@react-three/drei";
 import { Suspense, useRef, useState, useEffect } from "react";
 import * as THREE from "three";
 import { WebGLErrorBoundary, Default3DFallback } from "./3d/webgl-check";
+import { hero3DProducts } from "@/data/products";
 
 function FloatingCube({ position, color, size = 0.5, rotationSpeed = 1 }: { 
   position: [number, number, number]; 
@@ -15,6 +16,13 @@ function FloatingCube({ position, color, size = 0.5, rotationSpeed = 1 }: {
   rotationSpeed?: number;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
+  
+  useFrame(() => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x += 0.005 * rotationSpeed;
+      meshRef.current.rotation.y += 0.008 * rotationSpeed;
+    }
+  });
   
   return (
     <Float speed={2} rotationIntensity={rotationSpeed} floatIntensity={0.5}>
@@ -37,9 +45,17 @@ function FloatingSphere({ position, color, size = 0.3 }: {
   color: string;
   size?: number;
 }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.1;
+    }
+  });
+  
   return (
     <Float speed={3} rotationIntensity={0.5} floatIntensity={0.8}>
-      <mesh position={position} castShadow>
+      <mesh ref={meshRef} position={position} castShadow>
         <sphereGeometry args={[size, 32, 32]} />
         <meshPhysicalMaterial 
           color={color} 
@@ -48,6 +64,65 @@ function FloatingSphere({ position, color, size = 0.3 }: {
           clearcoat={1}
           transmission={0.5}
           thickness={0.5}
+        />
+      </mesh>
+    </Float>
+  );
+}
+
+function FloatingTorus({ position, color, size = 0.4 }: { 
+  position: [number, number, number]; 
+  color: string;
+  size?: number;
+}) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x = state.clock.elapsedTime * 0.5;
+      meshRef.current.rotation.z = state.clock.elapsedTime * 0.3;
+    }
+  });
+  
+  return (
+    <Float speed={2.5} rotationIntensity={0.8} floatIntensity={0.6}>
+      <mesh ref={meshRef} position={position} castShadow>
+        <torusGeometry args={[size, size * 0.3, 16, 32]} />
+        <meshPhysicalMaterial 
+          color={color} 
+          roughness={0.1} 
+          metalness={0.85}
+          clearcoat={0.8}
+        />
+      </mesh>
+    </Float>
+  );
+}
+
+function FloatingRing({ position, color, size = 0.5 }: { 
+  position: [number, number, number]; 
+  color: string;
+  size?: number;
+}) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y = state.clock.elapsedTime * 0.4;
+    }
+  });
+  
+  return (
+    <Float speed={1.5} rotationIntensity={0.4} floatIntensity={0.7}>
+      <mesh ref={meshRef} position={position} castShadow>
+        <torusGeometry args={[size, size * 0.15, 16, 48]} />
+        <meshPhysicalMaterial 
+          color={color} 
+          roughness={0.05} 
+          metalness={0.95}
+          clearcoat={1}
+          iridescence={0.5}
+          iridescenceIOR={1.5}
         />
       </mesh>
     </Float>
@@ -74,19 +149,29 @@ function HeroScene() {
   return (
     <WebGLErrorBoundary fallback={<Default3DFallback className="absolute inset-0" />}>
       <Canvas 
-        camera={{ position: [0, 0, 6], fov: 50 }}
-        gl={{ failIfMajorPerformanceCaveat: false }}
+        camera={{ position: [0, 0, 8], fov: 45 }}
+        gl={{ failIfMajorPerformanceCaveat: false, antialias: true }}
       >
-        <ambientLight intensity={0.3} />
-        <spotLight position={[10, 10, 10]} intensity={0.8} />
-        <pointLight position={[-10, -10, -10]} intensity={0.3} color="#a855f7" />
+        <ambientLight intensity={0.4} />
+        <spotLight position={[10, 10, 10]} intensity={1} castShadow />
+        <pointLight position={[-10, -10, -10]} intensity={0.4} color="#a855f7" />
+        <pointLight position={[10, -5, 5]} intensity={0.3} color="#ec4899" />
         
         <Suspense fallback={null}>
-          <FloatingCube position={[-2.5, 1, 0]} color="#a855f7" size={0.6} />
-          <FloatingCube position={[2.5, -0.5, -1]} color="#ec4899" size={0.5} rotationSpeed={1.5} />
-          <FloatingSphere position={[-1.5, -1.5, 0.5]} color="#06b6d4" size={0.35} />
-          <FloatingSphere position={[1.5, 1.5, -0.5]} color="#f59e0b" size={0.25} />
-          <FloatingCube position={[0, 2, -2]} color="#10b981" size={0.4} rotationSpeed={0.5} />
+          <FloatingCube position={[-3.5, 1.5, -2]} color="#a855f7" size={0.7} rotationSpeed={1.2} />
+          <FloatingCube position={[3.5, -0.8, -1.5]} color="#ec4899" size={0.55} rotationSpeed={0.8} />
+          <FloatingCube position={[0, 2.5, -3]} color="#06b6d4" size={0.5} rotationSpeed={1} />
+          
+          <FloatingSphere position={[-2, -1.8, 0.5]} color="#06b6d4" size={0.4} />
+          <FloatingSphere position={[2.5, 2, -1]} color="#f59e0b" size={0.3} />
+          <FloatingSphere position={[-3, 0.5, 1]} color="#10b981" size={0.25} />
+          
+          <FloatingTorus position={[3, 0, -2]} color="#8b5cf6" size={0.45} />
+          <FloatingTorus position={[-2.5, 2, -1]} color="#f43f5e" size={0.35} />
+          
+          <FloatingRing position={[0, -2, -1]} color="#fbbf24" size={0.6} />
+          <FloatingRing position={[-1.5, 0, -2.5]} color="#22d3ee" size={0.4} />
+          <FloatingRing position={[2, 1.5, -2]} color="#e879f9" size={0.35} />
           
           <Environment preset="city" />
         </Suspense>
@@ -95,12 +180,81 @@ function HeroScene() {
           enableZoom={false} 
           enablePan={false}
           autoRotate 
-          autoRotateSpeed={0.5}
+          autoRotateSpeed={0.3}
           maxPolarAngle={Math.PI / 2}
           minPolarAngle={Math.PI / 3}
         />
       </Canvas>
     </WebGLErrorBoundary>
+  );
+}
+
+function FloatingProductCard({ 
+  product, 
+  index 
+}: { 
+  product: { image: string; name: string; price: number }; 
+  index: number 
+}) {
+  const positions = [
+    { x: -38, y: 8, rotate: -8 },
+    { x: 38, y: 12, rotate: 8 },
+    { x: -35, y: 55, rotate: 5 },
+    { x: 36, y: 50, rotate: -5 },
+    { x: -42, y: 32, rotate: -3 },
+    { x: 42, y: 35, rotate: 3 },
+    { x: -30, y: 75, rotate: 6 },
+    { x: 32, y: 72, rotate: -6 },
+  ];
+  
+  const pos = positions[index % positions.length];
+  const animDuration = 5 + (index * 0.5);
+  const delay = index * 0.15;
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.5, y: 30, rotate: pos.rotate }}
+      animate={{ 
+        opacity: 1,
+        scale: [0.95, 1.05, 0.95],
+        y: [0, -15, 0],
+        rotateY: [0, 15, 0, -15, 0],
+        rotateZ: [pos.rotate - 2, pos.rotate + 2, pos.rotate - 2]
+      }}
+      transition={{ 
+        opacity: { duration: 0.5, delay },
+        scale: { duration: animDuration, delay: delay + 0.5, repeat: Infinity, ease: "easeInOut" },
+        y: { duration: animDuration * 0.8, delay: delay + 0.3, repeat: Infinity, ease: "easeInOut" },
+        rotateY: { duration: animDuration * 1.2, delay: delay + 0.2, repeat: Infinity, ease: "easeInOut" },
+        rotateZ: { duration: animDuration * 1.5, delay: delay, repeat: Infinity, ease: "easeInOut" }
+      }}
+      className="absolute w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/30 backdrop-blur-md bg-gradient-to-br from-white/20 to-white/5"
+      style={{ 
+        left: `${50 + pos.x}%`,
+        top: `${pos.y}%`,
+        transform: `translateX(-50%) rotate(${pos.rotate}deg)`,
+        perspective: '1000px',
+        transformStyle: 'preserve-3d'
+      }}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-transparent to-pink-500/20 z-10" />
+      <img 
+        src={product.image} 
+        alt={product.name}
+        className="w-full h-full object-cover"
+        loading="lazy"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-20" />
+      <motion.div 
+        className="absolute bottom-1 left-1 right-1 z-30 bg-white/10 backdrop-blur-sm rounded-lg px-2 py-1"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: delay + 0.8 }}
+      >
+        <p className="text-white text-[10px] font-medium truncate">{product.name.slice(0, 15)}...</p>
+        <p className="text-purple-300 text-[10px] font-bold">৳{product.price}</p>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -114,7 +268,7 @@ export function Hero() {
 
   return (
     <div 
-      className="relative h-[50vh] sm:h-[55vh] md:h-[60vh] min-h-[400px] max-h-[600px] flex flex-col items-center justify-center pt-12 md:pt-16 overflow-hidden"
+      className="relative h-[60vh] sm:h-[65vh] md:h-[70vh] min-h-[500px] max-h-[750px] flex flex-col items-center justify-center pt-12 md:pt-16 overflow-hidden"
       onMouseMove={(e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         mouseX.set(e.clientX - rect.width / 2);
@@ -123,9 +277,10 @@ export function Hero() {
     >
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-[#0f0f1a] to-[#0a0a0f]" />
-        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-purple-500/15 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-[350px] h-[350px] bg-pink-500/15 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "1s" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: "2s" }} />
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-purple-500/20 rounded-full blur-[150px] animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[450px] bg-pink-500/20 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: "1s" }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-500/15 rounded-full blur-[180px] animate-pulse" style={{ animationDelay: "2s" }} />
+        <div className="absolute top-10 right-1/3 w-[300px] h-[300px] bg-amber-500/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: "3s" }} />
         
         <div className="absolute inset-0 opacity-20">
           <div className="absolute w-full h-full" style={{
@@ -135,11 +290,15 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="absolute inset-0 z-[1] pointer-events-none">
+      <div className="absolute inset-0 z-[1] pointer-events-none hidden md:block">
         <div className="absolute w-full h-full">
           <HeroScene />
         </div>
       </div>
+
+      {hero3DProducts.slice(0, 8).map((product, index) => (
+        <FloatingProductCard key={product.id} product={product} index={index} />
+      ))}
 
       <div className="container relative z-10 px-4 flex flex-col items-center text-center">
         <motion.div
@@ -211,7 +370,6 @@ export function Hero() {
             </Button>
           </Link>
         </motion.div>
-
       </div>
     </div>
   );
