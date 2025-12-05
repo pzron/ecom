@@ -15,6 +15,7 @@ import ProfilePage from "@/pages/profile";
 import WishlistPage from "@/pages/wishlist";
 import DealsPage from "@/pages/deals";
 import ComparePage from "@/pages/compare";
+import ComboPage from "@/pages/combo";
 
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminUsers from "@/pages/admin/users";
@@ -74,6 +75,7 @@ function Router() {
       <Route path="/wishlist" component={WishlistPage} />
       <Route path="/deals" component={DealsPage} />
       <Route path="/compare" component={ComparePage} />
+      <Route path="/combo" component={ComboPage} />
 
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
