@@ -33,10 +33,10 @@ export function CategoriesMarquee() {
             >
               <motion.div
                 whileHover={{ scale: 1.05, y: -2 }}
-                className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-500/30 transition-all cursor-pointer group"
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-500/30 transition-all cursor-pointer group"
               >
-                <span className="text-xl">{category.icon}</span>
-                <span className="text-sm font-medium text-white/80 group-hover:text-white whitespace-nowrap">
+                <span className="text-base">{category.icon}</span>
+                <span className="text-xs font-medium text-white/80 group-hover:text-white whitespace-nowrap">
                   {category.name}
                 </span>
               </motion.div>

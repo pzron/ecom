@@ -198,7 +198,7 @@ export function Hero() {
 
   return (
     <div 
-      className="relative h-[60vh] sm:h-[65vh] md:h-[70vh] min-h-[500px] max-h-[750px] flex flex-col items-center justify-center pt-12 md:pt-16 overflow-hidden"
+      className="relative h-[51vh] sm:h-[55vh] md:h-[60vh] min-h-[430px] max-h-[640px] flex flex-col items-center justify-center pt-10 md:pt-14 overflow-hidden"
       onMouseMove={(e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         mouseX.set(e.clientX - rect.width / 2);

@@ -3,7 +3,7 @@ import { homeProducts, categories, type Product } from "@/data/products";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Heart, Star, Eye, Zap, ChevronRight, Sparkles, TrendingUp, Clock, Gift } from "lucide-react";
+import { ShoppingCart, Heart, Star, Eye, Zap, ChevronRight, Sparkles, TrendingUp, Clock, Gift, LayoutGrid, Layers } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/hooks/use-cart";
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
@@ -502,11 +502,8 @@ export function ProductGrid() {
         >
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-3xl md:text-4xl font-heading font-bold text-white flex items-center gap-3">
-                <Sparkles className="w-8 h-8 text-purple-400" />
-                Featured Collection
-              </h2>
-              <p className="text-white/60 mt-2 text-sm">
+              <p className="text-white/60 text-sm flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-purple-400" />
                 Curated excellence, delivered to you
               </p>
             </div>
@@ -518,7 +515,7 @@ export function ProductGrid() {
                 className={`w-10 h-10 rounded-full ${viewMode === "mixed" ? "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/25" : "border-white/20 text-white/70 hover:bg-white/10 backdrop-blur-sm"}`}
                 title="Mixed View"
               >
-                <Sparkles className="w-5 h-5" />
+                <LayoutGrid className="w-5 h-5" />
               </Button>
               <Button
                 variant={viewMode === "grid" ? "default" : "outline"}
@@ -527,7 +524,7 @@ export function ProductGrid() {
                 className={`w-10 h-10 rounded-full ${viewMode === "grid" ? "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/25" : "border-white/20 text-white/70 hover:bg-white/10 backdrop-blur-sm"}`}
                 title="By Category"
               >
-                <TrendingUp className="w-5 h-5" />
+                <Layers className="w-5 h-5" />
               </Button>
             </div>
           </div>
