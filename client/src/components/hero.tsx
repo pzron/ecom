@@ -173,7 +173,7 @@ function GlowingOrb({ position, color, size, delay }: {
 
 export function Hero() {
   const [isHovered, setIsHovered] = useState(false);
-  const [productCount, setProductCount] = useState(120);
+  const [productCount, setProductCount] = useState(18);
 
   const floatingProducts = useMemo(() => {
     const shuffled = [...homeProducts].sort(() => Math.random() - 0.5);
