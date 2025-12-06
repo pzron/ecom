@@ -6,8 +6,34 @@ import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Heart, Star, Eye, Zap, ChevronRight, Sparkles, TrendingUp, Clock, Gift } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/hooks/use-cart";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
+
+function generateWeightedRowPattern(length: number): number[] {
+  const pattern: number[] = [];
+  for (let i = 0; i < length; i++) {
+    const rand = Math.random();
+    if (rand < 0.35) {
+      pattern.push(4);
+    } else if (rand < 0.70) {
+      pattern.push(5);
+    } else if (rand < 0.85) {
+      pattern.push(6);
+    } else {
+      pattern.push(7);
+    }
+  }
+  return pattern;
+}
+
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 
 interface ProductCardProps {
   product: Product;
@@ -335,20 +361,32 @@ function DynamicRow({ products, startIndex, itemCount, rowIndex = 0 }: DynamicRo
 
   return (
     <motion.div 
+      layout
       className={`grid ${gridCols} ${rowStyle} mb-5`}
       initial={{ opacity: 0, y: 15 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-30px" }}
-      transition={{ duration: 0.4, delay: (rowIndex % 5) * 0.05 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, layout: { duration: 0.6, type: "spring", stiffness: 100, damping: 15 } }}
     >
       {rowProducts.map((product, idx) => (
-        <ProductCard 
-          key={product.id} 
-          product={product} 
-          index={startIndex + idx}
-          layout={itemCount >= 6 ? "compact" : "default"}
-          size={itemCount <= 4 ? "large" : itemCount >= 7 ? "small" : "medium"}
-        />
+        <motion.div
+          key={product.id}
+          layout
+          layoutId={`product-${product.id}`}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ 
+            duration: 0.4,
+            layout: { duration: 0.5, type: "spring", stiffness: 120, damping: 18 }
+          }}
+        >
+          <ProductCard 
+            product={product} 
+            index={startIndex + idx}
+            layout={itemCount >= 6 ? "compact" : "default"}
+            size={itemCount <= 4 ? "large" : itemCount >= 7 ? "small" : "medium"}
+          />
+        </motion.div>
       ))}
     </motion.div>
   );
@@ -358,9 +396,28 @@ export function ProductGrid() {
   const [visibleProducts, setVisibleProducts] = useState(60);
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<"mixed" | "grid">("mixed");
+  const [dynamicPattern, setDynamicPattern] = useState<number[]>(() => generateWeightedRowPattern(20));
+  const [shuffleKey, setShuffleKey] = useState(0);
   const { toast } = useToast();
-  
-  const rowPattern = [5, 6, 4, 7, 5, 6, 4, 5, 7, 6, 4, 5, 6, 7, 5];
+  const patternIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const shuffleIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (viewMode === "mixed") {
+      patternIntervalRef.current = setInterval(() => {
+        setDynamicPattern(generateWeightedRowPattern(20));
+      }, 10000);
+
+      shuffleIntervalRef.current = setInterval(() => {
+        setShuffleKey(prev => prev + 1);
+      }, 8000);
+    }
+
+    return () => {
+      if (patternIntervalRef.current) clearInterval(patternIntervalRef.current);
+      if (shuffleIntervalRef.current) clearInterval(shuffleIntervalRef.current);
+    };
+  }, [viewMode]);
   
   const categorizedProducts = useMemo(() => {
     const grouped: Record<string, Product[]> = {};
@@ -400,8 +457,8 @@ export function ProductGrid() {
         }
       }
     }
-    return result;
-  }, [categorizedProducts, visibleProducts]);
+    return shuffleKey > 0 ? shuffleArray(result) : result;
+  }, [categorizedProducts, visibleProducts, shuffleKey]);
 
   const rows = useMemo(() => {
     const result: { start: number; count: number }[] = [];
@@ -409,14 +466,14 @@ export function ProductGrid() {
     let patternIndex = 0;
     
     while (currentIndex < visibleProducts && currentIndex < mixedProducts.length) {
-      const count = Math.min(rowPattern[patternIndex % rowPattern.length], mixedProducts.length - currentIndex);
+      const count = Math.min(dynamicPattern[patternIndex % dynamicPattern.length], mixedProducts.length - currentIndex);
       result.push({ start: currentIndex, count });
       currentIndex += count;
       patternIndex++;
     }
     
     return result;
-  }, [visibleProducts, mixedProducts.length]);
+  }, [visibleProducts, mixedProducts.length, dynamicPattern]);
 
   const loadMore = useCallback(() => {
     setIsLoading(true);
