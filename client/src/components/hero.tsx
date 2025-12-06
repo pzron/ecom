@@ -3,21 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { useState, useEffect, useMemo } from "react";
-
-const productImages = [
-  { src: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&q=80", name: "Watch" },
-  { src: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80", name: "Headphones" },
-  { src: "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=300&q=80", name: "Shoes" },
-  { src: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&q=80", name: "Cosmetics" },
-  { src: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&q=80", name: "Medicine" },
-  { src: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=300&q=80", name: "Camera" },
-  { src: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300&q=80", name: "Sunglasses" },
-  { src: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&q=80", name: "Bag" },
-  { src: "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=300&q=80", name: "Perfume" },
-  { src: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80", name: "Sneakers" },
-  { src: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=300&q=80", name: "Luxury Shoes" },
-  { src: "https://images.unsplash.com/photo-1491553895911-0055uj8jde1g?w=300&q=80", name: "Laptop" },
-];
+import { homeProducts } from "@/data/products";
 
 const glowColors = [
   "rgba(168, 85, 247, 0.6)",
@@ -28,6 +14,10 @@ const glowColors = [
   "rgba(139, 92, 246, 0.6)",
   "rgba(244, 63, 94, 0.6)",
   "rgba(34, 211, 238, 0.6)",
+  "rgba(251, 191, 36, 0.6)",
+  "rgba(52, 211, 153, 0.6)",
+  "rgba(192, 132, 252, 0.6)",
+  "rgba(251, 113, 133, 0.6)",
 ];
 
 const borderColors = [
@@ -39,112 +29,98 @@ const borderColors = [
   "border-violet-500/50",
   "border-rose-500/50",
   "border-teal-500/50",
+  "border-yellow-500/50",
+  "border-green-500/50",
+  "border-fuchsia-500/50",
+  "border-red-500/50",
 ];
 
 interface FloatingProductProps {
-  image: { src: string; name: string };
+  image: string;
+  name: string;
   index: number;
   totalProducts: number;
 }
 
-function FloatingProduct({ image, index, totalProducts }: FloatingProductProps) {
+function FloatingProduct({ image, name, index, totalProducts }: FloatingProductProps) {
   const colorIndex = index % glowColors.length;
   const glowColor = glowColors[colorIndex];
   const borderColor = borderColors[colorIndex];
   
-  const sizes = ["w-16 h-16", "w-20 h-20", "w-24 h-24", "w-28 h-28", "w-14 h-14", "w-18 h-18"];
+  const sizes = ["w-12 h-12", "w-14 h-14", "w-16 h-16", "w-18 h-18", "w-20 h-20", "w-10 h-10", "w-22 h-22", "w-24 h-24"];
   const size = sizes[index % sizes.length];
   
-  const animations = useMemo(() => {
-    const baseDelay = index * 0.3;
-    const duration = 15 + (index % 5) * 3;
-    
-    const startPositions = [
-      { x: -150, y: Math.random() * 100 - 50 },
-      { x: window.innerWidth + 150, y: Math.random() * 100 - 50 },
-      { x: Math.random() * 100 - 50, y: -150 },
-      { x: Math.random() * 100 - 50, y: window.innerHeight + 150 },
-    ];
-    
-    const startPos = startPositions[index % 4];
+  const randomSeed = useMemo(() => ({
+    startX: Math.random(),
+    startY: Math.random(),
+    pathVariant: Math.floor(Math.random() * 8),
+    duration: 12 + Math.random() * 15,
+    delay: (index * 0.15) % 10,
+    rotateDir: Math.random() > 0.5 ? 1 : -1,
+    scaleMax: 0.9 + Math.random() * 0.4,
+  }), [index]);
+
+  const getPath = useMemo(() => {
+    const w = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const h = typeof window !== 'undefined' ? window.innerHeight : 600;
     
     const paths = [
-      { 
-        x: [startPos.x, window.innerWidth * 0.2, window.innerWidth * 0.5, window.innerWidth * 0.8, window.innerWidth + 200],
-        y: [startPos.y, 100, 250, 150, startPos.y]
-      },
-      {
-        x: [window.innerWidth + 200, window.innerWidth * 0.7, window.innerWidth * 0.3, -200],
-        y: [100, 300, 200, 150]
-      },
-      {
-        x: [startPos.x, window.innerWidth * 0.3, window.innerWidth * 0.6, startPos.x],
-        y: [-100, 200, 350, 500]
-      },
-      {
-        x: [window.innerWidth * 0.5, window.innerWidth * 0.2, window.innerWidth * 0.8, window.innerWidth * 0.5],
-        y: [500, 250, 150, -100]
-      },
+      { x: [-100, w * 0.3, w * 0.6, w + 100], y: [h * randomSeed.startY, h * 0.2, h * 0.7, h * randomSeed.startY] },
+      { x: [w + 100, w * 0.7, w * 0.3, -100], y: [h * randomSeed.startY, h * 0.6, h * 0.3, h * randomSeed.startY] },
+      { x: [w * randomSeed.startX, w * 0.2, w * 0.8, w * randomSeed.startX], y: [-100, h * 0.4, h * 0.6, h + 100] },
+      { x: [w * randomSeed.startX, w * 0.8, w * 0.2, w * randomSeed.startX], y: [h + 100, h * 0.6, h * 0.3, -100] },
+      { x: [-100, w * 0.5, w * 0.8, w * 0.2, w + 100], y: [h * 0.3, h * 0.1, h * 0.5, h * 0.8, h * 0.4] },
+      { x: [w + 100, w * 0.6, w * 0.2, w * 0.7, -100], y: [h * 0.7, h * 0.4, h * 0.2, h * 0.6, h * 0.3] },
+      { x: [w * 0.5, w * 0.1, w * 0.9, w * 0.5], y: [-100, h * 0.5, h * 0.5, h + 100] },
+      { x: [w * 0.5, w * 0.9, w * 0.1, w * 0.5], y: [h + 100, h * 0.5, h * 0.5, -100] },
     ];
     
-    return {
-      path: paths[index % paths.length],
-      duration,
-      delay: baseDelay,
-      rotate: index % 2 === 0 ? [0, 360] : [0, -360],
-      scale: [0.8, 1.1, 0.9, 1.2, 0.8],
-    };
-  }, [index]);
+    return paths[randomSeed.pathVariant];
+  }, [randomSeed]);
 
   return (
     <motion.div
-      className={`absolute ${size} rounded-2xl overflow-hidden border-2 ${borderColor} backdrop-blur-sm`}
+      className={`absolute ${size} rounded-xl overflow-hidden border-2 ${borderColor} backdrop-blur-sm`}
       style={{
-        boxShadow: `0 0 30px ${glowColor}, 0 0 60px ${glowColor}`,
-        zIndex: 10 - (index % 5),
+        boxShadow: `0 0 20px ${glowColor}, 0 0 40px ${glowColor}`,
+        zIndex: Math.floor(Math.random() * 10),
       }}
       initial={{ 
-        x: animations.path.x[0], 
-        y: animations.path.y[0],
+        x: getPath.x[0], 
+        y: getPath.y[0],
         opacity: 0,
-        scale: 0.5,
+        scale: 0.3,
         rotate: 0,
       }}
       animate={{
-        x: animations.path.x,
-        y: animations.path.y,
-        opacity: [0, 1, 1, 1, 0],
-        scale: animations.scale,
-        rotate: animations.rotate,
+        x: getPath.x,
+        y: getPath.y,
+        opacity: [0, 0.9, 0.9, 0.9, 0],
+        scale: [0.5, randomSeed.scaleMax, randomSeed.scaleMax * 0.9, randomSeed.scaleMax, 0.5],
+        rotate: [0, 180 * randomSeed.rotateDir, 360 * randomSeed.rotateDir],
       }}
       transition={{
-        duration: animations.duration,
-        delay: animations.delay,
+        duration: randomSeed.duration,
+        delay: randomSeed.delay,
         repeat: Infinity,
         ease: "easeInOut",
       }}
     >
       <motion.div
         className="w-full h-full relative"
-        animate={{
-          rotateY: [0, 180, 360],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "linear",
-        }}
+        animate={{ rotateY: [0, 180, 360] }}
+        transition={{ duration: 6 + Math.random() * 4, repeat: Infinity, ease: "linear" }}
       >
         <img 
-          src={image.src} 
-          alt={image.name}
+          src={image} 
+          alt={name}
           className="w-full h-full object-cover"
           loading="lazy"
         />
         <div 
           className="absolute inset-0"
           style={{
-            background: `linear-gradient(135deg, ${glowColor} 0%, transparent 50%)`,
+            background: `linear-gradient(135deg, ${glowColor} 0%, transparent 60%)`,
             mixBlendMode: "overlay",
           }}
         />
@@ -158,8 +134,8 @@ function ParticleEffect({ index }: { index: number }) {
   const color = glowColors[colorIndex];
   
   const randomX = useMemo(() => Math.random() * 100, []);
-  const randomDelay = useMemo(() => Math.random() * 5, []);
-  const randomDuration = useMemo(() => 10 + Math.random() * 10, []);
+  const randomDelay = useMemo(() => Math.random() * 8, []);
+  const randomDuration = useMemo(() => 8 + Math.random() * 12, []);
   const randomSize = useMemo(() => 2 + Math.random() * 4, []);
   
   return (
@@ -170,19 +146,11 @@ function ParticleEffect({ index }: { index: number }) {
         height: randomSize,
         left: `${randomX}%`,
         background: color,
-        boxShadow: `0 0 10px ${color}`,
+        boxShadow: `0 0 8px ${color}`,
       }}
       initial={{ y: "100vh", opacity: 0 }}
-      animate={{ 
-        y: "-10vh",
-        opacity: [0, 1, 1, 0],
-      }}
-      transition={{
-        duration: randomDuration,
-        delay: randomDelay,
-        repeat: Infinity,
-        ease: "linear",
-      }}
+      animate={{ y: "-10vh", opacity: [0, 0.8, 0.8, 0] }}
+      transition={{ duration: randomDuration, delay: randomDelay, repeat: Infinity, ease: "linear" }}
     />
   );
 }
@@ -196,55 +164,35 @@ function GlowingOrb({ position, color, size, delay }: {
   return (
     <motion.div
       className={`absolute ${size} rounded-full blur-3xl`}
-      style={{
-        left: position.left,
-        top: position.top,
-        background: color,
-      }}
-      animate={{
-        scale: [1, 1.3, 1],
-        opacity: [0.3, 0.6, 0.3],
-      }}
-      transition={{
-        duration: 4,
-        delay,
-        repeat: Infinity,
-        ease: "easeInOut",
-      }}
+      style={{ left: position.left, top: position.top, background: color }}
+      animate={{ scale: [1, 1.4, 1], opacity: [0.2, 0.5, 0.2] }}
+      transition={{ duration: 5, delay, repeat: Infinity, ease: "easeInOut" }}
     />
   );
 }
 
 export function Hero() {
   const [isHovered, setIsHovered] = useState(false);
-  const [windowSize, setWindowSize] = useState({ width: 1200, height: 600 });
+  const [productCount, setProductCount] = useState(120);
 
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const floatingProducts = useMemo(() => {
+    const shuffled = [...homeProducts].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, productCount).map((product, i) => ({
+      id: `${product.id}-${i}`,
+      image: product.image,
+      name: product.name,
+    }));
+  }, [productCount]);
 
-  const floatingProducts = useMemo(() => 
-    productImages.slice(0, 10).map((img, i) => ({
-      ...img,
-      id: i,
-    })), 
-  []);
-
-  const particles = useMemo(() => 
-    Array.from({ length: 20 }, (_, i) => i),
-  []);
+  const particles = useMemo(() => Array.from({ length: 30 }, (_, i) => i), []);
 
   const orbs = [
-    { position: { left: "10%", top: "20%" }, color: "rgba(168, 85, 247, 0.4)", size: "w-64 h-64", delay: 0 },
-    { position: { left: "70%", top: "60%" }, color: "rgba(236, 72, 153, 0.4)", size: "w-80 h-80", delay: 1 },
-    { position: { left: "50%", top: "30%" }, color: "rgba(6, 182, 212, 0.3)", size: "w-72 h-72", delay: 2 },
-    { position: { left: "20%", top: "70%" }, color: "rgba(245, 158, 11, 0.3)", size: "w-56 h-56", delay: 3 },
-    { position: { left: "80%", top: "10%" }, color: "rgba(16, 185, 129, 0.3)", size: "w-48 h-48", delay: 4 },
+    { position: { left: "5%", top: "15%" }, color: "rgba(168, 85, 247, 0.35)", size: "w-72 h-72", delay: 0 },
+    { position: { left: "75%", top: "55%" }, color: "rgba(236, 72, 153, 0.35)", size: "w-80 h-80", delay: 1 },
+    { position: { left: "45%", top: "25%" }, color: "rgba(6, 182, 212, 0.25)", size: "w-64 h-64", delay: 2 },
+    { position: { left: "15%", top: "65%" }, color: "rgba(245, 158, 11, 0.25)", size: "w-56 h-56", delay: 3 },
+    { position: { left: "85%", top: "10%" }, color: "rgba(16, 185, 129, 0.25)", size: "w-48 h-48", delay: 4 },
+    { position: { left: "55%", top: "75%" }, color: "rgba(139, 92, 246, 0.3)", size: "w-60 h-60", delay: 5 },
   ];
 
   return (
@@ -256,10 +204,10 @@ export function Hero() {
           <GlowingOrb key={i} {...orb} />
         ))}
         
-        <div className="absolute inset-0 opacity-30">
+        <div className="absolute inset-0 opacity-20">
           <div className="absolute w-full h-full" style={{
-            backgroundImage: "radial-gradient(circle at 25% 25%, transparent 0%, transparent 2%, rgba(168, 85, 247, 0.15) 2%, transparent 3%)",
-            backgroundSize: "50px 50px"
+            backgroundImage: "radial-gradient(circle at 25% 25%, transparent 0%, transparent 2%, rgba(168, 85, 247, 0.12) 2%, transparent 3%)",
+            backgroundSize: "45px 45px"
           }} />
         </div>
         
@@ -267,13 +215,13 @@ export function Hero() {
           className="absolute inset-0"
           animate={{
             background: [
-              "radial-gradient(ellipse at 20% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%)",
-              "radial-gradient(ellipse at 80% 50%, rgba(236, 72, 153, 0.15) 0%, transparent 50%)",
-              "radial-gradient(ellipse at 50% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 50%)",
-              "radial-gradient(ellipse at 20% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%)",
+              "radial-gradient(ellipse at 20% 50%, rgba(168, 85, 247, 0.12) 0%, transparent 50%)",
+              "radial-gradient(ellipse at 80% 50%, rgba(236, 72, 153, 0.12) 0%, transparent 50%)",
+              "radial-gradient(ellipse at 50% 20%, rgba(6, 182, 212, 0.12) 0%, transparent 50%)",
+              "radial-gradient(ellipse at 20% 50%, rgba(168, 85, 247, 0.12) 0%, transparent 50%)",
             ],
           }}
-          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
         />
       </div>
 
@@ -285,7 +233,8 @@ export function Hero() {
         {floatingProducts.map((product, index) => (
           <FloatingProduct
             key={product.id}
-            image={product}
+            image={product.image}
+            name={product.name}
             index={index}
             totalProducts={floatingProducts.length}
           />
