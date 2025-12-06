@@ -698,72 +698,74 @@ function shuffleWithSeed<T>(array: T[], random: () => number): T[] {
 function generateRealProducts(count: number = 1200): Product[] {
   const generatedProducts: Product[] = [];
   const random = seededRandom(42);
+  const usedNames = new Set<string>();
+  const usedIds = new Set<string>();
   let productId = 0;
 
   const categoryOrder = shuffleWithSeed([...categories], random);
   
-  while (generatedProducts.length < count) {
-    for (const category of categoryOrder) {
-      if (generatedProducts.length >= count) break;
+  for (const category of categoryOrder) {
+    const categoryProductList = categoryProductNames[category.slug] || [];
+    if (categoryProductList.length === 0) continue;
 
-      const categoryProductList = categoryProductNames[category.slug] || [];
-      if (categoryProductList.length === 0) continue;
+    for (let i = 0; i < categoryProductList.length; i++) {
+      const productName = categoryProductList[i];
+      const uniqueKey = `${category.slug}-${productName}`;
+      
+      if (usedNames.has(uniqueKey)) continue;
+      usedNames.add(uniqueKey);
+      
+      productId++;
+      const productIdStr = `p${productId}`;
+      
+      if (usedIds.has(productIdStr)) continue;
+      usedIds.add(productIdStr);
+      
+      const palette = colorPalettes[productId % colorPalettes.length];
+      const basePrice = Math.floor(random() * 4500) + 150;
+      const hasDiscount = random() > 0.55;
+      
+      const catImages = categoryImages[category.slug] || [];
+      const imageIndex = i % Math.max(catImages.length, 1);
+      const image = catImages.length > 0 
+        ? catImages[imageIndex] 
+        : `https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80`;
 
-      const productsPerCategoryRound = Math.min(
-        Math.ceil(categoryProductList.length / 3),
-        Math.ceil((count - generatedProducts.length) / categories.length)
-      );
-
-      for (let i = 0; i < productsPerCategoryRound && generatedProducts.length < count; i++) {
-        productId++;
-        const productNameIndex = (productId + i) % categoryProductList.length;
-        const productName = categoryProductList[productNameIndex];
-        
-        const palette = colorPalettes[productId % colorPalettes.length];
-        const basePrice = Math.floor(random() * 4500) + 150;
-        const hasDiscount = random() > 0.55;
-        
-        const catImages = categoryImages[category.slug] || [];
-        const imageIndex = productId % Math.max(catImages.length, 1);
-        const image = catImages.length > 0 
-          ? catImages[imageIndex] 
-          : `https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80`;
-
-        generatedProducts.push({
-          id: `p${productId}`,
-          name: productName,
-          slug: productName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
-          category: category.name,
-          categorySlug: category.slug,
-          price: basePrice,
-          originalPrice: hasDiscount ? basePrice + Math.floor(random() * 800) + 100 : undefined,
-          rating: Number((random() * 1.8 + 3.2).toFixed(1)),
-          reviews: Math.floor(random() * 8000) + 10,
-          image: image,
-          colors: [
-            { name: "Primary", value: palette.accent },
-            { name: "Secondary", value: colorPalettes[(productId + 3) % colorPalettes.length].accent },
-            { name: "Neutral", value: "#6B7280" },
-          ],
-          sizes: random() > 0.5 ? ["S", "M", "L", "XL", "XXL"] : ["One Size"],
-          shortDescription: `${productName} - Premium quality product with excellent features`,
-          inStock: random() > 0.05,
-          stock: Math.floor(random() * 300) + 1,
-          isNew: random() > 0.82,
-          isBestseller: random() > 0.9,
-          isFeatured: random() > 0.93,
-          has3D: random() > 0.65,
-          model3dType: ["box", "sphere", "torus", "cylinder"][Math.floor(random() * 4)] as "box" | "sphere" | "torus" | "cylinder",
-          vendorName: vendors[Math.floor(random() * vendors.length)],
-          tags: [category.slug, "trending", "quality", "premium"],
-          badgeColor: palette.name,
-          animation: animations[Math.floor(random() * animations.length)],
-        });
-      }
+      generatedProducts.push({
+        id: productIdStr,
+        name: productName,
+        slug: `${productName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}-${productId}`,
+        category: category.name,
+        categorySlug: category.slug,
+        price: basePrice,
+        originalPrice: hasDiscount ? basePrice + Math.floor(random() * 800) + 100 : undefined,
+        rating: Number((random() * 1.8 + 3.2).toFixed(1)),
+        reviews: Math.floor(random() * 8000) + 10,
+        image: image,
+        colors: [
+          { name: "Primary", value: palette.accent },
+          { name: "Secondary", value: colorPalettes[(productId + 3) % colorPalettes.length].accent },
+          { name: "Neutral", value: "#6B7280" },
+        ],
+        sizes: random() > 0.5 ? ["S", "M", "L", "XL", "XXL"] : ["One Size"],
+        shortDescription: `${productName} - Premium quality product with excellent features`,
+        inStock: random() > 0.05,
+        stock: Math.floor(random() * 300) + 1,
+        isNew: random() > 0.82,
+        isBestseller: random() > 0.9,
+        isFeatured: random() > 0.93,
+        has3D: random() > 0.65,
+        model3dType: ["box", "sphere", "torus", "cylinder"][Math.floor(random() * 4)] as "box" | "sphere" | "torus" | "cylinder",
+        vendorName: vendors[Math.floor(random() * vendors.length)],
+        tags: [category.slug, "trending", "quality", "premium"],
+        badgeColor: palette.name,
+        animation: animations[Math.floor(random() * animations.length)],
+      });
     }
   }
 
-  return shuffleWithSeed(generatedProducts, seededRandom(123));
+  const finalProducts = shuffleWithSeed(generatedProducts, seededRandom(123));
+  return finalProducts.slice(0, Math.min(count, finalProducts.length));
 }
 
 export const products: Product[] = generateRealProducts(1150);
