@@ -1,237 +1,299 @@
 import { Button } from "@/components/ui/button";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, OrbitControls, Environment } from "@react-three/drei";
-import { Suspense, useRef, useState, useEffect } from "react";
-import * as THREE from "three";
-import { WebGLErrorBoundary, Default3DFallback } from "./3d/webgl-check";
+import { useState, useEffect, useMemo } from "react";
 
-function FloatingCube({ position, color, size = 0.5, rotationSpeed = 1 }: { 
-  position: [number, number, number]; 
-  color: string;
-  size?: number;
-  rotationSpeed?: number;
-}) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  
-  useFrame(() => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x += 0.005 * rotationSpeed;
-      meshRef.current.rotation.y += 0.008 * rotationSpeed;
-    }
-  });
-  
-  return (
-    <Float speed={2} rotationIntensity={rotationSpeed} floatIntensity={0.5}>
-      <mesh ref={meshRef} position={position} castShadow>
-        <boxGeometry args={[size, size, size]} />
-        <meshPhysicalMaterial 
-          color={color} 
-          roughness={0.1} 
-          metalness={0.9}
-          clearcoat={1}
-          envMapIntensity={1}
-        />
-      </mesh>
-    </Float>
-  );
+const productImages = [
+  { src: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&q=80", name: "Watch" },
+  { src: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80", name: "Headphones" },
+  { src: "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=300&q=80", name: "Shoes" },
+  { src: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&q=80", name: "Cosmetics" },
+  { src: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&q=80", name: "Medicine" },
+  { src: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=300&q=80", name: "Camera" },
+  { src: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300&q=80", name: "Sunglasses" },
+  { src: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&q=80", name: "Bag" },
+  { src: "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=300&q=80", name: "Perfume" },
+  { src: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80", name: "Sneakers" },
+  { src: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=300&q=80", name: "Luxury Shoes" },
+  { src: "https://images.unsplash.com/photo-1491553895911-0055uj8jde1g?w=300&q=80", name: "Laptop" },
+];
+
+const glowColors = [
+  "rgba(168, 85, 247, 0.6)",
+  "rgba(236, 72, 153, 0.6)",
+  "rgba(6, 182, 212, 0.6)",
+  "rgba(245, 158, 11, 0.6)",
+  "rgba(16, 185, 129, 0.6)",
+  "rgba(139, 92, 246, 0.6)",
+  "rgba(244, 63, 94, 0.6)",
+  "rgba(34, 211, 238, 0.6)",
+];
+
+const borderColors = [
+  "border-purple-500/50",
+  "border-pink-500/50",
+  "border-cyan-500/50",
+  "border-amber-500/50",
+  "border-emerald-500/50",
+  "border-violet-500/50",
+  "border-rose-500/50",
+  "border-teal-500/50",
+];
+
+interface FloatingProductProps {
+  image: { src: string; name: string };
+  index: number;
+  totalProducts: number;
 }
 
-function FloatingSphere({ position, color, size = 0.3 }: { 
-  position: [number, number, number]; 
-  color: string;
-  size?: number;
-}) {
-  const meshRef = useRef<THREE.Mesh>(null);
+function FloatingProduct({ image, index, totalProducts }: FloatingProductProps) {
+  const colorIndex = index % glowColors.length;
+  const glowColor = glowColors[colorIndex];
+  const borderColor = borderColors[colorIndex];
   
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.1;
-    }
-  });
+  const sizes = ["w-16 h-16", "w-20 h-20", "w-24 h-24", "w-28 h-28", "w-14 h-14", "w-18 h-18"];
+  const size = sizes[index % sizes.length];
   
-  return (
-    <Float speed={3} rotationIntensity={0.5} floatIntensity={0.8}>
-      <mesh ref={meshRef} position={position} castShadow>
-        <sphereGeometry args={[size, 32, 32]} />
-        <meshPhysicalMaterial 
-          color={color} 
-          roughness={0.05} 
-          metalness={0.9}
-          clearcoat={1}
-          transmission={0.5}
-          thickness={0.5}
-        />
-      </mesh>
-    </Float>
-  );
-}
-
-function FloatingTorus({ position, color, size = 0.4 }: { 
-  position: [number, number, number]; 
-  color: string;
-  size?: number;
-}) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.5;
-      meshRef.current.rotation.z = state.clock.elapsedTime * 0.3;
-    }
-  });
-  
-  return (
-    <Float speed={2.5} rotationIntensity={0.8} floatIntensity={0.6}>
-      <mesh ref={meshRef} position={position} castShadow>
-        <torusGeometry args={[size, size * 0.3, 16, 32]} />
-        <meshPhysicalMaterial 
-          color={color} 
-          roughness={0.1} 
-          metalness={0.85}
-          clearcoat={0.8}
-        />
-      </mesh>
-    </Float>
-  );
-}
-
-function FloatingRing({ position, color, size = 0.5 }: { 
-  position: [number, number, number]; 
-  color: string;
-  size?: number;
-}) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.4;
-    }
-  });
-  
-  return (
-    <Float speed={1.5} rotationIntensity={0.4} floatIntensity={0.7}>
-      <mesh ref={meshRef} position={position} castShadow>
-        <torusGeometry args={[size, size * 0.15, 16, 48]} />
-        <meshPhysicalMaterial 
-          color={color} 
-          roughness={0.05} 
-          metalness={0.95}
-          clearcoat={1}
-          iridescence={0.5}
-          iridescenceIOR={1.5}
-        />
-      </mesh>
-    </Float>
-  );
-}
-
-function HeroScene() {
-  const [hasWebGL, setHasWebGL] = useState(true);
-
-  useEffect(() => {
-    try {
-      const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      setHasWebGL(!!gl);
-    } catch (e) {
-      setHasWebGL(false);
-    }
-  }, []);
-
-  if (!hasWebGL) {
-    return <Default3DFallback className="absolute inset-0" />;
-  }
+  const animations = useMemo(() => {
+    const baseDelay = index * 0.3;
+    const duration = 15 + (index % 5) * 3;
+    
+    const startPositions = [
+      { x: -150, y: Math.random() * 100 - 50 },
+      { x: window.innerWidth + 150, y: Math.random() * 100 - 50 },
+      { x: Math.random() * 100 - 50, y: -150 },
+      { x: Math.random() * 100 - 50, y: window.innerHeight + 150 },
+    ];
+    
+    const startPos = startPositions[index % 4];
+    
+    const paths = [
+      { 
+        x: [startPos.x, window.innerWidth * 0.2, window.innerWidth * 0.5, window.innerWidth * 0.8, window.innerWidth + 200],
+        y: [startPos.y, 100, 250, 150, startPos.y]
+      },
+      {
+        x: [window.innerWidth + 200, window.innerWidth * 0.7, window.innerWidth * 0.3, -200],
+        y: [100, 300, 200, 150]
+      },
+      {
+        x: [startPos.x, window.innerWidth * 0.3, window.innerWidth * 0.6, startPos.x],
+        y: [-100, 200, 350, 500]
+      },
+      {
+        x: [window.innerWidth * 0.5, window.innerWidth * 0.2, window.innerWidth * 0.8, window.innerWidth * 0.5],
+        y: [500, 250, 150, -100]
+      },
+    ];
+    
+    return {
+      path: paths[index % paths.length],
+      duration,
+      delay: baseDelay,
+      rotate: index % 2 === 0 ? [0, 360] : [0, -360],
+      scale: [0.8, 1.1, 0.9, 1.2, 0.8],
+    };
+  }, [index]);
 
   return (
-    <WebGLErrorBoundary fallback={<Default3DFallback className="absolute inset-0" />}>
-      <Canvas 
-        camera={{ position: [0, 0, 8], fov: 45 }}
-        gl={{ failIfMajorPerformanceCaveat: false, antialias: true }}
+    <motion.div
+      className={`absolute ${size} rounded-2xl overflow-hidden border-2 ${borderColor} backdrop-blur-sm`}
+      style={{
+        boxShadow: `0 0 30px ${glowColor}, 0 0 60px ${glowColor}`,
+        zIndex: 10 - (index % 5),
+      }}
+      initial={{ 
+        x: animations.path.x[0], 
+        y: animations.path.y[0],
+        opacity: 0,
+        scale: 0.5,
+        rotate: 0,
+      }}
+      animate={{
+        x: animations.path.x,
+        y: animations.path.y,
+        opacity: [0, 1, 1, 1, 0],
+        scale: animations.scale,
+        rotate: animations.rotate,
+      }}
+      transition={{
+        duration: animations.duration,
+        delay: animations.delay,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    >
+      <motion.div
+        className="w-full h-full relative"
+        animate={{
+          rotateY: [0, 180, 360],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "linear",
+        }}
       >
-        <ambientLight intensity={0.4} />
-        <spotLight position={[10, 10, 10]} intensity={1} castShadow />
-        <pointLight position={[-10, -10, -10]} intensity={0.4} color="#a855f7" />
-        <pointLight position={[10, -5, 5]} intensity={0.3} color="#ec4899" />
-        
-        <Suspense fallback={null}>
-          <FloatingCube position={[-3.5, 1.5, -2]} color="#a855f7" size={0.7} rotationSpeed={1.2} />
-          <FloatingCube position={[3.5, -0.8, -1.5]} color="#ec4899" size={0.55} rotationSpeed={0.8} />
-          <FloatingCube position={[0, 2.5, -3]} color="#06b6d4" size={0.5} rotationSpeed={1} />
-          
-          <FloatingSphere position={[-2, -1.8, 0.5]} color="#06b6d4" size={0.4} />
-          <FloatingSphere position={[2.5, 2, -1]} color="#f59e0b" size={0.3} />
-          <FloatingSphere position={[-3, 0.5, 1]} color="#10b981" size={0.25} />
-          
-          <FloatingTorus position={[3, 0, -2]} color="#8b5cf6" size={0.45} />
-          <FloatingTorus position={[-2.5, 2, -1]} color="#f43f5e" size={0.35} />
-          
-          <FloatingRing position={[0, -2, -1]} color="#fbbf24" size={0.6} />
-          <FloatingRing position={[-1.5, 0, -2.5]} color="#22d3ee" size={0.4} />
-          <FloatingRing position={[2, 1.5, -2]} color="#e879f9" size={0.35} />
-          
-          <Environment preset="city" />
-        </Suspense>
-        
-        <OrbitControls 
-          enableZoom={false} 
-          enablePan={false}
-          autoRotate 
-          autoRotateSpeed={0.3}
-          maxPolarAngle={Math.PI / 2}
-          minPolarAngle={Math.PI / 3}
+        <img 
+          src={image.src} 
+          alt={image.name}
+          className="w-full h-full object-cover"
+          loading="lazy"
         />
-      </Canvas>
-    </WebGLErrorBoundary>
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(135deg, ${glowColor} 0%, transparent 50%)`,
+            mixBlendMode: "overlay",
+          }}
+        />
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function ParticleEffect({ index }: { index: number }) {
+  const colorIndex = index % glowColors.length;
+  const color = glowColors[colorIndex];
+  
+  const randomX = useMemo(() => Math.random() * 100, []);
+  const randomDelay = useMemo(() => Math.random() * 5, []);
+  const randomDuration = useMemo(() => 10 + Math.random() * 10, []);
+  const randomSize = useMemo(() => 2 + Math.random() * 4, []);
+  
+  return (
+    <motion.div
+      className="absolute rounded-full"
+      style={{
+        width: randomSize,
+        height: randomSize,
+        left: `${randomX}%`,
+        background: color,
+        boxShadow: `0 0 10px ${color}`,
+      }}
+      initial={{ y: "100vh", opacity: 0 }}
+      animate={{ 
+        y: "-10vh",
+        opacity: [0, 1, 1, 0],
+      }}
+      transition={{
+        duration: randomDuration,
+        delay: randomDelay,
+        repeat: Infinity,
+        ease: "linear",
+      }}
+    />
+  );
+}
+
+function GlowingOrb({ position, color, size, delay }: { 
+  position: { left: string; top: string }; 
+  color: string; 
+  size: string;
+  delay: number;
+}) {
+  return (
+    <motion.div
+      className={`absolute ${size} rounded-full blur-3xl`}
+      style={{
+        left: position.left,
+        top: position.top,
+        background: color,
+      }}
+      animate={{
+        scale: [1, 1.3, 1],
+        opacity: [0.3, 0.6, 0.3],
+      }}
+      transition={{
+        duration: 4,
+        delay,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    />
   );
 }
 
 export function Hero() {
   const [isHovered, setIsHovered] = useState(false);
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  
-  const rotateX = useTransform(mouseY, [-300, 300], [5, -5]);
-  const rotateY = useTransform(mouseX, [-300, 300], [-5, 5]);
+  const [windowSize, setWindowSize] = useState({ width: 1200, height: 600 });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const floatingProducts = useMemo(() => 
+    productImages.slice(0, 10).map((img, i) => ({
+      ...img,
+      id: i,
+    })), 
+  []);
+
+  const particles = useMemo(() => 
+    Array.from({ length: 20 }, (_, i) => i),
+  []);
+
+  const orbs = [
+    { position: { left: "10%", top: "20%" }, color: "rgba(168, 85, 247, 0.4)", size: "w-64 h-64", delay: 0 },
+    { position: { left: "70%", top: "60%" }, color: "rgba(236, 72, 153, 0.4)", size: "w-80 h-80", delay: 1 },
+    { position: { left: "50%", top: "30%" }, color: "rgba(6, 182, 212, 0.3)", size: "w-72 h-72", delay: 2 },
+    { position: { left: "20%", top: "70%" }, color: "rgba(245, 158, 11, 0.3)", size: "w-56 h-56", delay: 3 },
+    { position: { left: "80%", top: "10%" }, color: "rgba(16, 185, 129, 0.3)", size: "w-48 h-48", delay: 4 },
+  ];
 
   return (
-    <div 
-      className="relative h-[51vh] sm:h-[55vh] md:h-[60vh] min-h-[430px] max-h-[640px] flex flex-col items-center justify-center pt-10 md:pt-14 overflow-hidden"
-      onMouseMove={(e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        mouseX.set(e.clientX - rect.width / 2);
-        mouseY.set(e.clientY - rect.height / 2);
-      }}
-    >
+    <div className="relative h-[51vh] sm:h-[55vh] md:h-[60vh] min-h-[430px] max-h-[640px] flex flex-col items-center justify-center pt-10 md:pt-14 overflow-hidden">
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-[#0f0f1a] to-[#0a0a0f]" />
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-purple-500/20 rounded-full blur-[150px] animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[450px] bg-pink-500/20 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: "1s" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-500/15 rounded-full blur-[180px] animate-pulse" style={{ animationDelay: "2s" }} />
-        <div className="absolute top-10 right-1/3 w-[300px] h-[300px] bg-amber-500/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: "3s" }} />
         
-        <div className="absolute inset-0 opacity-20">
+        {orbs.map((orb, i) => (
+          <GlowingOrb key={i} {...orb} />
+        ))}
+        
+        <div className="absolute inset-0 opacity-30">
           <div className="absolute w-full h-full" style={{
-            backgroundImage: "radial-gradient(circle at 25% 25%, transparent 0%, transparent 2%, rgba(168, 85, 247, 0.1) 2%, transparent 3%)",
-            backgroundSize: "60px 60px"
+            backgroundImage: "radial-gradient(circle at 25% 25%, transparent 0%, transparent 2%, rgba(168, 85, 247, 0.15) 2%, transparent 3%)",
+            backgroundSize: "50px 50px"
           }} />
         </div>
+        
+        <motion.div
+          className="absolute inset-0"
+          animate={{
+            background: [
+              "radial-gradient(ellipse at 20% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%)",
+              "radial-gradient(ellipse at 80% 50%, rgba(236, 72, 153, 0.15) 0%, transparent 50%)",
+              "radial-gradient(ellipse at 50% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 50%)",
+              "radial-gradient(ellipse at 20% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%)",
+            ],
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+        />
       </div>
 
-      <div className="absolute inset-0 z-[1] pointer-events-none hidden md:block">
-        <div className="absolute w-full h-full">
-          <HeroScene />
-        </div>
-      </div>
+      {particles.map((i) => (
+        <ParticleEffect key={i} index={i} />
+      ))}
 
+      <div className="absolute inset-0 z-[1] pointer-events-none">
+        {floatingProducts.map((product, index) => (
+          <FloatingProduct
+            key={product.id}
+            image={product}
+            index={index}
+            totalProducts={floatingProducts.length}
+          />
+        ))}
+      </div>
 
       <div className="container relative z-10 px-4 flex flex-col items-center text-center">
-        <motion.div
-          style={{ rotateX, rotateY, perspective: 1000 }}
-          className="relative"
-        >
+        <motion.div className="relative">
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -241,12 +303,16 @@ export function Hero() {
           >
             The Future of{" "}
             <span className="relative inline-block">
-              <span className="relative z-10 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
-                Shopping
-              </span>
               <motion.span 
-                className="absolute -inset-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-xl rounded-lg"
-                animate={{ opacity: [0.5, 0.8, 0.5] }}
+                className="relative z-10 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent bg-[length:300%_auto]"
+                animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+              >
+                Shopping
+              </motion.span>
+              <motion.span 
+                className="absolute -inset-2 bg-gradient-to-r from-purple-500/30 to-pink-500/30 blur-xl rounded-lg"
+                animate={{ opacity: [0.5, 0.8, 0.5], scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               />
             </span>
