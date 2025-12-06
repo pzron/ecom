@@ -766,11 +766,11 @@ function generateRealProducts(count: number = 1200): Product[] {
   return shuffleWithSeed(generatedProducts, seededRandom(123));
 }
 
-export const products: Product[] = generateRealProducts(1200);
+export const products: Product[] = generateRealProducts(1150);
 
 export const PRODUCTS = products;
 
-export const homeProducts = products.slice(0, 600);
+export const homeProducts = products.slice(0, 700);
 
 export const featuredProducts = products.filter(p => p.isFeatured).slice(0, 24);
 export const newArrivals = products.filter(p => p.isNew).slice(0, 24);

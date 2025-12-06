@@ -302,7 +302,14 @@ function CategorySection({ title, icon, products, layout, showViewAll = true, ca
   );
 }
 
-function DynamicRow({ products, startIndex, itemCount }: { products: Product[]; startIndex: number; itemCount: number }) {
+interface DynamicRowProps {
+  products: Product[];
+  startIndex: number;
+  itemCount: number;
+  rowIndex?: number;
+}
+
+function DynamicRow({ products, startIndex, itemCount, rowIndex = 0 }: DynamicRowProps) {
   const rowProducts = products.slice(startIndex, startIndex + itemCount);
   
   const gridCols = useMemo(() => {
@@ -315,17 +322,35 @@ function DynamicRow({ products, startIndex, itemCount }: { products: Product[]; 
     }
   }, [itemCount]);
 
+  const rowStyle = useMemo(() => {
+    const styles = [
+      "gap-3 md:gap-4",
+      "gap-2 md:gap-3",
+      "gap-4 md:gap-5",
+      "gap-3 md:gap-4",
+      "gap-2 md:gap-4",
+    ];
+    return styles[rowIndex % styles.length];
+  }, [rowIndex]);
+
   return (
-    <div className={`grid ${gridCols} gap-3 md:gap-4 mb-5`}>
+    <motion.div 
+      className={`grid ${gridCols} ${rowStyle} mb-5`}
+      initial={{ opacity: 0, y: 15 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-30px" }}
+      transition={{ duration: 0.4, delay: (rowIndex % 5) * 0.05 }}
+    >
       {rowProducts.map((product, idx) => (
         <ProductCard 
           key={product.id} 
           product={product} 
           index={startIndex + idx}
-          layout="compact"
+          layout={itemCount >= 6 ? "compact" : "default"}
+          size={itemCount <= 4 ? "large" : itemCount >= 7 ? "small" : "medium"}
         />
       ))}
-    </div>
+    </motion.div>
   );
 }
 
@@ -425,7 +450,7 @@ export function ProductGrid() {
                 Featured Collection
               </h2>
               <p className="text-white/60 mt-2 text-sm">
-                Showing {Math.min(visibleProducts, totalProducts).toLocaleString()} of {totalProducts.toLocaleString()}+ products across {Object.keys(categorizedProducts).length} categories
+                Showing {Math.min(visibleProducts, totalProducts).toLocaleString()} of 1100+ products across {Object.keys(categorizedProducts).length} categories
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -490,6 +515,7 @@ export function ProductGrid() {
                     products={mixedProducts}
                     startIndex={row.start}
                     itemCount={row.count}
+                    rowIndex={idx}
                   />
                 ))}
               </motion.div>
@@ -508,6 +534,7 @@ export function ProductGrid() {
                   products={mixedProducts}
                   startIndex={row.start}
                   itemCount={row.count}
+                  rowIndex={idx}
                 />
               ))}
             </motion.div>

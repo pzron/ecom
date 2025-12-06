@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Gift, Package, Truck, Sparkles, ShoppingBag, Bell } from "lucide-react";
+import { X, Gift, Package, Sparkles, ShoppingBag, CheckCircle, ShoppingCart } from "lucide-react";
+import { useCart } from "@/hooks/use-cart";
 
 interface Notification {
   id: string;
-  type: "offer" | "combo" | "delivery" | "activity";
+  type: "offer" | "combo" | "cart" | "success";
   title: string;
   message: string;
   icon: ReactNode;
@@ -12,7 +13,7 @@ interface Notification {
   time: string;
 }
 
-const notificationTemplates: Omit<Notification, "id" | "time">[] = [
+const promotionalTemplates: Omit<Notification, "id" | "time">[] = [
   {
     type: "offer",
     title: "Flash Sale!",
@@ -42,41 +43,33 @@ const notificationTemplates: Omit<Notification, "id" | "time">[] = [
     color: "from-cyan-500 to-blue-500",
   },
   {
-    type: "delivery",
-    title: "Order Delivered",
-    message: "Customer in Dhaka just received their order!",
-    icon: <Truck className="w-5 h-5" />,
-    color: "from-green-500 to-emerald-500",
-  },
-  {
-    type: "activity",
-    title: "Someone just purchased",
-    message: "Premium Face Wash - 2 minutes ago",
-    icon: <Bell className="w-5 h-5" />,
+    type: "offer",
+    title: "Member Exclusive",
+    message: "Extra 10% off on your next purchase!",
+    icon: <Sparkles className="w-5 h-5" />,
     color: "from-violet-500 to-purple-500",
   },
   {
-    type: "activity",
-    title: "Trending Now",
-    message: "Organic Hair Oil is selling fast - 15 sold today",
-    icon: <Sparkles className="w-5 h-5" />,
-    color: "from-blue-500 to-indigo-500",
-  },
-  {
-    type: "delivery",
-    title: "Fast Delivery",
-    message: "Order shipped to Chittagong - arriving tomorrow!",
-    icon: <Truck className="w-5 h-5" />,
-    color: "from-teal-500 to-green-500",
+    type: "offer",
+    title: "Bundle & Save",
+    message: "Buy 2 get 1 free on selected items",
+    icon: <Gift className="w-5 h-5" />,
+    color: "from-emerald-500 to-teal-500",
   },
 ];
 
-export function NotificationPopup() {
+interface NotificationPopupProps {
+  showPromotional?: boolean;
+}
+
+export function NotificationPopup({ showPromotional = true }: NotificationPopupProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const { items } = useCart();
+  const [lastItemCount, setLastItemCount] = useState(0);
 
-  const generateNotification = useCallback(() => {
-    const template = notificationTemplates[Math.floor(Math.random() * notificationTemplates.length)];
+  const generatePromotionalNotification = useCallback(() => {
+    const template = promotionalTemplates[Math.floor(Math.random() * promotionalTemplates.length)];
     const id = `notification-${Date.now()}`;
     
     return {
@@ -99,32 +92,63 @@ export function NotificationPopup() {
   }, []);
 
   useEffect(() => {
+    const currentCount = items.reduce((total, item) => total + item.quantity, 0);
+    
+    if (currentCount > lastItemCount) {
+      const lastAddedItem = items[items.length - 1];
+      if (lastAddedItem) {
+        const cartNotification: Notification = {
+          id: `cart-${Date.now()}`,
+          type: "cart",
+          title: "Added to Cart!",
+          message: `${lastAddedItem.product.name} has been added to your cart`,
+          icon: <ShoppingCart className="w-5 h-5" />,
+          color: "from-green-500 to-emerald-500",
+          time: "Just now",
+        };
+        
+        setNotifications((prev) => [...prev.slice(-1), cartNotification]);
+        
+        setTimeout(() => {
+          dismissNotification(cartNotification.id);
+        }, 4000);
+      }
+    }
+    
+    setLastItemCount(currentCount);
+  }, [items, lastItemCount, dismissNotification]);
+
+  useEffect(() => {
+    if (!showPromotional) return;
+
     const showInitialNotification = setTimeout(() => {
-      const notification = generateNotification();
+      const notification = generatePromotionalNotification();
       setNotifications([notification]);
       
       setTimeout(() => {
         dismissNotification(notification.id);
       }, 6000);
-    }, 3000);
+    }, 5000);
 
     return () => clearTimeout(showInitialNotification);
-  }, [generateNotification, dismissNotification]);
+  }, [generatePromotionalNotification, dismissNotification, showPromotional]);
 
   useEffect(() => {
+    if (!showPromotional) return;
+
     const interval = setInterval(() => {
-      if (notifications.length < 2) {
-        const notification = generateNotification();
+      if (notifications.filter(n => n.type !== "cart").length < 1) {
+        const notification = generatePromotionalNotification();
         setNotifications((prev) => [...prev.slice(-1), notification]);
         
         setTimeout(() => {
           dismissNotification(notification.id);
         }, 6000);
       }
-    }, 12000);
+    }, 20000);
 
     return () => clearInterval(interval);
-  }, [notifications.length, generateNotification, dismissNotification]);
+  }, [notifications.length, generatePromotionalNotification, dismissNotification, showPromotional]);
 
   return (
     <div className="fixed bottom-4 left-4 z-50 flex flex-col gap-3 max-w-sm">
@@ -166,9 +190,9 @@ export function NotificationPopup() {
                     <h4 className="text-sm font-semibold text-white truncate">
                       {notification.title}
                     </h4>
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium uppercase bg-gradient-to-r ${notification.color} text-white`}>
-                      {notification.type}
-                    </span>
+                    {notification.type === "cart" && (
+                      <CheckCircle className="w-4 h-4 text-green-400" />
+                    )}
                   </div>
                   <p className="text-xs text-white/60 line-clamp-2">
                     {notification.message}
@@ -184,7 +208,7 @@ export function NotificationPopup() {
               className={`h-0.5 bg-gradient-to-r ${notification.color}`}
               initial={{ width: "100%" }}
               animate={{ width: "0%" }}
-              transition={{ duration: 6, ease: "linear" }}
+              transition={{ duration: notification.type === "cart" ? 4 : 6, ease: "linear" }}
             />
           </motion.div>
         ))}
