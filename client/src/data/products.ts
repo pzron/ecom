@@ -307,6 +307,309 @@ const baseCategories: { name: string; icon: string; iconName: string; gradient: 
   { name: "Men's Health", icon: "👨", iconName: "User", gradient: "from-blue-600 to-indigo-600" },
   { name: "Senior Health", icon: "👴", iconName: "User", gradient: "from-gray-500 to-slate-500" },
   { name: "Kids Health", icon: "👧", iconName: "Heart", gradient: "from-yellow-400 to-orange-400" },
+  { name: "Protein Powders", icon: "🥛", iconName: "Cup", gradient: "from-amber-500 to-orange-500" },
+  { name: "Pre-Workout", icon: "💪", iconName: "Zap", gradient: "from-red-500 to-orange-500" },
+  { name: "Post-Workout", icon: "🏆", iconName: "Trophy", gradient: "from-green-500 to-teal-500" },
+  { name: "BCAA & Amino Acids", icon: "🧬", iconName: "Dna", gradient: "from-blue-500 to-indigo-500" },
+  { name: "Creatine", icon: "💊", iconName: "Pill", gradient: "from-purple-500 to-violet-500" },
+  { name: "Fat Burners", icon: "🔥", iconName: "Flame", gradient: "from-orange-500 to-red-500" },
+  { name: "Mass Gainers", icon: "📈", iconName: "TrendingUp", gradient: "from-green-600 to-emerald-600" },
+  { name: "Energy Bars", icon: "🍫", iconName: "Cookie", gradient: "from-amber-600 to-orange-600" },
+  { name: "Electrolytes", icon: "⚡", iconName: "Zap", gradient: "from-cyan-500 to-blue-500" },
+  { name: "Multivitamins", icon: "💊", iconName: "Pill", gradient: "from-green-500 to-teal-500" },
+  { name: "Omega Fatty Acids", icon: "🐟", iconName: "Fish", gradient: "from-blue-500 to-cyan-500" },
+  { name: "Probiotics", icon: "🦠", iconName: "Circle", gradient: "from-green-400 to-emerald-400" },
+  { name: "Collagen", icon: "✨", iconName: "Sparkles", gradient: "from-pink-400 to-rose-400" },
+  { name: "Biotin", icon: "💇", iconName: "Heart", gradient: "from-purple-400 to-pink-400" },
+  { name: "Vitamin D", icon: "☀️", iconName: "Sun", gradient: "from-yellow-500 to-orange-500" },
+  { name: "Vitamin C", icon: "🍊", iconName: "Circle", gradient: "from-orange-500 to-amber-500" },
+  { name: "Iron Supplements", icon: "💪", iconName: "Dumbbell", gradient: "from-red-600 to-rose-600" },
+  { name: "Calcium", icon: "🦴", iconName: "Bone", gradient: "from-gray-400 to-slate-400" },
+  { name: "Zinc", icon: "🛡️", iconName: "Shield", gradient: "from-gray-500 to-zinc-500" },
+  { name: "Magnesium", icon: "🌙", iconName: "Moon", gradient: "from-indigo-400 to-purple-400" },
+  { name: "Turmeric", icon: "🌿", iconName: "Leaf", gradient: "from-yellow-600 to-orange-600" },
+  { name: "Ashwagandha", icon: "🌱", iconName: "Sprout", gradient: "from-green-600 to-emerald-600" },
+  { name: "Ginseng", icon: "🍃", iconName: "Leaf", gradient: "from-green-500 to-teal-500" },
+  { name: "Green Tea Extract", icon: "🍵", iconName: "Cup", gradient: "from-green-400 to-emerald-400" },
+  { name: "Apple Cider Vinegar", icon: "🍎", iconName: "Apple", gradient: "from-red-400 to-rose-400" },
+  { name: "Spirulina", icon: "🌊", iconName: "Waves", gradient: "from-teal-500 to-cyan-500" },
+  { name: "CBD Products", icon: "🌿", iconName: "Leaf", gradient: "from-green-500 to-emerald-500" },
+  { name: "Melatonin", icon: "🌙", iconName: "Moon", gradient: "from-indigo-500 to-purple-500" },
+  { name: "Caffeine Pills", icon: "☕", iconName: "Coffee", gradient: "from-amber-700 to-orange-700" },
+  { name: "Nootropics", icon: "🧠", iconName: "Brain", gradient: "from-purple-600 to-pink-600" },
+  { name: "Smart Speakers", icon: "🔊", iconName: "Speaker", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Smart Displays", icon: "📱", iconName: "Monitor", gradient: "from-blue-500 to-indigo-500" },
+  { name: "Smart Lighting", icon: "💡", iconName: "Lightbulb", gradient: "from-yellow-500 to-amber-500" },
+  { name: "Smart Thermostats", icon: "🌡️", iconName: "Thermometer", gradient: "from-cyan-500 to-blue-500" },
+  { name: "Smart Locks", icon: "🔐", iconName: "Lock", gradient: "from-gray-700 to-slate-700" },
+  { name: "Smart Cameras", icon: "📹", iconName: "Camera", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Smart Doorbells", icon: "🔔", iconName: "Bell", gradient: "from-amber-500 to-orange-500" },
+  { name: "Smart Plugs", icon: "🔌", iconName: "Plug", gradient: "from-green-500 to-teal-500" },
+  { name: "Smart Sensors", icon: "📡", iconName: "Radio", gradient: "from-blue-600 to-cyan-600" },
+  { name: "Home Automation Hubs", icon: "🏠", iconName: "Home", gradient: "from-purple-500 to-violet-500" },
+  { name: "Robot Vacuums", icon: "🤖", iconName: "Bot", gradient: "from-gray-500 to-slate-500" },
+  { name: "Air Purifiers", icon: "🌬️", iconName: "Wind", gradient: "from-cyan-400 to-blue-400" },
+  { name: "Humidifiers", icon: "💨", iconName: "Cloud", gradient: "from-blue-400 to-cyan-400" },
+  { name: "Dehumidifiers", icon: "💧", iconName: "Droplet", gradient: "from-blue-500 to-indigo-500" },
+  { name: "Space Heaters", icon: "🔥", iconName: "Flame", gradient: "from-red-500 to-orange-500" },
+  { name: "Fans", icon: "🌀", iconName: "RefreshCw", gradient: "from-cyan-500 to-teal-500" },
+  { name: "Air Conditioners", icon: "❄️", iconName: "Snowflake", gradient: "from-blue-500 to-cyan-500" },
+  { name: "Water Filters", icon: "💧", iconName: "Droplet", gradient: "from-blue-400 to-cyan-400" },
+  { name: "Blenders", icon: "🥤", iconName: "Cup", gradient: "from-green-500 to-emerald-500" },
+  { name: "Juicers", icon: "🍊", iconName: "Circle", gradient: "from-orange-500 to-amber-500" },
+  { name: "Coffee Makers", icon: "☕", iconName: "Coffee", gradient: "from-amber-700 to-orange-700" },
+  { name: "Espresso Machines", icon: "☕", iconName: "Coffee", gradient: "from-gray-700 to-slate-700" },
+  { name: "Tea Kettles", icon: "🫖", iconName: "Cup", gradient: "from-amber-500 to-yellow-500" },
+  { name: "Toasters", icon: "🍞", iconName: "Square", gradient: "from-amber-600 to-orange-600" },
+  { name: "Microwaves", icon: "📻", iconName: "Radio", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Air Fryers", icon: "🍟", iconName: "Flame", gradient: "from-orange-500 to-red-500" },
+  { name: "Instant Pots", icon: "🍲", iconName: "Flame", gradient: "from-red-500 to-rose-500" },
+  { name: "Slow Cookers", icon: "🥘", iconName: "Flame", gradient: "from-amber-600 to-orange-600" },
+  { name: "Food Processors", icon: "🔪", iconName: "Scissors", gradient: "from-gray-500 to-slate-500" },
+  { name: "Stand Mixers", icon: "🍰", iconName: "Cake", gradient: "from-pink-500 to-rose-500" },
+  { name: "Hand Mixers", icon: "🥣", iconName: "Cup", gradient: "from-cyan-400 to-blue-400" },
+  { name: "Waffle Makers", icon: "🧇", iconName: "Grid", gradient: "from-amber-500 to-yellow-500" },
+  { name: "Sandwich Makers", icon: "🥪", iconName: "Square", gradient: "from-amber-600 to-orange-600" },
+  { name: "Electric Grills", icon: "🍖", iconName: "Flame", gradient: "from-red-600 to-orange-600" },
+  { name: "Rice Cookers", icon: "🍚", iconName: "Circle", gradient: "from-gray-400 to-slate-400" },
+  { name: "Sous Vide", icon: "🍳", iconName: "Thermometer", gradient: "from-amber-500 to-orange-500" },
+  { name: "Ice Cream Makers", icon: "🍦", iconName: "Circle", gradient: "from-pink-400 to-rose-400" },
+  { name: "Bread Machines", icon: "🍞", iconName: "Square", gradient: "from-amber-700 to-orange-700" },
+  { name: "Vacuum Sealers", icon: "📦", iconName: "Package", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Electric Kettles", icon: "🫖", iconName: "Cup", gradient: "from-blue-500 to-cyan-500" },
+  { name: "Wine Coolers", icon: "🍷", iconName: "Wine", gradient: "from-red-700 to-rose-700" },
+  { name: "Beer Brewing", icon: "🍺", iconName: "Beer", gradient: "from-amber-600 to-yellow-600" },
+  { name: "Knife Sets", icon: "🔪", iconName: "Scissors", gradient: "from-gray-700 to-slate-700" },
+  { name: "Cutting Boards", icon: "🪵", iconName: "Square", gradient: "from-amber-600 to-orange-600" },
+  { name: "Pot & Pan Sets", icon: "🍳", iconName: "Circle", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Cast Iron", icon: "🥘", iconName: "Circle", gradient: "from-gray-700 to-slate-700" },
+  { name: "Non-Stick Cookware", icon: "🍳", iconName: "Circle", gradient: "from-gray-500 to-zinc-500" },
+  { name: "Stainless Steel", icon: "🥄", iconName: "Circle", gradient: "from-gray-400 to-slate-400" },
+  { name: "Dutch Ovens", icon: "🥘", iconName: "Circle", gradient: "from-red-600 to-rose-600" },
+  { name: "Woks", icon: "🥡", iconName: "Circle", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Skillets", icon: "🍳", iconName: "Circle", gradient: "from-gray-700 to-slate-700" },
+  { name: "Saucepans", icon: "🍲", iconName: "Circle", gradient: "from-gray-500 to-zinc-500" },
+  { name: "Stock Pots", icon: "🥣", iconName: "Circle", gradient: "from-gray-600 to-slate-600" },
+  { name: "Baking Sheets", icon: "📋", iconName: "Square", gradient: "from-amber-500 to-orange-500" },
+  { name: "Cake Pans", icon: "🎂", iconName: "Circle", gradient: "from-pink-400 to-rose-400" },
+  { name: "Muffin Pans", icon: "🧁", iconName: "Circle", gradient: "from-pink-500 to-rose-500" },
+  { name: "Pie Pans", icon: "🥧", iconName: "Circle", gradient: "from-amber-600 to-orange-600" },
+  { name: "Loaf Pans", icon: "🍞", iconName: "Square", gradient: "from-amber-700 to-orange-700" },
+  { name: "Roasting Pans", icon: "🍗", iconName: "Square", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Mixing Bowls", icon: "🥣", iconName: "Circle", gradient: "from-cyan-400 to-blue-400" },
+  { name: "Measuring Cups", icon: "🥛", iconName: "Cup", gradient: "from-gray-400 to-slate-400" },
+  { name: "Kitchen Scales", icon: "⚖️", iconName: "Scale", gradient: "from-gray-500 to-zinc-500" },
+  { name: "Rolling Pins", icon: "🪵", iconName: "Circle", gradient: "from-amber-600 to-orange-600" },
+  { name: "Pastry Brushes", icon: "🖌️", iconName: "Brush", gradient: "from-amber-500 to-yellow-500" },
+  { name: "Piping Bags", icon: "🧁", iconName: "Circle", gradient: "from-pink-400 to-rose-400" },
+  { name: "Cookie Cutters", icon: "🍪", iconName: "Star", gradient: "from-amber-400 to-orange-400" },
+  { name: "Dinner Plates", icon: "🍽️", iconName: "Circle", gradient: "from-gray-400 to-slate-400" },
+  { name: "Salad Plates", icon: "🥗", iconName: "Circle", gradient: "from-green-400 to-emerald-400" },
+  { name: "Soup Bowls", icon: "🥣", iconName: "Circle", gradient: "from-amber-500 to-orange-500" },
+  { name: "Mugs", icon: "☕", iconName: "Cup", gradient: "from-amber-600 to-orange-600" },
+  { name: "Wine Glasses", icon: "🍷", iconName: "Wine", gradient: "from-red-600 to-rose-600" },
+  { name: "Beer Glasses", icon: "🍺", iconName: "Beer", gradient: "from-amber-500 to-yellow-500" },
+  { name: "Tumblers", icon: "🥤", iconName: "Cup", gradient: "from-cyan-500 to-blue-500" },
+  { name: "Water Bottles", icon: "🧴", iconName: "Droplet", gradient: "from-blue-400 to-cyan-400" },
+  { name: "Travel Mugs", icon: "☕", iconName: "Cup", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Flatware Sets", icon: "🍴", iconName: "Utensils", gradient: "from-gray-500 to-slate-500" },
+  { name: "Serving Platters", icon: "🍽️", iconName: "Square", gradient: "from-gray-400 to-zinc-400" },
+  { name: "Serving Bowls", icon: "🥗", iconName: "Circle", gradient: "from-amber-500 to-orange-500" },
+  { name: "Table Linens", icon: "🧵", iconName: "Square", gradient: "from-pink-400 to-rose-400" },
+  { name: "Placemats", icon: "📋", iconName: "Square", gradient: "from-amber-500 to-yellow-500" },
+  { name: "Napkins", icon: "📋", iconName: "Square", gradient: "from-gray-400 to-slate-400" },
+  { name: "Salt & Pepper", icon: "🧂", iconName: "Circle", gradient: "from-gray-500 to-zinc-500" },
+  { name: "Candle Holders", icon: "🕯️", iconName: "Flame", gradient: "from-amber-600 to-orange-600" },
+  { name: "Vases", icon: "🏺", iconName: "Circle", gradient: "from-purple-400 to-pink-400" },
+  { name: "Picture Frames", icon: "🖼️", iconName: "Frame", gradient: "from-amber-600 to-orange-600" },
+  { name: "Mirrors", icon: "🪞", iconName: "Square", gradient: "from-gray-400 to-slate-400" },
+  { name: "Clocks", icon: "🕐", iconName: "Clock", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Wall Art", icon: "🎨", iconName: "Frame", gradient: "from-purple-500 to-pink-500" },
+  { name: "Sculptures", icon: "🗿", iconName: "Box", gradient: "from-gray-600 to-slate-600" },
+  { name: "Throw Pillows", icon: "🛋️", iconName: "Square", gradient: "from-pink-400 to-rose-400" },
+  { name: "Throw Blankets", icon: "🧶", iconName: "Square", gradient: "from-amber-500 to-orange-500" },
+  { name: "Area Rugs", icon: "🪴", iconName: "Square", gradient: "from-amber-600 to-orange-600" },
+  { name: "Curtains", icon: "🪟", iconName: "Square", gradient: "from-gray-500 to-slate-500" },
+  { name: "Blinds", icon: "🪟", iconName: "Square", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Bedding Sets", icon: "🛏️", iconName: "Square", gradient: "from-indigo-400 to-purple-400" },
+  { name: "Sheets", icon: "🛏️", iconName: "Square", gradient: "from-gray-400 to-slate-400" },
+  { name: "Comforters", icon: "🛏️", iconName: "Square", gradient: "from-indigo-500 to-purple-500" },
+  { name: "Duvets", icon: "🛏️", iconName: "Square", gradient: "from-gray-500 to-zinc-500" },
+  { name: "Pillows", icon: "🛏️", iconName: "Square", gradient: "from-gray-400 to-slate-400" },
+  { name: "Mattress Toppers", icon: "🛏️", iconName: "Square", gradient: "from-indigo-400 to-purple-400" },
+  { name: "Mattress Protectors", icon: "🛏️", iconName: "Shield", gradient: "from-cyan-400 to-blue-400" },
+  { name: "Towels", icon: "🧖", iconName: "Square", gradient: "from-cyan-500 to-teal-500" },
+  { name: "Bath Mats", icon: "🛁", iconName: "Square", gradient: "from-cyan-400 to-blue-400" },
+  { name: "Shower Curtains", icon: "🚿", iconName: "Square", gradient: "from-blue-400 to-cyan-400" },
+  { name: "Soap Dispensers", icon: "🧴", iconName: "Droplet", gradient: "from-cyan-500 to-teal-500" },
+  { name: "Toothbrush Holders", icon: "🦷", iconName: "Circle", gradient: "from-cyan-400 to-blue-400" },
+  { name: "Bathroom Storage", icon: "📦", iconName: "Box", gradient: "from-gray-500 to-slate-500" },
+  { name: "Toilet Accessories", icon: "🚽", iconName: "Circle", gradient: "from-gray-400 to-zinc-400" },
+  { name: "Laundry Baskets", icon: "🧺", iconName: "Box", gradient: "from-amber-500 to-orange-500" },
+  { name: "Ironing Boards", icon: "📋", iconName: "Square", gradient: "from-gray-500 to-slate-500" },
+  { name: "Irons", icon: "🔌", iconName: "Zap", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Clothes Hangers", icon: "👔", iconName: "Circle", gradient: "from-amber-600 to-orange-600" },
+  { name: "Closet Organizers", icon: "📦", iconName: "Box", gradient: "from-gray-500 to-slate-500" },
+  { name: "Shoe Racks", icon: "👟", iconName: "Square", gradient: "from-amber-600 to-orange-600" },
+  { name: "Storage Bins", icon: "📦", iconName: "Box", gradient: "from-gray-400 to-zinc-400" },
+  { name: "Shelving Units", icon: "📚", iconName: "Square", gradient: "from-amber-700 to-orange-700" },
+  { name: "Garage Storage", icon: "🔧", iconName: "Box", gradient: "from-gray-600 to-slate-600" },
+  { name: "Trash Cans", icon: "🗑️", iconName: "Trash", gradient: "from-gray-500 to-zinc-500" },
+  { name: "Recycling Bins", icon: "♻️", iconName: "Recycle", gradient: "from-green-500 to-emerald-500" },
+  { name: "Vacuum Cleaners", icon: "🧹", iconName: "Zap", gradient: "from-red-500 to-rose-500" },
+  { name: "Mops", icon: "🧹", iconName: "Circle", gradient: "from-cyan-500 to-blue-500" },
+  { name: "Brooms", icon: "🧹", iconName: "Circle", gradient: "from-amber-600 to-orange-600" },
+  { name: "Dusters", icon: "🪶", iconName: "Feather", gradient: "from-gray-400 to-slate-400" },
+  { name: "Cleaning Supplies", icon: "🧴", iconName: "Droplet", gradient: "from-cyan-500 to-teal-500" },
+  { name: "Laundry Detergent", icon: "🧴", iconName: "Droplet", gradient: "from-blue-500 to-indigo-500" },
+  { name: "Dishwashing", icon: "🍽️", iconName: "Droplet", gradient: "from-cyan-400 to-blue-400" },
+  { name: "All-Purpose Cleaners", icon: "🧹", iconName: "Sparkles", gradient: "from-green-500 to-teal-500" },
+  { name: "Glass Cleaners", icon: "🪟", iconName: "Sparkles", gradient: "from-blue-400 to-cyan-400" },
+  { name: "Floor Cleaners", icon: "🧹", iconName: "Sparkles", gradient: "from-amber-500 to-orange-500" },
+  { name: "Disinfectants", icon: "🧴", iconName: "Shield", gradient: "from-green-600 to-emerald-600" },
+  { name: "Air Fresheners", icon: "🌸", iconName: "Flower", gradient: "from-purple-400 to-pink-400" },
+  { name: "Drain Cleaners", icon: "🚰", iconName: "Droplet", gradient: "from-blue-600 to-indigo-600" },
+  { name: "Stain Removers", icon: "✨", iconName: "Sparkles", gradient: "from-cyan-500 to-teal-500" },
+  { name: "Paper Towels", icon: "📋", iconName: "Square", gradient: "from-gray-400 to-slate-400" },
+  { name: "Tissues", icon: "📋", iconName: "Square", gradient: "from-cyan-400 to-blue-400" },
+  { name: "Toilet Paper", icon: "🧻", iconName: "Circle", gradient: "from-gray-400 to-zinc-400" },
+  { name: "Trash Bags", icon: "🗑️", iconName: "Trash", gradient: "from-gray-600 to-slate-600" },
+  { name: "Food Wraps", icon: "📋", iconName: "Square", gradient: "from-green-400 to-emerald-400" },
+  { name: "Aluminum Foil", icon: "📋", iconName: "Square", gradient: "from-gray-500 to-zinc-500" },
+  { name: "Plastic Bags", icon: "📋", iconName: "Square", gradient: "from-gray-400 to-slate-400" },
+  { name: "Disposable Plates", icon: "🍽️", iconName: "Circle", gradient: "from-gray-400 to-zinc-400" },
+  { name: "Disposable Cups", icon: "🥤", iconName: "Cup", gradient: "from-gray-400 to-slate-400" },
+  { name: "Disposable Utensils", icon: "🍴", iconName: "Utensils", gradient: "from-gray-500 to-zinc-500" },
+  { name: "Batteries", icon: "🔋", iconName: "Battery", gradient: "from-green-500 to-emerald-500" },
+  { name: "Light Bulbs", icon: "💡", iconName: "Lightbulb", gradient: "from-yellow-500 to-amber-500" },
+  { name: "Extension Cords", icon: "🔌", iconName: "Cable", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Surge Protectors", icon: "⚡", iconName: "Shield", gradient: "from-blue-600 to-indigo-600" },
+  { name: "Smoke Detectors", icon: "🔔", iconName: "Bell", gradient: "from-red-500 to-rose-500" },
+  { name: "Carbon Monoxide Detectors", icon: "🔔", iconName: "Bell", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Fire Extinguishers", icon: "🧯", iconName: "Shield", gradient: "from-red-600 to-rose-600" },
+  { name: "Safes", icon: "🔐", iconName: "Lock", gradient: "from-gray-700 to-slate-700" },
+  { name: "Door Locks", icon: "🔒", iconName: "Lock", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Security Cameras", icon: "📹", iconName: "Camera", gradient: "from-gray-600 to-slate-600" },
+  { name: "Motion Sensors", icon: "📡", iconName: "Radio", gradient: "from-blue-500 to-indigo-500" },
+  { name: "Alarm Systems", icon: "🔔", iconName: "Bell", gradient: "from-red-500 to-rose-500" },
+  { name: "Baby Monitors", icon: "📱", iconName: "Monitor", gradient: "from-pink-400 to-rose-400" },
+  { name: "Intercoms", icon: "🔊", iconName: "Speaker", gradient: "from-gray-500 to-zinc-500" },
+  { name: "Home Safes", icon: "🔐", iconName: "Lock", gradient: "from-gray-700 to-slate-700" },
+  { name: "Key Holders", icon: "🔑", iconName: "Key", gradient: "from-amber-600 to-orange-600" },
+  { name: "Mail Boxes", icon: "📬", iconName: "Mail", gradient: "from-blue-500 to-indigo-500" },
+  { name: "House Numbers", icon: "🏠", iconName: "Home", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Doormats", icon: "🚪", iconName: "Square", gradient: "from-amber-600 to-orange-600" },
+  { name: "Outdoor Furniture", icon: "🪑", iconName: "Armchair", gradient: "from-amber-600 to-yellow-600" },
+  { name: "Porch Swings", icon: "🪑", iconName: "Circle", gradient: "from-amber-500 to-orange-500" },
+  { name: "Hammocks", icon: "🛏️", iconName: "Square", gradient: "from-green-500 to-teal-500" },
+  { name: "Outdoor Umbrellas", icon: "☂️", iconName: "Circle", gradient: "from-red-500 to-rose-500" },
+  { name: "Gazebos", icon: "⛺", iconName: "Tent", gradient: "from-amber-700 to-orange-700" },
+  { name: "Pergolas", icon: "🏠", iconName: "Home", gradient: "from-amber-600 to-orange-600" },
+  { name: "Fire Pits", icon: "🔥", iconName: "Flame", gradient: "from-red-600 to-orange-600" },
+  { name: "Outdoor Heaters", icon: "🔥", iconName: "Flame", gradient: "from-orange-600 to-red-600" },
+  { name: "Charcoal Grills", icon: "🍖", iconName: "Flame", gradient: "from-gray-700 to-slate-700" },
+  { name: "Gas Grills", icon: "🍖", iconName: "Flame", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Smokers", icon: "🍖", iconName: "Cloud", gradient: "from-gray-600 to-slate-600" },
+  { name: "Grill Accessories", icon: "🍖", iconName: "Wrench", gradient: "from-gray-500 to-zinc-500" },
+  { name: "Pool Floats", icon: "🏊", iconName: "Circle", gradient: "from-cyan-400 to-blue-400" },
+  { name: "Pool Toys", icon: "🏖️", iconName: "Circle", gradient: "from-yellow-400 to-orange-400" },
+  { name: "Pool Chemicals", icon: "🧴", iconName: "Droplet", gradient: "from-cyan-500 to-blue-500" },
+  { name: "Pool Cleaners", icon: "🏊", iconName: "Sparkles", gradient: "from-cyan-500 to-teal-500" },
+  { name: "Hot Tubs", icon: "🛁", iconName: "Waves", gradient: "from-blue-500 to-cyan-500" },
+  { name: "Lawn Mowers", icon: "🌱", iconName: "Leaf", gradient: "from-green-600 to-emerald-600" },
+  { name: "Leaf Blowers", icon: "🍂", iconName: "Wind", gradient: "from-amber-600 to-orange-600" },
+  { name: "Hedge Trimmers", icon: "🌳", iconName: "Scissors", gradient: "from-green-600 to-emerald-600" },
+  { name: "Chain Saws", icon: "🪵", iconName: "Scissors", gradient: "from-gray-700 to-slate-700" },
+  { name: "Pressure Washers", icon: "💧", iconName: "Droplet", gradient: "from-blue-600 to-indigo-600" },
+  { name: "Garden Hoses", icon: "💧", iconName: "Circle", gradient: "from-green-500 to-teal-500" },
+  { name: "Sprinklers", icon: "💧", iconName: "Droplet", gradient: "from-cyan-500 to-blue-500" },
+  { name: "Garden Tools", icon: "🌱", iconName: "Wrench", gradient: "from-green-600 to-emerald-600" },
+  { name: "Planters", icon: "🪴", iconName: "Flower", gradient: "from-amber-600 to-orange-600" },
+  { name: "Raised Beds", icon: "🌱", iconName: "Square", gradient: "from-amber-700 to-orange-700" },
+  { name: "Compost Bins", icon: "♻️", iconName: "Recycle", gradient: "from-green-600 to-emerald-600" },
+  { name: "Garden Fencing", icon: "🏡", iconName: "Square", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Bird Feeders", icon: "🐦", iconName: "Bird", gradient: "from-amber-500 to-orange-500" },
+  { name: "Bird Houses", icon: "🏠", iconName: "Home", gradient: "from-amber-600 to-orange-600" },
+  { name: "Wind Chimes", icon: "🎐", iconName: "Wind", gradient: "from-cyan-400 to-blue-400" },
+  { name: "Garden Statues", icon: "🗿", iconName: "Box", gradient: "from-gray-500 to-slate-500" },
+  { name: "Solar Lights", icon: "☀️", iconName: "Sun", gradient: "from-yellow-500 to-orange-500" },
+  { name: "Pathway Lights", icon: "💡", iconName: "Lightbulb", gradient: "from-amber-500 to-yellow-500" },
+  { name: "String Lights", icon: "💡", iconName: "Lightbulb", gradient: "from-yellow-400 to-orange-400" },
+  { name: "Spotlights", icon: "💡", iconName: "Lightbulb", gradient: "from-gray-500 to-zinc-500" },
+  { name: "Insect Repellents", icon: "🐜", iconName: "Shield", gradient: "from-green-600 to-teal-600" },
+  { name: "Rodent Control", icon: "🐭", iconName: "Shield", gradient: "from-gray-600 to-slate-600" },
+  { name: "Weed Killers", icon: "🌿", iconName: "Shield", gradient: "from-red-500 to-rose-500" },
+  { name: "Winter Jackets", icon: "🧥", iconName: "Cloud", gradient: "from-slate-600 to-gray-600" },
+  { name: "Down Jackets", icon: "🧥", iconName: "Snowflake", gradient: "from-blue-600 to-indigo-600" },
+  { name: "Raincoats", icon: "🌧️", iconName: "Cloud", gradient: "from-cyan-500 to-blue-500" },
+  { name: "Windbreakers", icon: "🌬️", iconName: "Wind", gradient: "from-gray-500 to-zinc-500" },
+  { name: "Fleece Jackets", icon: "🧥", iconName: "Cloud", gradient: "from-green-600 to-teal-600" },
+  { name: "Parkas", icon: "🧥", iconName: "Snowflake", gradient: "from-gray-700 to-slate-700" },
+  { name: "Overcoats", icon: "🧥", iconName: "Shirt", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Trench Coats", icon: "🧥", iconName: "Shirt", gradient: "from-amber-700 to-orange-700" },
+  { name: "Leather Jackets", icon: "🧥", iconName: "Shirt", gradient: "from-gray-800 to-slate-800" },
+  { name: "Denim Jackets", icon: "🧥", iconName: "Shirt", gradient: "from-blue-500 to-indigo-500" },
+  { name: "Bomber Jackets", icon: "🧥", iconName: "Shirt", gradient: "from-green-700 to-emerald-700" },
+  { name: "Varsity Jackets", icon: "🧥", iconName: "Shirt", gradient: "from-red-600 to-rose-600" },
+  { name: "Motorcycle Jackets", icon: "🏍️", iconName: "Shirt", gradient: "from-gray-700 to-slate-700" },
+  { name: "Ski Jackets", icon: "⛷️", iconName: "Snowflake", gradient: "from-blue-600 to-cyan-600" },
+  { name: "Snowboard Jackets", icon: "🏂", iconName: "Snowflake", gradient: "from-purple-600 to-pink-600" },
+  { name: "Running Shoes", icon: "👟", iconName: "Footprints", gradient: "from-green-500 to-teal-500" },
+  { name: "Basketball Shoes", icon: "🏀", iconName: "Circle", gradient: "from-orange-500 to-red-500" },
+  { name: "Soccer Cleats", icon: "⚽", iconName: "Circle", gradient: "from-green-600 to-emerald-600" },
+  { name: "Tennis Shoes", icon: "🎾", iconName: "Circle", gradient: "from-yellow-500 to-orange-500" },
+  { name: "Golf Shoes", icon: "⛳", iconName: "Flag", gradient: "from-gray-500 to-slate-500" },
+  { name: "Hiking Boots", icon: "🥾", iconName: "Mountain", gradient: "from-amber-700 to-orange-700" },
+  { name: "Work Boots", icon: "🥾", iconName: "Shield", gradient: "from-amber-800 to-orange-800" },
+  { name: "Dress Shoes", icon: "👞", iconName: "Circle", gradient: "from-gray-700 to-slate-700" },
+  { name: "Loafers", icon: "👞", iconName: "Circle", gradient: "from-amber-600 to-orange-600" },
+  { name: "Oxfords", icon: "👞", iconName: "Circle", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Sandals", icon: "🩴", iconName: "Circle", gradient: "from-amber-500 to-orange-500" },
+  { name: "Flip Flops", icon: "🩴", iconName: "Circle", gradient: "from-cyan-400 to-blue-400" },
+  { name: "Slippers", icon: "🧦", iconName: "Circle", gradient: "from-pink-400 to-rose-400" },
+  { name: "Sneakers", icon: "👟", iconName: "Footprints", gradient: "from-blue-500 to-indigo-500" },
+  { name: "High Heels", icon: "👠", iconName: "Circle", gradient: "from-red-500 to-rose-500" },
+  { name: "Wedges", icon: "👠", iconName: "Circle", gradient: "from-amber-500 to-orange-500" },
+  { name: "Flats", icon: "👞", iconName: "Circle", gradient: "from-pink-400 to-rose-400" },
+  { name: "Boots", icon: "🥾", iconName: "Circle", gradient: "from-gray-700 to-slate-700" },
+  { name: "Ankle Boots", icon: "🥾", iconName: "Circle", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Knee High Boots", icon: "🥾", iconName: "Circle", gradient: "from-gray-800 to-slate-800" },
+  { name: "Rain Boots", icon: "🌧️", iconName: "Cloud", gradient: "from-yellow-500 to-orange-500" },
+  { name: "Snow Boots", icon: "❄️", iconName: "Snowflake", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Canvas Shoes", icon: "👟", iconName: "Circle", gradient: "from-red-400 to-rose-400" },
+  { name: "Espadrilles", icon: "👟", iconName: "Circle", gradient: "from-amber-500 to-orange-500" },
+  { name: "Moccasins", icon: "👞", iconName: "Circle", gradient: "from-amber-700 to-orange-700" },
+  { name: "Boat Shoes", icon: "⛵", iconName: "Circle", gradient: "from-blue-500 to-cyan-500" },
+  { name: "Platform Shoes", icon: "👠", iconName: "Circle", gradient: "from-pink-500 to-rose-500" },
+  { name: "Wrestling Shoes", icon: "🤼", iconName: "Circle", gradient: "from-red-600 to-rose-600" },
+  { name: "Boxing Shoes", icon: "🥊", iconName: "Circle", gradient: "from-red-600 to-orange-600" },
+  { name: "Weightlifting Shoes", icon: "🏋️", iconName: "Circle", gradient: "from-gray-700 to-slate-700" },
+  { name: "Crossfit Shoes", icon: "💪", iconName: "Circle", gradient: "from-green-600 to-teal-600" },
+  { name: "Trail Running Shoes", icon: "🏔️", iconName: "Mountain", gradient: "from-amber-600 to-orange-600" },
+  { name: "Volleyball Shoes", icon: "🏐", iconName: "Circle", gradient: "from-blue-500 to-indigo-500" },
+  { name: "Badminton Shoes", icon: "🏸", iconName: "Circle", gradient: "from-green-500 to-teal-500" },
+  { name: "Table Tennis Shoes", icon: "🏓", iconName: "Circle", gradient: "from-red-500 to-orange-500" },
+  { name: "Cycling Shoes", icon: "🚴", iconName: "Circle", gradient: "from-blue-600 to-cyan-600" },
+  { name: "Skateboarding Shoes", icon: "🛹", iconName: "Circle", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Dance Shoes", icon: "💃", iconName: "Circle", gradient: "from-pink-500 to-rose-500" },
+  { name: "Ballet Shoes", icon: "🩰", iconName: "Circle", gradient: "from-pink-400 to-rose-400" },
+  { name: "Tap Shoes", icon: "👞", iconName: "Circle", gradient: "from-gray-600 to-slate-600" },
+  { name: "Jazz Shoes", icon: "👞", iconName: "Circle", gradient: "from-gray-700 to-zinc-700" },
+  { name: "Ballroom Shoes", icon: "👠", iconName: "Circle", gradient: "from-gold-500 to-amber-500" },
+  { name: "Latin Dance Shoes", icon: "👠", iconName: "Circle", gradient: "from-red-600 to-rose-600" },
+  { name: "Diabetic Shoes", icon: "👟", iconName: "Heart", gradient: "from-blue-400 to-cyan-400" },
+  { name: "Orthopedic Shoes", icon: "👟", iconName: "Heart", gradient: "from-gray-500 to-slate-500" },
+  { name: "Wide Width Shoes", icon: "👟", iconName: "Circle", gradient: "from-gray-500 to-zinc-500" },
+  { name: "Narrow Width Shoes", icon: "👟", iconName: "Circle", gradient: "from-gray-400 to-slate-400" },
+  { name: "Steel Toe Boots", icon: "🥾", iconName: "Shield", gradient: "from-gray-700 to-slate-700" },
+  { name: "Composite Toe Boots", icon: "🥾", iconName: "Shield", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Waterproof Boots", icon: "🥾", iconName: "Droplet", gradient: "from-blue-600 to-indigo-600" },
+  { name: "Insulated Boots", icon: "🥾", iconName: "Snowflake", gradient: "from-gray-700 to-slate-700" },
+  { name: "Slip Resistant Shoes", icon: "👟", iconName: "Shield", gradient: "from-gray-600 to-zinc-600" },
+  { name: "Chef Shoes", icon: "👨‍🍳", iconName: "ChefHat", gradient: "from-gray-600 to-slate-600" },
+  { name: "Nursing Shoes", icon: "👩‍⚕️", iconName: "Heart", gradient: "from-cyan-500 to-blue-500" },
+  { name: "Mechanic Shoes", icon: "🔧", iconName: "Wrench", gradient: "from-gray-700 to-slate-700" },
+  { name: "Electrician Shoes", icon: "⚡", iconName: "Zap", gradient: "from-yellow-600 to-amber-600" },
 ];
 
 function generateCategories(): Category[] {
@@ -353,22 +656,27 @@ const productAdjectives = [
   "Digital", "Heavy-Duty", "Lightweight", "Ergonomic", "Adjustable", "Foldable", "Rechargeable", "Waterproof",
   "Stainless", "Durable", "Extra", "Multi-Purpose", "High-Performance", "Quick", "Instant", "Express",
   "Complete", "Full", "Mini", "Mega", "Super", "Extreme", "Ultimate", "Maximum", "Intense", "Gentle",
-  "Soft", "Strong", "Powerful", "Quiet", "Silent", "Fast", "Slow", "Long-Lasting", "Extended", "Enhanced"
+  "Soft", "Strong", "Powerful", "Quiet", "Silent", "Fast", "Slow", "Long-Lasting", "Extended", "Enhanced",
+  "Sleek", "Stylish", "Vintage", "Retro", "Futuristic", "Innovative", "Revolutionary", "Cutting-Edge", "Next-Gen", "AI-Powered",
+  "Eco-Friendly", "Sustainable", "Biodegradable", "Recyclable", "Energy-Efficient", "Solar-Powered", "Battery-Operated", "Cordless",
+  "Automatic", "Manual", "Semi-Automatic", "Programmable", "Customizable", "Personalized", "Handcrafted", "Artisan",
+  "Industrial", "Commercial", "Residential", "Outdoor", "Indoor", "All-Weather", "All-Season", "Year-Round",
+  "Travel-Size", "Family-Size", "Economy", "Value", "Budget", "Affordable", "Exclusive", "Limited-Edition"
 ];
 
 const productNouns: Record<string, string[]> = {
-  "health": ["Supplements", "Vitamins", "Capsules", "Tablets", "Powder", "Drops", "Syrup", "Gel", "Cream", "Oil", "Extract", "Formula", "Complex", "Blend", "Mix", "Solution", "Spray", "Balm", "Patch", "Strips"],
-  "beauty": ["Cream", "Serum", "Lotion", "Gel", "Mask", "Scrub", "Cleanser", "Toner", "Moisturizer", "Treatment", "Essence", "Mist", "Spray", "Oil", "Balm", "Butter", "Polish", "Primer", "Foundation", "Concealer"],
-  "fashion": ["Shirt", "Pants", "Dress", "Skirt", "Jacket", "Coat", "Sweater", "Hoodie", "Top", "Blouse", "Cardigan", "Blazer", "Suit", "Shorts", "Jeans", "Leggings", "Scarf", "Hat", "Belt", "Tie"],
-  "electronics": ["Device", "Gadget", "Player", "Speaker", "Headphones", "Charger", "Cable", "Adapter", "Hub", "Stand", "Mount", "Case", "Cover", "Screen", "Display", "Controller", "Keyboard", "Mouse", "Camera", "Lens"],
-  "home": ["Set", "Kit", "Pack", "Bundle", "Collection", "Organizer", "Holder", "Rack", "Stand", "Shelf", "Box", "Container", "Basket", "Tray", "Mat", "Cover", "Pad", "Cushion", "Pillow", "Blanket"],
-  "sports": ["Equipment", "Gear", "Set", "Kit", "Ball", "Racket", "Bat", "Gloves", "Shoes", "Boots", "Helmet", "Pads", "Guard", "Bag", "Mat", "Bench", "Bar", "Weights", "Band", "Rope"],
-  "food": ["Mix", "Blend", "Pack", "Set", "Box", "Jar", "Bottle", "Can", "Bag", "Packet", "Tin", "Container", "Sachet", "Tube", "Pouch", "Bar", "Snack", "Treat", "Spread", "Sauce"],
-  "tools": ["Set", "Kit", "Tool", "Machine", "Device", "Equipment", "Drill", "Saw", "Hammer", "Wrench", "Pliers", "Screwdriver", "Level", "Tape", "Clamp", "Vise", "Sander", "Grinder", "Cutter", "Blade"],
-  "pets": ["Food", "Treats", "Toy", "Bed", "Bowl", "Collar", "Leash", "Harness", "Carrier", "Crate", "Cage", "Tank", "Brush", "Shampoo", "Medicine", "Supplement", "Feeder", "Fountain", "Litter", "Pad"],
-  "baby": ["Set", "Kit", "Pack", "Bottle", "Cup", "Bowl", "Spoon", "Bib", "Blanket", "Clothes", "Diaper", "Wipes", "Cream", "Lotion", "Shampoo", "Toy", "Rattle", "Mobile", "Monitor", "Carrier"],
-  "office": ["Set", "Kit", "Pack", "Pen", "Pencil", "Marker", "Highlighter", "Notebook", "Folder", "Binder", "Stapler", "Tape", "Scissors", "Ruler", "Calculator", "Desk", "Chair", "Lamp", "Organizer", "Holder"],
-  "outdoor": ["Set", "Kit", "Gear", "Equipment", "Tent", "Bag", "Pack", "Mat", "Chair", "Table", "Grill", "Cooler", "Lantern", "Flashlight", "Knife", "Compass", "Map", "Rope", "Net", "Pole"],
+  "health": ["Supplements", "Vitamins", "Capsules", "Tablets", "Powder", "Drops", "Syrup", "Gel", "Cream", "Oil", "Extract", "Formula", "Complex", "Blend", "Mix", "Solution", "Spray", "Balm", "Patch", "Strips", "Gummies", "Chewables", "Softgels", "Elixir", "Tincture"],
+  "beauty": ["Cream", "Serum", "Lotion", "Gel", "Mask", "Scrub", "Cleanser", "Toner", "Moisturizer", "Treatment", "Essence", "Mist", "Spray", "Oil", "Balm", "Butter", "Polish", "Primer", "Foundation", "Concealer", "Palette", "Lipstick", "Mascara", "Eyeliner", "Blush"],
+  "fashion": ["Shirt", "Pants", "Dress", "Skirt", "Jacket", "Coat", "Sweater", "Hoodie", "Top", "Blouse", "Cardigan", "Blazer", "Suit", "Shorts", "Jeans", "Leggings", "Scarf", "Hat", "Belt", "Tie", "Vest", "Romper", "Jumpsuit", "Kimono", "Poncho"],
+  "electronics": ["Device", "Gadget", "Player", "Speaker", "Headphones", "Charger", "Cable", "Adapter", "Hub", "Stand", "Mount", "Case", "Cover", "Screen", "Display", "Controller", "Keyboard", "Mouse", "Camera", "Lens", "Dock", "Router", "Modem", "Webcam", "Microphone"],
+  "home": ["Set", "Kit", "Pack", "Bundle", "Collection", "Organizer", "Holder", "Rack", "Stand", "Shelf", "Box", "Container", "Basket", "Tray", "Mat", "Cover", "Pad", "Cushion", "Pillow", "Blanket", "Curtain", "Rug", "Lamp", "Clock", "Frame"],
+  "sports": ["Equipment", "Gear", "Set", "Kit", "Ball", "Racket", "Bat", "Gloves", "Shoes", "Boots", "Helmet", "Pads", "Guard", "Bag", "Mat", "Bench", "Bar", "Weights", "Band", "Rope", "Net", "Goal", "Timer", "Whistle", "Jersey"],
+  "food": ["Mix", "Blend", "Pack", "Set", "Box", "Jar", "Bottle", "Can", "Bag", "Packet", "Tin", "Container", "Sachet", "Tube", "Pouch", "Bar", "Snack", "Treat", "Spread", "Sauce", "Seasoning", "Spice", "Powder", "Syrup", "Extract"],
+  "tools": ["Set", "Kit", "Tool", "Machine", "Device", "Equipment", "Drill", "Saw", "Hammer", "Wrench", "Pliers", "Screwdriver", "Level", "Tape", "Clamp", "Vise", "Sander", "Grinder", "Cutter", "Blade", "Bit", "Socket", "Ratchet", "Gauge", "Meter"],
+  "pets": ["Food", "Treats", "Toy", "Bed", "Bowl", "Collar", "Leash", "Harness", "Carrier", "Crate", "Cage", "Tank", "Brush", "Shampoo", "Medicine", "Supplement", "Feeder", "Fountain", "Litter", "Pad", "Groomer", "Clipper", "Sweater", "Costume", "Tag"],
+  "baby": ["Set", "Kit", "Pack", "Bottle", "Cup", "Bowl", "Spoon", "Bib", "Blanket", "Clothes", "Diaper", "Wipes", "Cream", "Lotion", "Shampoo", "Toy", "Rattle", "Mobile", "Monitor", "Carrier", "Stroller", "Car Seat", "High Chair", "Playpen", "Walker"],
+  "office": ["Set", "Kit", "Pack", "Pen", "Pencil", "Marker", "Highlighter", "Notebook", "Folder", "Binder", "Stapler", "Tape", "Scissors", "Ruler", "Calculator", "Desk", "Chair", "Lamp", "Organizer", "Holder", "Shredder", "Scanner", "Printer", "Copier", "Whiteboard"],
+  "outdoor": ["Set", "Kit", "Gear", "Equipment", "Tent", "Bag", "Pack", "Mat", "Chair", "Table", "Grill", "Cooler", "Lantern", "Flashlight", "Knife", "Compass", "Map", "Rope", "Net", "Pole", "Canopy", "Hammock", "Shelter", "Stove", "Axe"],
 };
 
 const categoryImageUrls = [
@@ -451,7 +759,10 @@ const vendors = [
   "Metro Retail", "City Supplies", "Prime Goods", "Urban Market", "Fresh Direct",
   "Wholesale Hub", "Retail Plus", "Discount Center", "Mega Store", "Daily Deals",
   "Online Plus", "Quick Ship", "Flash Store", "Direct Supply", "Market Pro",
-  "Shop Central", "Trade Hub", "Retail King", "Supply Chain", "Vendor Direct"
+  "Shop Central", "Trade Hub", "Retail King", "Supply Chain", "Vendor Direct",
+  "Digital Mart", "Tech Zone", "Gadget World", "Home Essentials", "Style House",
+  "Fashion Forward", "Beauty Bliss", "Health Haven", "Sports Center", "Pet Paradise",
+  "Baby Boutique", "Office Pro", "Garden Glory", "Auto Parts Plus", "Food Bazaar"
 ];
 
 function seededRandom(seed: number): () => number {
@@ -472,29 +783,30 @@ function shuffleWithSeed<T>(array: T[], random: () => number): T[] {
 
 function getCategoryType(categorySlug: string): string {
   const slug = categorySlug.toLowerCase();
-  if (slug.includes("health") || slug.includes("vitamin") || slug.includes("medical") || slug.includes("supplement")) return "health";
-  if (slug.includes("cosmetic") || slug.includes("beauty") || slug.includes("skin") || slug.includes("makeup") || slug.includes("hair") || slug.includes("nail") || slug.includes("fragrance") || slug.includes("perfume")) return "beauty";
-  if (slug.includes("fashion") || slug.includes("wear") || slug.includes("clothing") || slug.includes("dress") || slug.includes("shirt") || slug.includes("sock") || slug.includes("belt") || slug.includes("tie") || slug.includes("scarf") || slug.includes("hat") || slug.includes("glove")) return "fashion";
-  if (slug.includes("electronic") || slug.includes("laptop") || slug.includes("phone") || slug.includes("tablet") || slug.includes("camera") || slug.includes("audio") || slug.includes("smart") || slug.includes("computer") || slug.includes("mobile") || slug.includes("storage") || slug.includes("network") || slug.includes("printer") || slug.includes("projector") || slug.includes("tv") || slug.includes("drone") || slug.includes("vr") || slug.includes("robot")) return "electronics";
-  if (slug.includes("home") || slug.includes("living") || slug.includes("bedroom") || slug.includes("kitchen") || slug.includes("bathroom") || slug.includes("dining") || slug.includes("lighting") || slug.includes("decor") || slug.includes("storage") || slug.includes("cleaning") || slug.includes("laundry") || slug.includes("cookware") || slug.includes("bakeware") || slug.includes("tableware") || slug.includes("drinkware") || slug.includes("appliance") || slug.includes("furniture")) return "home";
-  if (slug.includes("sport") || slug.includes("fitness") || slug.includes("gym") || slug.includes("yoga") || slug.includes("running") || slug.includes("cycling") || slug.includes("swimming") || slug.includes("golf") || slug.includes("martial") || slug.includes("water-sport") || slug.includes("winter-sport")) return "sports";
-  if (slug.includes("food") || slug.includes("grocery") || slug.includes("snack") || slug.includes("beverage") || slug.includes("breakfast") || slug.includes("dairy") || slug.includes("bakery") || slug.includes("frozen") || slug.includes("canned") || slug.includes("condiment") || slug.includes("organic") || slug.includes("tea") || slug.includes("coffee")) return "food";
-  if (slug.includes("tool") || slug.includes("hardware") || slug.includes("power") || slug.includes("hand") || slug.includes("measuring") || slug.includes("safety") || slug.includes("plumbing") || slug.includes("electrical") || slug.includes("paint") || slug.includes("fastener") || slug.includes("woodwork")) return "tools";
-  if (slug.includes("pet") || slug.includes("dog") || slug.includes("cat") || slug.includes("bird") || slug.includes("fish") || slug.includes("reptile")) return "pets";
-  if (slug.includes("baby") || slug.includes("nursery") || slug.includes("maternity") || slug.includes("diaper") || slug.includes("stroller")) return "baby";
-  if (slug.includes("office") || slug.includes("stationery") || slug.includes("school")) return "office";
-  if (slug.includes("outdoor") || slug.includes("garden") || slug.includes("camping") || slug.includes("hiking") || slug.includes("tent") || slug.includes("backpack") || slug.includes("climbing") || slug.includes("navigation")) return "outdoor";
+  if (slug.includes("health") || slug.includes("vitamin") || slug.includes("medical") || slug.includes("supplement") || slug.includes("protein") || slug.includes("nutrition") || slug.includes("wellness") || slug.includes("therapy") || slug.includes("immunity") || slug.includes("digestive") || slug.includes("joint") || slug.includes("heart") || slug.includes("brain")) return "health";
+  if (slug.includes("cosmetic") || slug.includes("beauty") || slug.includes("skin") || slug.includes("makeup") || slug.includes("hair") || slug.includes("nail") || slug.includes("fragrance") || slug.includes("perfume") || slug.includes("bath") || slug.includes("body") || slug.includes("grooming") || slug.includes("shaving") || slug.includes("styling")) return "beauty";
+  if (slug.includes("fashion") || slug.includes("wear") || slug.includes("clothing") || slug.includes("dress") || slug.includes("shirt") || slug.includes("sock") || slug.includes("belt") || slug.includes("tie") || slug.includes("scarf") || slug.includes("hat") || slug.includes("glove") || slug.includes("jacket") || slug.includes("coat") || slug.includes("shoes") || slug.includes("boots") || slug.includes("footwear") || slug.includes("sandals") || slug.includes("sneakers") || slug.includes("heels")) return "fashion";
+  if (slug.includes("electronic") || slug.includes("laptop") || slug.includes("phone") || slug.includes("tablet") || slug.includes("camera") || slug.includes("audio") || slug.includes("smart") || slug.includes("computer") || slug.includes("mobile") || slug.includes("storage") || slug.includes("network") || slug.includes("printer") || slug.includes("projector") || slug.includes("tv") || slug.includes("drone") || slug.includes("vr") || slug.includes("robot") || slug.includes("speaker") || slug.includes("headphone") || slug.includes("charger")) return "electronics";
+  if (slug.includes("home") || slug.includes("living") || slug.includes("bedroom") || slug.includes("kitchen") || slug.includes("bathroom") || slug.includes("dining") || slug.includes("lighting") || slug.includes("decor") || slug.includes("storage") || slug.includes("cleaning") || slug.includes("laundry") || slug.includes("cookware") || slug.includes("bakeware") || slug.includes("tableware") || slug.includes("drinkware") || slug.includes("appliance") || slug.includes("furniture") || slug.includes("bedding") || slug.includes("towel") || slug.includes("curtain") || slug.includes("rug") || slug.includes("mirror") || slug.includes("clock") || slug.includes("frame")) return "home";
+  if (slug.includes("sport") || slug.includes("fitness") || slug.includes("gym") || slug.includes("yoga") || slug.includes("running") || slug.includes("cycling") || slug.includes("swimming") || slug.includes("golf") || slug.includes("martial") || slug.includes("water-sport") || slug.includes("winter-sport") || slug.includes("basketball") || slug.includes("soccer") || slug.includes("tennis") || slug.includes("volleyball") || slug.includes("boxing") || slug.includes("wrestling")) return "sports";
+  if (slug.includes("food") || slug.includes("grocery") || slug.includes("snack") || slug.includes("beverage") || slug.includes("breakfast") || slug.includes("dairy") || slug.includes("bakery") || slug.includes("frozen") || slug.includes("canned") || slug.includes("condiment") || slug.includes("organic") || slug.includes("tea") || slug.includes("coffee") || slug.includes("wine") || slug.includes("beer") || slug.includes("energy-bar")) return "food";
+  if (slug.includes("tool") || slug.includes("hardware") || slug.includes("power") || slug.includes("hand") || slug.includes("measuring") || slug.includes("safety") || slug.includes("plumbing") || slug.includes("electrical") || slug.includes("paint") || slug.includes("fastener") || slug.includes("woodwork") || slug.includes("drill") || slug.includes("saw") || slug.includes("hammer") || slug.includes("wrench")) return "tools";
+  if (slug.includes("pet") || slug.includes("dog") || slug.includes("cat") || slug.includes("bird") || slug.includes("fish") || slug.includes("reptile") || slug.includes("hamster") || slug.includes("rabbit")) return "pets";
+  if (slug.includes("baby") || slug.includes("nursery") || slug.includes("maternity") || slug.includes("diaper") || slug.includes("stroller") || slug.includes("infant") || slug.includes("toddler")) return "baby";
+  if (slug.includes("office") || slug.includes("stationery") || slug.includes("school") || slug.includes("desk") || slug.includes("pen") || slug.includes("notebook") || slug.includes("binder") || slug.includes("calculator")) return "office";
+  if (slug.includes("outdoor") || slug.includes("garden") || slug.includes("camping") || slug.includes("hiking") || slug.includes("tent") || slug.includes("backpack") || slug.includes("climbing") || slug.includes("navigation") || slug.includes("grill") || slug.includes("pool") || slug.includes("patio") || slug.includes("lawn") || slug.includes("fence")) return "outdoor";
   return "home";
 }
 
-function generateProducts(count: number = 5000): Product[] {
+function generateProducts(count: number = 10000): Product[] {
   const generatedProducts: Product[] = [];
   const random = seededRandom(42);
-  const usedNames = new Set<string>();
+  const usedSlugs = new Set<string>();
   const usedIds = new Set<string>();
   let productId = 0;
 
   const allCategories = [...categories];
+  const totalCategories = allCategories.length;
   
   while (generatedProducts.length < count) {
     for (const category of allCategories) {
@@ -503,18 +815,19 @@ function generateProducts(count: number = 5000): Product[] {
       const categoryType = getCategoryType(category.slug);
       const nouns = productNouns[categoryType] || productNouns["home"];
       
-      const productsPerCategory = Math.ceil(count / allCategories.length);
+      const productsPerCategory = Math.ceil(count / totalCategories) + 5;
       
       for (let i = 0; i < productsPerCategory && generatedProducts.length < count; i++) {
-        const adj = productAdjectives[Math.floor(random() * productAdjectives.length)];
+        const adj1 = productAdjectives[Math.floor(random() * productAdjectives.length)];
+        const adj2 = productAdjectives[Math.floor(random() * productAdjectives.length)];
         const noun = nouns[Math.floor(random() * nouns.length)];
-        const variant = Math.floor(random() * 1000);
+        const variant = Math.floor(random() * 10000);
         
-        const productName = `${adj} ${category.name} ${noun} ${variant}`;
-        const uniqueKey = productName.toLowerCase();
+        const productName = `${adj1} ${adj2} ${noun}`;
+        const productSlug = `${productName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}-${variant}`;
         
-        if (usedNames.has(uniqueKey)) continue;
-        usedNames.add(uniqueKey);
+        if (usedSlugs.has(productSlug)) continue;
+        usedSlugs.add(productSlug);
         
         productId++;
         const productIdStr = `p${productId}`;
@@ -531,8 +844,8 @@ function generateProducts(count: number = 5000): Product[] {
 
         generatedProducts.push({
           id: productIdStr,
-          name: productName,
-          slug: `${productName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}-${productId}`,
+          name: `${productName} - ${category.name}`,
+          slug: productSlug,
           category: category.name,
           categorySlug: category.slug,
           price: basePrice,
@@ -546,7 +859,7 @@ function generateProducts(count: number = 5000): Product[] {
             { name: "Neutral", value: "#6B7280" },
           ],
           sizes: random() > 0.5 ? ["S", "M", "L", "XL", "XXL"] : ["One Size"],
-          shortDescription: `${productName} - Premium quality product with excellent features and value`,
+          shortDescription: `${productName} - Premium quality product with excellent features and value for ${category.name}`,
           inStock: random() > 0.05,
           stock: Math.floor(random() * 500) + 1,
           isNew: random() > 0.85,
@@ -555,7 +868,7 @@ function generateProducts(count: number = 5000): Product[] {
           has3D: random() > 0.7,
           model3dType: ["box", "sphere", "torus", "cylinder"][Math.floor(random() * 4)] as "box" | "sphere" | "torus" | "cylinder",
           vendorName: vendors[Math.floor(random() * vendors.length)],
-          tags: [category.slug, "trending", "quality", "premium"],
+          tags: [category.slug, "trending", "quality", "premium", categoryType],
           badgeColor: palette.name,
           animation: animations[Math.floor(random() * animations.length)],
         });
@@ -566,7 +879,7 @@ function generateProducts(count: number = 5000): Product[] {
   return shuffleWithSeed(generatedProducts, seededRandom(123));
 }
 
-export const products: Product[] = generateProducts(5000);
+export const products: Product[] = generateProducts(10000);
 
 export const PRODUCTS = products;
 
