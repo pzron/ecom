@@ -502,7 +502,7 @@ export function ProductGrid() {
         >
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <p className="text-white/60 text-sm flex items-center gap-2">
+              <p className="text-lg font-bold flex items-center gap-2 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
                 <Sparkles className="w-5 h-5 text-purple-400" />
                 Curated excellence, delivered to you
               </p>
