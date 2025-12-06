@@ -13,11 +13,11 @@ function generateWeightedRowPattern(length: number): number[] {
   const pattern: number[] = [];
   for (let i = 0; i < length; i++) {
     const rand = Math.random();
-    if (rand < 0.35) {
+    if (rand < 0.45) {
       pattern.push(4);
-    } else if (rand < 0.70) {
-      pattern.push(5);
     } else if (rand < 0.85) {
+      pattern.push(5);
+    } else if (rand < 0.93) {
       pattern.push(6);
     } else {
       pattern.push(7);
@@ -406,11 +406,11 @@ export function ProductGrid() {
     if (viewMode === "mixed") {
       patternIntervalRef.current = setInterval(() => {
         setDynamicPattern(generateWeightedRowPattern(20));
-      }, 10000);
+      }, 58000);
 
       shuffleIntervalRef.current = setInterval(() => {
         setShuffleKey(prev => prev + 1);
-      }, 8000);
+      }, 65000);
     }
 
     return () => {
@@ -507,25 +507,27 @@ export function ProductGrid() {
                 Featured Collection
               </h2>
               <p className="text-white/60 mt-2 text-sm">
-                Showing {Math.min(visibleProducts, totalProducts).toLocaleString()} of 1100+ products across {Object.keys(categorizedProducts).length} categories
+                Curated excellence, delivered to you
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Button
                 variant={viewMode === "mixed" ? "default" : "outline"}
-                size="sm"
+                size="icon"
                 onClick={() => setViewMode("mixed")}
-                className={viewMode === "mixed" ? "bg-purple-500 hover:bg-purple-600" : "border-white/20 text-white/70 hover:bg-white/10"}
+                className={`w-10 h-10 rounded-full ${viewMode === "mixed" ? "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/25" : "border-white/20 text-white/70 hover:bg-white/10 backdrop-blur-sm"}`}
+                title="Mixed View"
               >
-                <Gift className="w-4 h-4 mr-1.5" /> Mixed
+                <Sparkles className="w-5 h-5" />
               </Button>
               <Button
                 variant={viewMode === "grid" ? "default" : "outline"}
-                size="sm"
+                size="icon"
                 onClick={() => setViewMode("grid")}
-                className={viewMode === "grid" ? "bg-purple-500 hover:bg-purple-600" : "border-white/20 text-white/70 hover:bg-white/10"}
+                className={`w-10 h-10 rounded-full ${viewMode === "grid" ? "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/25" : "border-white/20 text-white/70 hover:bg-white/10 backdrop-blur-sm"}`}
+                title="By Category"
               >
-                <Clock className="w-4 h-4 mr-1.5" /> By Category
+                <TrendingUp className="w-5 h-5" />
               </Button>
             </div>
           </div>
