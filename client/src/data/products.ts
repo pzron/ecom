@@ -765,6 +765,192 @@ const vendors = [
   "Baby Boutique", "Office Pro", "Garden Glory", "Auto Parts Plus", "Food Bazaar"
 ];
 
+const productDescriptions: Record<string, string[]> = {
+  "health": [
+    "Experience optimal wellness with our scientifically formulated health product. Made with premium ingredients sourced from trusted suppliers, this product supports your body's natural functions and promotes overall vitality. Each batch is rigorously tested for purity and potency.",
+    "Boost your daily health routine with this advanced formula. Designed by nutrition experts, it delivers essential nutrients your body needs. Non-GMO, gluten-free, and suitable for various dietary requirements.",
+    "Transform your wellness journey with our breakthrough health solution. Clinically studied ingredients work synergistically to support immune function, energy levels, and mental clarity. Made in ISO-certified facilities.",
+    "Discover the power of natural health support. This premium product combines traditional wisdom with modern science. Free from artificial additives, it provides gentle yet effective support for your wellbeing.",
+    "Elevate your health with our pharmaceutical-grade formula. Each ingredient is carefully selected for maximum bioavailability. Trusted by healthcare professionals and wellness enthusiasts worldwide."
+  ],
+  "beauty": [
+    "Unveil your natural radiance with this luxurious beauty essential. Formulated with cutting-edge skincare technology and nourishing botanicals, it delivers visible results. Dermatologist tested and suitable for all skin types.",
+    "Transform your beauty routine with our award-winning formula. Infused with hyaluronic acid, vitamins, and antioxidants, it hydrates, protects, and rejuvenates your skin. Cruelty-free and vegan-friendly.",
+    "Experience salon-quality results at home. This professional-grade beauty product uses advanced delivery systems to ensure deep penetration of active ingredients. See visible improvement in texture and tone.",
+    "Indulge in self-care with our premium beauty collection. Made with organic ingredients and essential oils, it pampers your skin while delivering powerful anti-aging benefits. Paraben-free and hypoallergenic.",
+    "Achieve your beauty goals with this innovative formula. Backed by clinical studies, it addresses multiple skin concerns simultaneously. Experience the difference of luxury skincare."
+  ],
+  "fashion": [
+    "Make a statement with this meticulously crafted fashion piece. Designed with attention to detail and premium materials, it offers both style and comfort. Versatile enough for any occasion, from casual to formal.",
+    "Elevate your wardrobe with our signature collection. Each piece features superior craftsmanship, quality stitching, and timeless design. Made to last and look great wear after wear.",
+    "Express your unique style with this trendsetting fashion item. Featuring contemporary design elements and comfortable fit, it's perfect for the modern individual who values both aesthetics and practicality.",
+    "Discover fashion that feels as good as it looks. Our premium fabrics ensure breathability and comfort throughout the day. Available in multiple sizes for the perfect fit.",
+    "Step out in confidence with our designer-inspired fashion. Combining classic elegance with modern trends, this piece is a must-have for any fashion-forward individual. Easy care and durable construction."
+  ],
+  "electronics": [
+    "Experience cutting-edge technology with this innovative electronic device. Featuring the latest advancements in performance and efficiency, it's designed to enhance your digital life. Built with premium components for reliability.",
+    "Upgrade your tech experience with our flagship product. Packed with smart features and intuitive controls, it seamlessly integrates into your lifestyle. Energy-efficient design with long-lasting performance.",
+    "Stay ahead with this next-generation electronic. Advanced processors, stunning displays, and seamless connectivity make it the perfect choice for tech enthusiasts. Comprehensive warranty included.",
+    "Transform the way you interact with technology. This feature-rich device combines power with portability. User-friendly interface ensures everyone can enjoy its advanced capabilities.",
+    "Discover the future of electronics. Engineered for excellence, this product delivers exceptional performance in a sleek design. Eco-friendly manufacturing and responsible sourcing."
+  ],
+  "home": [
+    "Enhance your living space with this beautifully designed home essential. Combining functionality with aesthetics, it adds both style and convenience to any room. Crafted from premium materials for lasting quality.",
+    "Create the home of your dreams with our curated collection. Each piece is thoughtfully designed to maximize comfort and organization. Easy to assemble and maintain for busy households.",
+    "Transform your house into a home with this versatile product. Its timeless design complements any décor style while providing practical everyday solutions. Durable construction ensures years of use.",
+    "Elevate your home environment with our premium collection. Designed with modern living in mind, it offers smart solutions for contemporary spaces. Safe materials suitable for families.",
+    "Make every day at home special with this essential item. Carefully crafted to blend form and function, it enhances both the look and livability of your space. Eco-conscious materials and production."
+  ],
+  "sports": [
+    "Achieve peak performance with this professional-grade sports equipment. Engineered for athletes of all levels, it provides the durability and precision you need to excel. Tested by professionals.",
+    "Take your training to the next level with our advanced sports gear. Featuring innovative materials and ergonomic design, it enhances your performance while reducing fatigue and injury risk.",
+    "Dominate your sport with equipment that matches your ambition. Built to withstand intense use, it delivers consistent performance in any condition. Trusted by coaches and athletes worldwide.",
+    "Unlock your athletic potential with our premium sports collection. Designed with biomechanics in mind, each product optimizes your natural movement. Suitable for beginners to professionals.",
+    "Push your limits with gear that's built to perform. Advanced technology meets practical design in this essential sports equipment. Lightweight yet durable for maximum versatility."
+  ],
+  "food": [
+    "Savor the finest quality with our premium food product. Sourced from trusted suppliers and processed with care, it delivers authentic taste and superior nutrition. Free from artificial preservatives.",
+    "Elevate your culinary experience with this gourmet selection. Carefully prepared using traditional methods and quality ingredients, it brings exceptional flavor to your table. Perfect for everyday meals or special occasions.",
+    "Nourish your body with wholesome, delicious food. Made with carefully selected ingredients and minimal processing, it retains maximum nutritional value. Suitable for health-conscious consumers.",
+    "Discover authentic taste with our artisan food collection. Crafted in small batches using time-honored recipes, each bite delivers a unique flavor experience. No artificial colors or flavors.",
+    "Transform everyday meals into extraordinary experiences. Our premium ingredients and expert preparation ensure consistent quality and taste. Convenient packaging for modern lifestyles."
+  ],
+  "tools": [
+    "Get the job done right with this professional-grade tool. Engineered for precision and durability, it meets the demands of both DIY enthusiasts and professional tradespeople. Ergonomic design reduces fatigue.",
+    "Build with confidence using our premium tool collection. Each piece is manufactured to exacting standards, ensuring reliable performance for years. Heat-treated steel and reinforced construction.",
+    "Work smarter with tools designed by experts. Featuring innovative designs and quality materials, they make every project easier and more efficient. Comprehensive safety features included.",
+    "Equip yourself with the best. Our professional-grade tools deliver exceptional performance and durability. Precision-engineered components and comfortable grips for extended use.",
+    "Master any project with reliable, high-quality tools. Designed for maximum efficiency and ease of use, they're the choice of professionals and serious hobbyists alike. Backed by manufacturer warranty."
+  ],
+  "pets": [
+    "Give your furry friend the best with our premium pet product. Specially formulated with veterinary guidance, it supports your pet's health and happiness. Made with safe, quality ingredients.",
+    "Show your pet love with products they'll adore. Designed with animal behavior experts, our collection ensures comfort, safety, and enjoyment. Durable construction for active pets.",
+    "Keep your companion healthy and happy. Our scientifically developed pet products meet the highest standards of nutrition and safety. Suitable for pets of all ages and breeds.",
+    "Treat your pet to premium quality. From nutrition to comfort, our products are designed to enhance your pet's life. Non-toxic materials and rigorous testing ensure safety.",
+    "Your pet deserves the best, and that's exactly what we deliver. Our thoughtfully designed products promote health, happiness, and strong bonds between pets and their families."
+  ],
+  "baby": [
+    "Give your little one the gentle care they deserve. Our baby products are specially formulated for sensitive skin and developing bodies. Pediatrician tested and parent approved.",
+    "Create precious moments with products designed for babies. Ultra-soft materials and safe construction ensure comfort and peace of mind. Free from harmful chemicals and allergens.",
+    "Nurture your baby with premium care products. Developed with child development experts, they support healthy growth while being gentle on delicate skin. Easy to use for busy parents.",
+    "Only the best for your bundle of joy. Our baby collection features safe, effective products made with the highest quality standards. Trusted by parents worldwide.",
+    "Welcome to parenthood with confidence. Our baby essentials are designed for safety, comfort, and convenience. Rigorously tested to exceed safety standards."
+  ],
+  "office": [
+    "Boost your productivity with our professional office supplies. Designed for the modern workplace, they combine functionality with style. Quality construction ensures reliable daily performance.",
+    "Organize your workspace with premium office essentials. Each product is designed to enhance efficiency and create a more productive environment. Ergonomic designs reduce strain.",
+    "Take your work to the next level with our curated office collection. From organization to comfort, we've got everything you need for success. Professional quality at accessible prices.",
+    "Create your ideal workspace with our comprehensive office range. Quality materials and thoughtful design make work easier and more enjoyable. Suitable for home and corporate offices.",
+    "Work smarter with office supplies that deliver results. Our products are tested for durability and performance. Eco-friendly options available for environmentally conscious businesses."
+  ],
+  "outdoor": [
+    "Explore the great outdoors with our adventure-ready gear. Built to withstand the elements, it provides reliability and performance when you need it most. Lightweight and portable for easy transport.",
+    "Connect with nature using our premium outdoor collection. Designed by outdoor enthusiasts, each product is tested in real-world conditions. Durable materials and weather-resistant construction.",
+    "Adventure awaits with gear you can trust. Our outdoor products combine innovation with proven designs for the best experience. Safety features and quality construction included.",
+    "Make the most of outdoor living with our essential products. From camping to gardening, we have everything you need. Easy to use and maintain for all skill levels.",
+    "Embrace outdoor adventures with confidence. Our rugged, reliable products are designed to enhance your connection with nature. Sustainable materials and responsible manufacturing."
+  ]
+};
+
+const productSpecifications: Record<string, Record<string, string[]>> = {
+  "health": {
+    "Form": ["Capsules", "Tablets", "Powder", "Liquid", "Softgels", "Gummies"],
+    "Serving Size": ["1 Capsule", "2 Tablets", "1 Scoop (30g)", "1 Tablespoon", "2 Gummies"],
+    "Servings Per Container": ["30", "60", "90", "120", "180"],
+    "Certification": ["GMP Certified", "FDA Approved Facility", "USDA Organic", "NSF Certified", "Non-GMO Verified"],
+    "Storage": ["Store in cool, dry place", "Refrigerate after opening", "Keep away from sunlight", "Room temperature"],
+    "Allergens": ["Gluten-Free", "Dairy-Free", "Soy-Free", "Nut-Free", "Vegan"]
+  },
+  "beauty": {
+    "Skin Type": ["All Skin Types", "Oily Skin", "Dry Skin", "Sensitive Skin", "Combination Skin"],
+    "Volume": ["30ml", "50ml", "100ml", "200ml", "250ml"],
+    "Key Ingredients": ["Hyaluronic Acid", "Retinol", "Vitamin C", "Niacinamide", "Peptides", "Collagen"],
+    "Formulation": ["Water-Based", "Oil-Based", "Gel", "Cream", "Serum", "Mist"],
+    "Cruelty-Free": ["Yes - Certified", "Vegan Formula", "Not Tested on Animals"],
+    "Usage": ["Daily Use", "Twice Daily", "Weekly Treatment", "As Needed"]
+  },
+  "fashion": {
+    "Material": ["100% Cotton", "Polyester Blend", "Linen", "Silk", "Wool", "Cashmere", "Denim"],
+    "Fit": ["Regular Fit", "Slim Fit", "Relaxed Fit", "Oversized", "Tailored"],
+    "Care": ["Machine Washable", "Hand Wash Only", "Dry Clean Only", "Tumble Dry Low"],
+    "Origin": ["Made in Bangladesh", "Imported", "Handcrafted", "Locally Sourced"],
+    "Season": ["All Season", "Spring/Summer", "Fall/Winter", "Year-Round"],
+    "Closure": ["Button", "Zipper", "Pull-On", "Hook & Eye", "Snap"]
+  },
+  "electronics": {
+    "Connectivity": ["Bluetooth 5.3", "WiFi 6E", "USB-C", "NFC", "5G Compatible"],
+    "Battery Life": ["8 Hours", "12 Hours", "24 Hours", "48 Hours", "Rechargeable Li-Ion"],
+    "Display": ["LCD", "OLED", "LED", "AMOLED", "Retina", "4K UHD"],
+    "Processor": ["Latest Gen Chip", "Dual Core", "Quad Core", "Octa Core"],
+    "Memory": ["4GB RAM", "8GB RAM", "16GB RAM", "32GB Storage", "64GB Storage", "128GB Storage"],
+    "Warranty": ["1 Year", "2 Years", "3 Years", "Extended Available", "Lifetime Limited"]
+  },
+  "home": {
+    "Material": ["Stainless Steel", "Wood", "Plastic", "Glass", "Ceramic", "Fabric", "Metal"],
+    "Dimensions": ["Compact", "Standard", "Large", "Extra Large", "Adjustable"],
+    "Color Options": ["Multiple Colors", "Natural Wood", "White", "Black", "Gray", "Custom"],
+    "Assembly": ["Fully Assembled", "Easy Assembly", "Professional Assembly", "No Tools Required"],
+    "Weight Capacity": ["Up to 25kg", "Up to 50kg", "Up to 100kg", "Heavy Duty"],
+    "Care": ["Wipe Clean", "Dishwasher Safe", "Hand Wash", "Spot Clean Only"]
+  },
+  "sports": {
+    "Material": ["High-Density Foam", "Carbon Fiber", "Aluminum", "Synthetic", "Rubber", "Leather"],
+    "Weight": ["Lightweight", "Ultra Light", "Standard", "Heavy Duty"],
+    "Skill Level": ["Beginner", "Intermediate", "Advanced", "Professional", "All Levels"],
+    "Size": ["Youth", "Adult Small", "Adult Medium", "Adult Large", "Adjustable"],
+    "Durability": ["Indoor Use", "Outdoor Use", "All Weather", "Competition Grade"],
+    "Certification": ["ISO Certified", "Professional Grade", "Safety Tested", "Tournament Approved"]
+  },
+  "food": {
+    "Net Weight": ["100g", "250g", "500g", "1kg", "2kg"],
+    "Shelf Life": ["6 Months", "12 Months", "18 Months", "24 Months", "Best Before Date"],
+    "Dietary": ["Organic", "Gluten-Free", "Vegan", "Keto-Friendly", "Low Sodium", "Sugar-Free"],
+    "Storage": ["Store in Cool, Dry Place", "Refrigerate", "Freeze", "Room Temperature"],
+    "Origin": ["Product of Bangladesh", "Imported", "Local Farm", "Mixed Origin"],
+    "Certifications": ["BSTI Approved", "Halal Certified", "Organic Certified", "ISO 22000"]
+  },
+  "tools": {
+    "Material": ["Chrome Vanadium Steel", "Carbon Steel", "Aluminum", "Titanium", "Hardened Steel"],
+    "Handle": ["Rubber Grip", "Wooden Handle", "Ergonomic Design", "Non-Slip", "Comfort Grip"],
+    "Power": ["Manual", "Cordless", "Electric 110V", "Electric 220V", "Pneumatic"],
+    "Weight": ["0.5kg", "1kg", "2kg", "5kg", "Heavy Duty"],
+    "Warranty": ["1 Year", "2 Years", "5 Years", "Lifetime", "Limited Warranty"],
+    "Certification": ["CE Certified", "ISO 9001", "Safety Tested", "Professional Grade"]
+  },
+  "pets": {
+    "Pet Type": ["Dogs", "Cats", "Birds", "Fish", "Small Animals", "All Pets"],
+    "Size/Weight": ["Small Pets (0-10kg)", "Medium Pets (10-25kg)", "Large Pets (25kg+)", "Universal"],
+    "Age": ["Puppy/Kitten", "Adult", "Senior", "All Life Stages"],
+    "Material": ["Food Grade", "Non-Toxic", "Natural Ingredients", "Hypoallergenic"],
+    "Quantity": ["Pack of 1", "Pack of 5", "Pack of 10", "Bulk Pack"],
+    "Veterinary": ["Vet Recommended", "Clinically Tested", "Approved Ingredients"]
+  },
+  "baby": {
+    "Age Range": ["0-3 Months", "3-6 Months", "6-12 Months", "1-2 Years", "2-4 Years"],
+    "Material": ["Organic Cotton", "BPA-Free Plastic", "Natural Rubber", "Bamboo Fiber", "Hypoallergenic"],
+    "Safety": ["CPSC Certified", "EN71 Tested", "Non-Toxic", "Lead-Free", "Phthalate-Free"],
+    "Size": ["Newborn", "Small", "Medium", "Large", "Adjustable"],
+    "Care": ["Machine Washable", "Hand Wash", "Wipe Clean", "Sterilizable"],
+    "Certification": ["Pediatrician Approved", "Dermatologist Tested", "ASTM Certified"]
+  },
+  "office": {
+    "Material": ["Recycled Paper", "Plastic", "Metal", "Wood", "Leather"],
+    "Dimensions": ["A4", "A5", "Letter Size", "Legal Size", "Custom"],
+    "Capacity": ["50 Sheets", "100 Sheets", "200 Sheets", "500 Sheets"],
+    "Color": ["Black", "Blue", "Red", "Assorted", "Custom Colors"],
+    "Compatibility": ["Universal", "Standard", "Specific Model", "Multi-Purpose"],
+    "Eco-Friendly": ["Recycled Materials", "FSC Certified", "Biodegradable", "Refillable"]
+  },
+  "outdoor": {
+    "Material": ["Ripstop Nylon", "Polyester", "Aluminum Frame", "Stainless Steel", "Weather-Resistant"],
+    "Weight": ["Ultralight", "Lightweight", "Standard", "Heavy Duty"],
+    "Capacity": ["1-2 Person", "2-4 Person", "4-6 Person", "6+ Person", "Variable"],
+    "Weather Rating": ["3-Season", "4-Season", "All Weather", "Waterproof", "UV Resistant"],
+    "Portability": ["Foldable", "Compact", "Carry Bag Included", "Easy Transport"],
+    "Warranty": ["1 Year", "2 Years", "5 Years", "Lifetime", "Limited Warranty"]
+  }
+};
+
 function seededRandom(seed: number): () => number {
   return function() {
     seed = (seed * 9301 + 49297) % 233280;
@@ -796,6 +982,35 @@ function getCategoryType(categorySlug: string): string {
   if (slug.includes("office") || slug.includes("stationery") || slug.includes("school") || slug.includes("desk") || slug.includes("pen") || slug.includes("notebook") || slug.includes("binder") || slug.includes("calculator")) return "office";
   if (slug.includes("outdoor") || slug.includes("garden") || slug.includes("camping") || slug.includes("hiking") || slug.includes("tent") || slug.includes("backpack") || slug.includes("climbing") || slug.includes("navigation") || slug.includes("grill") || slug.includes("pool") || slug.includes("patio") || slug.includes("lawn") || slug.includes("fence")) return "outdoor";
   return "home";
+}
+
+function generateProductSpecifications(categoryType: string, random: () => number): Record<string, string> {
+  const specs = productSpecifications[categoryType] || productSpecifications["home"];
+  const result: Record<string, string> = {};
+  
+  for (const [key, values] of Object.entries(specs)) {
+    result[key] = values[Math.floor(random() * values.length)];
+  }
+  
+  return result;
+}
+
+function generateProductDescription(categoryType: string, productName: string, categoryName: string, random: () => number): string {
+  const descriptions = productDescriptions[categoryType] || productDescriptions["home"];
+  const baseDescription = descriptions[Math.floor(random() * descriptions.length)];
+  return `${baseDescription}\n\nThe ${productName} from our ${categoryName} collection represents the pinnacle of quality and value. Whether you're a first-time buyer or a loyal customer, you'll appreciate the attention to detail and superior craftsmanship that goes into every product we offer.`;
+}
+
+function generateMultipleImages(productId: number): string[] {
+  const totalImages = categoryImageUrls.length;
+  const images: string[] = [];
+  
+  for (let i = 0; i < 4; i++) {
+    const imageIndex = (productId + i * 7) % totalImages;
+    images.push(categoryImageUrls[imageIndex]);
+  }
+  
+  return images;
 }
 
 function generateProducts(count: number = 10000): Product[] {
@@ -841,6 +1056,11 @@ function generateProducts(count: number = 10000): Product[] {
         
         const imageIndex = productId % categoryImageUrls.length;
         const image = categoryImageUrls[imageIndex];
+        const images = generateMultipleImages(productId);
+        
+        const shortDescription = `${productName} - Premium quality ${noun.toLowerCase()} with excellent features designed for ${category.name}. Trusted by thousands of satisfied customers.`;
+        const fullDescription = generateProductDescription(categoryType, productName, category.name, random);
+        const specifications = generateProductSpecifications(categoryType, random);
 
         generatedProducts.push({
           id: productIdStr,
@@ -853,13 +1073,16 @@ function generateProducts(count: number = 10000): Product[] {
           rating: Number((random() * 1.8 + 3.2).toFixed(1)),
           reviews: Math.floor(random() * 15000) + 5,
           image: image,
+          images: images,
           colors: [
             { name: "Primary", value: palette.accent },
             { name: "Secondary", value: colorPalettes[(productId + 3) % colorPalettes.length].accent },
             { name: "Neutral", value: "#6B7280" },
           ],
           sizes: random() > 0.5 ? ["S", "M", "L", "XL", "XXL"] : ["One Size"],
-          shortDescription: `${productName} - Premium quality product with excellent features and value for ${category.name}`,
+          description: fullDescription,
+          shortDescription: shortDescription,
+          specifications: specifications,
           inStock: random() > 0.05,
           stock: Math.floor(random() * 500) + 1,
           isNew: random() > 0.85,

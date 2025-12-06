@@ -140,7 +140,7 @@ export default function ProductDetails() {
               transition={{ delay: 0.1 }}
               className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 md:gap-4"
             >
-              {[0, 1, 2, 3].map((i) => (
+              {(product.images || [product.image, product.image, product.image, product.image]).map((img, i) => (
                 <div 
                   key={i} 
                   onClick={() => setActiveImageIndex(i)}
@@ -151,7 +151,7 @@ export default function ProductDetails() {
                   }`}
                 >
                   <img 
-                    src={product.image} 
+                    src={img} 
                     className="w-full h-full object-cover" 
                     alt={`${product.name} view ${i + 1}`}
                   />
@@ -391,9 +391,9 @@ export default function ProductDetails() {
           transition={{ delay: 0.6 }}
           className="mt-20"
         >
-          <Tabs defaultValue="features">
+          <Tabs defaultValue="description">
             <TabsList className="w-full justify-start bg-transparent border-b border-white/10 rounded-none p-0 h-auto overflow-x-auto">
-              {["features", "specifications", "reviews"].map((tab) => (
+              {["description", "features", "specifications", "reviews"].map((tab) => (
                 <TabsTrigger 
                   key={tab}
                   value={tab} 
@@ -404,6 +404,42 @@ export default function ProductDetails() {
               ))}
             </TabsList>
             <div className="p-4 md:p-8 bg-gradient-to-br from-white/5 to-transparent rounded-b-2xl border-x border-b border-white/10 min-h-[300px]">
+              <TabsContent value="description" className="mt-0 space-y-6">
+                <h3 className="text-2xl font-heading font-bold text-white">Product Description</h3>
+                <div className="prose prose-invert max-w-none">
+                  {product.description ? (
+                    <div className="space-y-4">
+                      {product.description.split('\n\n').map((paragraph, i) => (
+                        <p key={i} className="text-white/70 leading-relaxed text-base">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-white/70 leading-relaxed">
+                      {product.shortDescription || `Discover the ${product.name} - a premium product designed to meet your needs with exceptional quality and value.`}
+                    </p>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 mt-6 border-t border-white/10">
+                  <div className="text-center p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div className="text-2xl font-bold text-purple-400">{product.reviews.toLocaleString()}</div>
+                    <div className="text-sm text-white/50">Reviews</div>
+                  </div>
+                  <div className="text-center p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div className="text-2xl font-bold text-pink-400">{product.rating}</div>
+                    <div className="text-sm text-white/50">Rating</div>
+                  </div>
+                  <div className="text-center p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div className="text-2xl font-bold text-green-400">{product.stock}</div>
+                    <div className="text-sm text-white/50">In Stock</div>
+                  </div>
+                  <div className="text-center p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div className="text-2xl font-bold text-cyan-400">{product.colors?.length || 1}</div>
+                    <div className="text-sm text-white/50">Colors</div>
+                  </div>
+                </div>
+              </TabsContent>
               <TabsContent value="features" className="mt-0 space-y-6">
                 <h3 className="text-2xl font-heading font-bold text-white">Key Features</h3>
                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
