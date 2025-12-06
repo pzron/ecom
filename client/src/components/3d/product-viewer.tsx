@@ -234,6 +234,7 @@ export function ProductViewer({
   const [zoom, setZoom] = useState(1);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const hasWebGL = useWebGLSupport();
 
   const handleZoomIn = useCallback(() => {
     setZoom(prev => Math.min(prev + 0.25, 2));
@@ -306,50 +307,54 @@ export function ProductViewer({
         </Button>
       </motion.div>
       
-      <WebGLErrorBoundary fallback={<Default3DFallback />}>
-        <Canvas
-          shadows
-          dpr={[1, 2]}
-          camera={{ position: [0, 1, 5], fov: 45 }}
-          gl={{ 
-            antialias: true,
-            toneMapping: THREE.ACESFilmicToneMapping,
-            toneMappingExposure: isDarkMode ? 1 : 1.5,
-            failIfMajorPerformanceCaveat: false
-          }}
-          onCreated={({ gl }) => {
-            gl.setClearColor('#0a0a0f');
-          }}
-        >
-          <color attach="background" args={[isDarkMode ? '#0a0a0f' : '#1a1a2e']} />
-          <fog attach="fog" args={[isDarkMode ? '#0a0a0f' : '#1a1a2e', 5, 20]} />
-          
-          <Suspense fallback={<LoadingFallback />}>
-            <CinematicLighting isDarkMode={isDarkMode} />
+      {hasWebGL ? (
+        <WebGLErrorBoundary fallback={<Default3DFallback />}>
+          <Canvas
+            shadows
+            dpr={[1, 2]}
+            camera={{ position: [0, 1, 5], fov: 45 }}
+            gl={{ 
+              antialias: true,
+              toneMapping: THREE.ACESFilmicToneMapping,
+              toneMappingExposure: isDarkMode ? 1 : 1.5,
+              failIfMajorPerformanceCaveat: false
+            }}
+            onCreated={({ gl }) => {
+              gl.setClearColor('#0a0a0f');
+            }}
+          >
+            <color attach="background" args={[isDarkMode ? '#0a0a0f' : '#1a1a2e']} />
+            <fog attach="fog" args={[isDarkMode ? '#0a0a0f' : '#1a1a2e', 5, 20]} />
             
-            <Center>
-              <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-                <PremiumProduct 
-                  color={color} 
-                  isExploded={isExploded}
-                  productType={productType}
-                />
-              </Float>
-            </Center>
-            
-            {showFloor && <ReflectiveFloor />}
-            {showParticles && <FloatingParticles />}
-            
-            <Environment preset="city" background={false} />
-            
-            <CameraController 
-              autoRotate={isAutoRotate} 
-              zoom={zoom}
-              onZoomChange={setZoom}
-            />
-          </Suspense>
-        </Canvas>
-      </WebGLErrorBoundary>
+            <Suspense fallback={<LoadingFallback />}>
+              <CinematicLighting isDarkMode={isDarkMode} />
+              
+              <Center>
+                <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+                  <PremiumProduct 
+                    color={color} 
+                    isExploded={isExploded}
+                    productType={productType}
+                  />
+                </Float>
+              </Center>
+              
+              {showFloor && <ReflectiveFloor />}
+              {showParticles && <FloatingParticles />}
+              
+              <Environment preset="city" background={false} />
+              
+              <CameraController 
+                autoRotate={isAutoRotate} 
+                zoom={zoom}
+                onZoomChange={setZoom}
+              />
+            </Suspense>
+          </Canvas>
+        </WebGLErrorBoundary>
+      ) : (
+        <Default3DFallback />
+      )}
       
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
