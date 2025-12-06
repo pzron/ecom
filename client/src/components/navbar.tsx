@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Search, ShoppingCart, User, Menu, Heart, Sparkles, Mic, MicOff, LogIn, UserPlus, LogOut, Settings } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, Heart, Sparkles, Mic, MicOff, LogIn, UserPlus, LogOut, Settings, X, Gift, Shield, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -13,11 +13,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [showSignUpPopup, setShowSignUpPopup] = useState(false);
   const [, navigate] = useLocation();
   const { getItemCount, setIsOpen } = useCart();
   const { isAuthenticated, user, logout } = useAuthStore();
@@ -250,27 +258,32 @@ export function Navbar() {
               <DropdownMenuTrigger asChild>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
-                  className="h-8 w-8 lg:h-10 lg:w-10 rounded-full border-2 border-white/20 hover:border-white/40 transition-all flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10"
+                  className="h-8 w-8 lg:h-10 lg:w-10 rounded-full border-2 border-purple-500/40 hover:border-purple-400 transition-all flex items-center justify-center bg-gradient-to-br from-purple-500/10 to-pink-500/10 text-purple-300 hover:text-white hover:from-purple-500/20 hover:to-pink-500/20"
                   data-testid="profile-button"
                 >
-                  <User className="w-4 h-4" />
+                  <UserPlus className="w-4 h-4" />
                 </motion.button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
                 align="end" 
-                className="w-52 bg-[#0f0f15]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-xl shadow-purple-500/10 mt-2"
+                className="w-56 bg-[#0f0f15]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-xl shadow-purple-500/10 mt-2"
               >
+                <div className="px-4 py-3 border-b border-white/10">
+                  <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Welcome</p>
+                  <p className="text-sm font-medium text-white">Join our community</p>
+                </div>
                 <DropdownMenuItem asChild className="focus:bg-purple-500/10 cursor-pointer">
                   <Link href="/signup" className="flex items-center gap-3 text-white text-sm px-4 py-2.5">
                     <LogIn className="w-4 h-4 text-cyan-400" />
                     Login
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="focus:bg-purple-500/10 cursor-pointer">
-                  <Link href="/signup" className="flex items-center gap-3 text-white text-sm px-4 py-2.5">
-                    <UserPlus className="w-4 h-4 text-purple-400" />
-                    Sign Up
-                  </Link>
+                <DropdownMenuItem 
+                  onClick={() => setShowSignUpPopup(true)}
+                  className="focus:bg-purple-500/10 cursor-pointer px-4 py-2.5"
+                >
+                  <UserPlus className="w-4 h-4 mr-3 text-purple-400" />
+                  <span className="text-white text-sm font-medium">Sign Up</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -357,6 +370,92 @@ export function Navbar() {
           </Sheet>
         </div>
       </div>
+
+      <Dialog open={showSignUpPopup} onOpenChange={setShowSignUpPopup}>
+        <DialogContent className="bg-[#0f0f15]/98 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl shadow-purple-500/20 max-w-md p-0 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-pink-500/5" />
+          <div className="relative">
+            <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 px-6 py-8 text-center border-b border-white/10">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+                className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30"
+              >
+                <Sparkles className="w-8 h-8 text-white" />
+              </motion.div>
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold text-white mb-2">
+                  Welcome to NexCommerce
+                </DialogTitle>
+                <DialogDescription className="text-white/60 text-sm">
+                  Join thousands of shoppers discovering premium products with exclusive benefits
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+            
+            <div className="px-6 py-6 space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-500/10 flex items-center justify-center flex-shrink-0">
+                    <Gift className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">Exclusive Deals</p>
+                    <p className="text-xs text-white/50">Access member-only discounts up to 50% off</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500/20 to-cyan-500/10 flex items-center justify-center flex-shrink-0">
+                    <Shield className="w-5 h-5 text-cyan-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">Secure Shopping</p>
+                    <p className="text-xs text-white/50">Your data is protected with enterprise security</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500/20 to-pink-500/10 flex items-center justify-center flex-shrink-0">
+                    <Zap className="w-5 h-5 text-pink-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">Express Checkout</p>
+                    <p className="text-xs text-white/50">Complete purchases in seconds</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="pt-2 space-y-3">
+                <Button 
+                  onClick={() => {
+                    setShowSignUpPopup(false);
+                    navigate("/signup");
+                  }}
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-5 rounded-xl shadow-lg shadow-purple-500/25 transition-all hover:shadow-xl hover:scale-[1.02]"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Create Free Account
+                </Button>
+                
+                <p className="text-center text-xs text-white/40">
+                  Already have an account?{" "}
+                  <button 
+                    onClick={() => {
+                      setShowSignUpPopup(false);
+                      navigate("/signup");
+                    }}
+                    className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
+                  >
+                    Sign in
+                  </button>
+                </p>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 }
