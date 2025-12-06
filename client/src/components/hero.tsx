@@ -7,7 +7,6 @@ import { Float, OrbitControls, Environment } from "@react-three/drei";
 import { Suspense, useRef, useState, useEffect } from "react";
 import * as THREE from "three";
 import { WebGLErrorBoundary, Default3DFallback } from "./3d/webgl-check";
-import { hero3DProducts } from "@/data/products";
 
 function FloatingCube({ position, color, size = 0.5, rotationSpeed = 1 }: { 
   position: [number, number, number]; 
@@ -189,75 +188,6 @@ function HeroScene() {
   );
 }
 
-function FloatingProductCard({ 
-  product, 
-  index 
-}: { 
-  product: { image: string; name: string; price: number }; 
-  index: number 
-}) {
-  const positions = [
-    { x: -38, y: 8, rotate: -8 },
-    { x: 38, y: 12, rotate: 8 },
-    { x: -35, y: 55, rotate: 5 },
-    { x: 36, y: 50, rotate: -5 },
-    { x: -42, y: 32, rotate: -3 },
-    { x: 42, y: 35, rotate: 3 },
-    { x: -30, y: 75, rotate: 6 },
-    { x: 32, y: 72, rotate: -6 },
-  ];
-  
-  const pos = positions[index % positions.length];
-  const animDuration = 5 + (index * 0.5);
-  const delay = index * 0.15;
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.5, y: 30, rotate: pos.rotate }}
-      animate={{ 
-        opacity: 1,
-        scale: [0.95, 1.05, 0.95],
-        y: [0, -15, 0],
-        rotateY: [0, 15, 0, -15, 0],
-        rotateZ: [pos.rotate - 2, pos.rotate + 2, pos.rotate - 2]
-      }}
-      transition={{ 
-        opacity: { duration: 0.5, delay },
-        scale: { duration: animDuration, delay: delay + 0.5, repeat: Infinity, ease: "easeInOut" },
-        y: { duration: animDuration * 0.8, delay: delay + 0.3, repeat: Infinity, ease: "easeInOut" },
-        rotateY: { duration: animDuration * 1.2, delay: delay + 0.2, repeat: Infinity, ease: "easeInOut" },
-        rotateZ: { duration: animDuration * 1.5, delay: delay, repeat: Infinity, ease: "easeInOut" }
-      }}
-      className="absolute w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/30 backdrop-blur-md bg-gradient-to-br from-white/20 to-white/5"
-      style={{ 
-        left: `${50 + pos.x}%`,
-        top: `${pos.y}%`,
-        transform: `translateX(-50%) rotate(${pos.rotate}deg)`,
-        perspective: '1000px',
-        transformStyle: 'preserve-3d'
-      }}
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-transparent to-pink-500/20 z-10" />
-      <img 
-        src={product.image} 
-        alt={product.name}
-        className="w-full h-full object-cover"
-        loading="lazy"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-20" />
-      <motion.div 
-        className="absolute bottom-1 left-1 right-1 z-30 bg-white/10 backdrop-blur-sm rounded-lg px-2 py-1"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: delay + 0.8 }}
-      >
-        <p className="text-white text-[10px] font-medium truncate">{product.name.slice(0, 15)}...</p>
-        <p className="text-purple-300 text-[10px] font-bold">৳{product.price}</p>
-      </motion.div>
-    </motion.div>
-  );
-}
-
 export function Hero() {
   const [isHovered, setIsHovered] = useState(false);
   const mouseX = useMotionValue(0);
@@ -296,9 +226,6 @@ export function Hero() {
         </div>
       </div>
 
-      {hero3DProducts.slice(0, 8).map((product, index) => (
-        <FloatingProductCard key={product.id} product={product} index={index} />
-      ))}
 
       <div className="container relative z-10 px-4 flex flex-col items-center text-center">
         <motion.div
