@@ -1,8 +1,5 @@
 import OpenAI from "openai";
 
-// the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 export interface ChatMessage {
   role: "user" | "assistant" | "system";
   content: string;
@@ -17,6 +14,15 @@ export interface ProductContext {
   description?: string;
   rating: number;
   inStock: boolean;
+}
+
+let openaiClient: OpenAI | null = null;
+
+function getOpenAI(): OpenAI | null {
+  if (!openaiClient && process.env.OPENAI_API_KEY) {
+    openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+  return openaiClient;
 }
 
 const SYSTEM_PROMPT = `You are Nex AI, the intelligent shopping assistant for NexCommerce - a premium e-commerce platform. Your role is to:
@@ -43,6 +49,12 @@ export async function generateChatResponse(
   messages: ChatMessage[],
   products?: ProductContext[]
 ): Promise<string> {
+  const openai = getOpenAI();
+  
+  if (!openai) {
+    return "I'm currently in demo mode. Please configure the OpenAI API key to enable AI-powered responses. In the meantime, feel free to browse our products!";
+  }
+  
   try {
     let systemMessage = SYSTEM_PROMPT;
     
@@ -51,12 +63,12 @@ export async function generateChatResponse(
     }
 
     const response = await openai.chat.completions.create({
-      model: "gpt-5",
+      model: "gpt-4o",
       messages: [
         { role: "system", content: systemMessage },
         ...messages.map(m => ({ role: m.role, content: m.content }))
       ],
-      max_completion_tokens: 500,
+      max_tokens: 500,
     });
 
     return response.choices[0].message.content || "I'm sorry, I couldn't generate a response. Please try again.";
@@ -73,9 +85,18 @@ export async function searchProductsWithAI(
   query: string,
   products: ProductContext[]
 ): Promise<{ answer: string; recommendedIds: string[] }> {
+  const openai = getOpenAI();
+  
+  if (!openai) {
+    return {
+      answer: "Here are some products that might match what you're looking for.",
+      recommendedIds: products.slice(0, 5).map(p => p.id)
+    };
+  }
+  
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-5",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
@@ -88,7 +109,7 @@ Products available: ${JSON.stringify(products.map(p => ({ id: p.id, name: p.name
         { role: "user", content: query }
       ],
       response_format: { type: "json_object" },
-      max_completion_tokens: 500,
+      max_tokens: 500,
     });
 
     const result = JSON.parse(response.choices[0].message.content || "{}");
@@ -105,4 +126,4 @@ Products available: ${JSON.stringify(products.map(p => ({ id: p.id, name: p.name
   }
 }
 
-export { openai };
+export const openai = { getClient: getOpenAI };

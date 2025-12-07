@@ -5,6 +5,7 @@ import { CreditCard, Wallet, Lock, Check, Truck, MapPin, User, Mail, Phone, Gift
 import { useLocation, Link } from "wouter";
 import { useCart } from "@/hooks/use-cart";
 import { useAuthStore } from "@/stores/auth";
+import { Footer } from "@/components/layout/footer";
 
 interface PaymentMethod {
   id: string;
@@ -15,6 +16,7 @@ interface PaymentMethod {
 
 export default function CheckoutPage() {
   const [, navigate] = useLocation();
+  const { items, getSubtotal, clearCart } = useCart();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     email: "",
@@ -104,6 +106,7 @@ export default function CheckoutPage() {
     setOrderStatus("shipped");
     await new Promise(r => setTimeout(r, 1000));
     setShowSuccess(true);
+    clearCart();
     await new Promise(r => setTimeout(r, 3000));
     navigate("/");
   };
@@ -130,6 +133,7 @@ export default function CheckoutPage() {
     setOrderStatus("shipped");
     await new Promise(r => setTimeout(r, 1000));
     setShowSuccess(true);
+    clearCart();
     await new Promise(r => setTimeout(r, 3000));
     navigate("/");
   };
@@ -153,6 +157,7 @@ export default function CheckoutPage() {
       setOrderStatus("shipped");
       await new Promise(r => setTimeout(r, 1000));
       setShowSuccess(true);
+      clearCart();
       await new Promise(r => setTimeout(r, 3000));
       navigate("/");
     }
@@ -171,9 +176,10 @@ export default function CheckoutPage() {
     { id: "overnight", label: "Overnight", charge: 24.99, days: "1", icon: "✈️" },
   ];
 
-  const total = 2053.76;
+  const subtotal = getSubtotal();
   const deliveryCharge = deliveryOptions.find(o => o.id === deliveryOption)?.charge || 0;
-  const finalTotal = total + deliveryCharge + paymentDetails.codCharge;
+  const tax = Math.round(subtotal * 0.08 * 100) / 100;
+  const finalTotal = subtotal + deliveryCharge + tax + paymentDetails.codCharge;
 
   const statusConfig: any = {
     pending: { icon: Clock, color: "text-yellow-400", label: "Pending" },
