@@ -4,17 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   CreditCard, DollarSign, Receipt, ShoppingCart,
-  ArrowUpRight, Clock, CheckCircle2, TrendingUp
+  ArrowUpRight, Clock, CheckCircle2, TrendingUp, Loader2, AlertTriangle
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 
-const recentTransactions = [
-  { id: "TXN-001", customer: "Walk-in Customer", amount: "৳1,250", items: 3, method: "Cash", time: "2 min ago" },
-  { id: "TXN-002", customer: "Sarah Chen", amount: "৳3,450", items: 5, method: "Card", time: "15 min ago" },
-  { id: "TXN-003", customer: "Mike Johnson", amount: "৳890", items: 2, method: "Mobile Pay", time: "32 min ago" },
-  { id: "TXN-004", customer: "Walk-in Customer", amount: "৳2,100", items: 4, method: "Cash", time: "45 min ago" },
-];
+interface CashierDashboardData {
+  todaySales: number;
+  transactions: number;
+  itemsSold: number;
+  avgTime: string;
+  recentTransactions: { id: string; customer: string; amount: number; items: number; method: string; time: string }[];
+  shiftInfo: { start: string; end: string; breakTaken: string };
+}
 
 const quickActions = [
   { label: "New Sale", icon: ShoppingCart, href: "/spoon/cashier/pos", color: "from-green-500 to-emerald-500" },
@@ -23,6 +26,41 @@ const quickActions = [
 ];
 
 export default function CashierDashboard() {
+  const { data, isLoading, error } = useQuery<CashierDashboardData>({
+    queryKey: ["/api/cashier/dashboard"],
+    queryFn: async () => {
+      const res = await fetch("/api/cashier/dashboard", { credentials: "include" });
+      if (!res.ok) {
+        if (res.status === 401) throw new Error("Please log in to access this dashboard");
+        if (res.status === 403) throw new Error("You don't have permission to access this dashboard");
+        throw new Error("Failed to load dashboard");
+      }
+      return res.json();
+    },
+  });
+
+  const recentTransactions = data?.recentTransactions || [];
+
+  if (isLoading) {
+    return (
+      <DashboardLayout role="cashier">
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="w-8 h-8 animate-spin text-green-500" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout role="cashier">
+        <div className="flex flex-col items-center justify-center h-96 gap-4">
+          <AlertTriangle className="w-12 h-12 text-red-400" />
+          <p className="text-white/60">{error.message}</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
   return (
     <DashboardLayout role="cashier">
       <div className="space-y-6">
@@ -56,7 +94,7 @@ export default function CashierDashboard() {
                   </Badge>
                 </div>
                 <h3 className="text-sm text-white/60 mb-1">Today's Sales</h3>
-                <p className="text-3xl font-bold text-white">৳24,560</p>
+                <p className="text-3xl font-bold text-white">৳{(data?.todaySales || 0).toLocaleString()}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -70,7 +108,7 @@ export default function CashierDashboard() {
                   </div>
                 </div>
                 <h3 className="text-sm text-white/60 mb-1">Transactions</h3>
-                <p className="text-3xl font-bold text-white">47</p>
+                <p className="text-3xl font-bold text-white">{data?.transactions || 0}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -84,7 +122,7 @@ export default function CashierDashboard() {
                   </div>
                 </div>
                 <h3 className="text-sm text-white/60 mb-1">Items Sold</h3>
-                <p className="text-3xl font-bold text-white">156</p>
+                <p className="text-3xl font-bold text-white">{data?.itemsSold || 0}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -98,7 +136,7 @@ export default function CashierDashboard() {
                   </div>
                 </div>
                 <h3 className="text-sm text-white/60 mb-1">Avg. Time</h3>
-                <p className="text-3xl font-bold text-white">2.4 min</p>
+                <p className="text-3xl font-bold text-white">{data?.avgTime || "0 min"}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -186,15 +224,15 @@ export default function CashierDashboard() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-white/60">Shift Start</span>
-                      <span className="text-white">6:00 AM</span>
+                      <span className="text-white">{data?.shiftInfo?.start || "6:00 AM"}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-white/60">Shift End</span>
-                      <span className="text-white">2:00 PM</span>
+                      <span className="text-white">{data?.shiftInfo?.end || "2:00 PM"}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-white/60">Break Taken</span>
-                      <span className="text-green-400">30 min</span>
+                      <span className="text-green-400">{data?.shiftInfo?.breakTaken || "0 min"}</span>
                     </div>
                   </div>
                 </div>

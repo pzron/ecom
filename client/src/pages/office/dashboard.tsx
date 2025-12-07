@@ -5,24 +5,20 @@ import { Badge } from "@/components/ui/badge";
 import { 
   FileText, Headphones, MessageSquare, BarChart3,
   Clock, CheckCircle2, AlertCircle, Users,
-  ArrowUpRight, Calendar, Mail
+  ArrowUpRight, Calendar, Mail, AlertTriangle, Loader2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 
-const recentTickets = [
-  { id: "TKT-001", customer: "Sarah Chen", subject: "Order delivery delay", priority: "high", status: "open", time: "10 min ago" },
-  { id: "TKT-002", customer: "Mike Johnson", subject: "Refund request", priority: "medium", status: "open", time: "25 min ago" },
-  { id: "TKT-003", customer: "Emma Wilson", subject: "Product inquiry", priority: "low", status: "pending", time: "1 hour ago" },
-  { id: "TKT-004", customer: "David Brown", subject: "Account issue", priority: "high", status: "resolved", time: "2 hours ago" },
-];
-
-const upcomingTasks = [
-  { id: 1, title: "Process pending refunds", dueTime: "2:00 PM", priority: "high" },
-  { id: 2, title: "Generate weekly sales report", dueTime: "4:00 PM", priority: "medium" },
-  { id: 3, title: "Update customer records", dueTime: "5:00 PM", priority: "low" },
-  { id: 4, title: "Team meeting notes", dueTime: "Tomorrow", priority: "medium" },
-];
+interface OfficeDashboardData {
+  openTickets: number;
+  resolvedToday: number;
+  pendingDocuments: number;
+  avgResponseTime: string;
+  recentTickets: { id: string; customer: string; subject: string; priority: string; status: string; time: string }[];
+  upcomingTasks: { id: number; title: string; dueTime: string; priority: string }[];
+}
 
 const priorityColors: Record<string, string> = {
   high: "bg-red-500/20 text-red-400",
@@ -37,6 +33,43 @@ const statusColors: Record<string, string> = {
 };
 
 export default function OfficeDashboard() {
+  const { data, isLoading, error } = useQuery<OfficeDashboardData>({
+    queryKey: ["/api/office/dashboard"],
+    queryFn: async () => {
+      const res = await fetch("/api/office/dashboard", { credentials: "include" });
+      if (!res.ok) {
+        if (res.status === 401) throw new Error("Please log in to access this dashboard");
+        if (res.status === 403) throw new Error("You don't have permission to access this dashboard");
+        throw new Error("Failed to load dashboard");
+      }
+      return res.json();
+    },
+  });
+
+  const recentTickets = data?.recentTickets || [];
+  const upcomingTasks = data?.upcomingTasks || [];
+
+  if (isLoading) {
+    return (
+      <DashboardLayout role="office_member">
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout role="office_member">
+        <div className="flex flex-col items-center justify-center h-96 gap-4">
+          <AlertTriangle className="w-12 h-12 text-red-400" />
+          <p className="text-white/60">{error.message}</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout role="office_member">
       <div className="space-y-6">
@@ -78,7 +111,7 @@ export default function OfficeDashboard() {
                   </Badge>
                 </div>
                 <h3 className="text-sm text-white/60 mb-1">Open Tickets</h3>
-                <p className="text-3xl font-bold text-white">12</p>
+                <p className="text-3xl font-bold text-white">{data?.openTickets || 0}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -90,7 +123,7 @@ export default function OfficeDashboard() {
                   <CheckCircle2 className="w-5 h-5 text-green-400" />
                 </div>
                 <h3 className="text-sm text-white/60 mb-1">Resolved Today</h3>
-                <p className="text-3xl font-bold text-white">28</p>
+                <p className="text-3xl font-bold text-white">{data?.resolvedToday || 0}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -102,7 +135,7 @@ export default function OfficeDashboard() {
                   <FileText className="w-5 h-5 text-purple-400" />
                 </div>
                 <h3 className="text-sm text-white/60 mb-1">Pending Documents</h3>
-                <p className="text-3xl font-bold text-white">7</p>
+                <p className="text-3xl font-bold text-white">{data?.pendingDocuments || 0}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -114,7 +147,7 @@ export default function OfficeDashboard() {
                   <Clock className="w-5 h-5 text-cyan-400" />
                 </div>
                 <h3 className="text-sm text-white/60 mb-1">Avg. Response</h3>
-                <p className="text-3xl font-bold text-white">12 min</p>
+                <p className="text-3xl font-bold text-white">{data?.avgResponseTime || "0 min"}</p>
               </CardContent>
             </Card>
           </motion.div>

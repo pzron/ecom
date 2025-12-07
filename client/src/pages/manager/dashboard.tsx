@@ -5,34 +5,21 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Users, TrendingUp, Package, DollarSign, 
   Clock, CheckCircle2, AlertTriangle, Calendar,
-  ArrowUpRight, ArrowDownRight, BarChart3, Target
+  ArrowUpRight, ArrowDownRight, BarChart3, Target, Loader2
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar } from "recharts";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 
-const salesData = [
-  { name: 'Mon', sales: 4000, target: 3500 },
-  { name: 'Tue', sales: 3000, target: 3500 },
-  { name: 'Wed', sales: 5000, target: 3500 },
-  { name: 'Thu', sales: 2780, target: 3500 },
-  { name: 'Fri', sales: 1890, target: 3500 },
-  { name: 'Sat', sales: 6390, target: 4000 },
-  { name: 'Sun', sales: 3490, target: 3000 },
-];
-
-const teamPerformance = [
-  { name: 'Sarah', sales: 45, efficiency: 92 },
-  { name: 'Mike', sales: 38, efficiency: 88 },
-  { name: 'Emma', sales: 52, efficiency: 95 },
-  { name: 'John', sales: 41, efficiency: 85 },
-];
-
-const pendingApprovals = [
-  { id: 1, type: "Leave Request", employee: "Sarah Chen", date: "Dec 5-7", status: "pending" },
-  { id: 2, type: "Stock Order", description: "Electronics Restock", amount: "৳125,000", status: "pending" },
-  { id: 3, type: "Refund", customer: "John Doe", amount: "৳2,500", status: "pending" },
-  { id: 4, type: "Overtime", employee: "Mike Johnson", hours: "12 hrs", status: "pending" },
-];
+interface ManagerDashboardData {
+  todaySales: number;
+  teamMembersActive: string;
+  ordersProcessed: number;
+  avgProcessingTime: string;
+  salesData: { name: string; sales: number; target: number }[];
+  teamPerformance: { name: string; sales: number; efficiency: number }[];
+  pendingApprovals: { id: number; type: string; employee?: string; description?: string; customer?: string; date?: string; amount?: string; hours?: string; status: string }[];
+}
 
 function StatCard({ title, value, change, icon: Icon, color, delay = 0 }: {
   title: string;
@@ -76,6 +63,44 @@ function StatCard({ title, value, change, icon: Icon, color, delay = 0 }: {
 }
 
 export default function ManagerDashboard() {
+  const { data, isLoading, error } = useQuery<ManagerDashboardData>({
+    queryKey: ["/api/manager/dashboard"],
+    queryFn: async () => {
+      const res = await fetch("/api/manager/dashboard", { credentials: "include" });
+      if (!res.ok) {
+        if (res.status === 401) throw new Error("Please log in to access this dashboard");
+        if (res.status === 403) throw new Error("You don't have permission to access this dashboard");
+        throw new Error("Failed to load dashboard");
+      }
+      return res.json();
+    },
+  });
+
+  const salesData = data?.salesData || [];
+  const teamPerformance = data?.teamPerformance || [];
+  const pendingApprovals = data?.pendingApprovals || [];
+
+  if (isLoading) {
+    return (
+      <DashboardLayout role="manager">
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout role="manager">
+        <div className="flex flex-col items-center justify-center h-96 gap-4">
+          <AlertTriangle className="w-12 h-12 text-red-400" />
+          <p className="text-white/60">{error.message}</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout role="manager">
       <div className="space-y-6">
@@ -101,10 +126,10 @@ export default function ManagerDashboard() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard title="Today's Sales" value="৳45,230" change="+12.5%" icon={DollarSign} color="blue" delay={0} />
-          <StatCard title="Team Members Active" value="8/10" change="+2" icon={Users} color="green" delay={0.1} />
-          <StatCard title="Orders Processed" value="127" change="+18%" icon={Package} color="orange" delay={0.2} />
-          <StatCard title="Avg. Processing Time" value="4.2 min" change="-8%" icon={Clock} color="purple" delay={0.3} />
+          <StatCard title="Today's Sales" value={`৳${(data?.todaySales || 0).toLocaleString()}`} change="+12.5%" icon={DollarSign} color="blue" delay={0} />
+          <StatCard title="Team Members Active" value={data?.teamMembersActive || "0/0"} change="+2" icon={Users} color="green" delay={0.1} />
+          <StatCard title="Orders Processed" value={String(data?.ordersProcessed || 0)} change="+18%" icon={Package} color="orange" delay={0.2} />
+          <StatCard title="Avg. Processing Time" value={data?.avgProcessingTime || "0 min"} change="-8%" icon={Clock} color="purple" delay={0.3} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

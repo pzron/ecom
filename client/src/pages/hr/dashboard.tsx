@@ -5,41 +5,23 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Users, UserPlus, Calendar, DollarSign, 
   Clock, FileText, Briefcase, TrendingUp,
-  ArrowUpRight, ArrowDownRight, CheckCircle2, XCircle
+  ArrowUpRight, ArrowDownRight, CheckCircle2, XCircle, AlertTriangle, Loader2
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from "recharts";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 
-const headcountData = [
-  { month: 'Jul', employees: 42 },
-  { month: 'Aug', employees: 45 },
-  { month: 'Sep', employees: 48 },
-  { month: 'Oct', employees: 52 },
-  { month: 'Nov', employees: 55 },
-  { month: 'Dec', employees: 58 },
-];
-
-const departmentDistribution = [
-  { name: 'Sales', value: 18, color: '#3b82f6' },
-  { name: 'Marketing', value: 8, color: '#10b981' },
-  { name: 'Operations', value: 15, color: '#f59e0b' },
-  { name: 'Customer Service', value: 12, color: '#8b5cf6' },
-  { name: 'Admin', value: 5, color: '#ec4899' },
-];
-
-const pendingRequests = [
-  { id: 1, type: "Leave Request", employee: "Sarah Chen", department: "Sales", days: "3 days", status: "pending" },
-  { id: 2, type: "Leave Request", employee: "Mike Johnson", department: "Marketing", days: "5 days", status: "pending" },
-  { id: 3, type: "Overtime", employee: "Emma Davis", department: "Operations", hours: "8 hrs", status: "pending" },
-  { id: 4, type: "Leave Request", employee: "John Smith", department: "Customer Service", days: "2 days", status: "pending" },
-];
-
-const recentHires = [
-  { name: "Alex Thompson", role: "Sales Associate", department: "Sales", startDate: "Dec 1, 2024" },
-  { name: "Jessica Lee", role: "Marketing Specialist", department: "Marketing", startDate: "Nov 28, 2024" },
-  { name: "David Wilson", role: "Stock Keeper", department: "Operations", startDate: "Nov 25, 2024" },
-];
+interface HRDashboardData {
+  totalEmployees: number;
+  openPositions: number;
+  pendingLeave: number;
+  monthlyPayroll: string;
+  headcountData: { month: string; employees: number }[];
+  departmentDistribution: { name: string; value: number; color: string }[];
+  pendingRequests: { id: number; type: string; employee: string; department: string; days?: string; hours?: string; status: string }[];
+  recentHires: { name: string; role: string; department: string; startDate: string }[];
+}
 
 function StatCard({ title, value, change, icon: Icon, color, delay = 0 }: {
   title: string;
@@ -83,6 +65,49 @@ function StatCard({ title, value, change, icon: Icon, color, delay = 0 }: {
 }
 
 export default function HRDashboard() {
+  const { data, isLoading, error } = useQuery<HRDashboardData>({
+    queryKey: ["/api/hr/dashboard"],
+    queryFn: async () => {
+      const res = await fetch("/api/hr/dashboard", { credentials: "include" });
+      if (!res.ok) {
+        if (res.status === 401) throw new Error("Please log in to access this dashboard");
+        if (res.status === 403) throw new Error("You don't have permission to access this dashboard");
+        throw new Error("Failed to load dashboard");
+      }
+      return res.json();
+    },
+  });
+
+  const headcountData = data?.headcountData || [];
+  const defaultColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+  const departmentDistribution = (data?.departmentDistribution || []).map((dept, i) => ({
+    ...dept,
+    color: dept.color || defaultColors[i % defaultColors.length]
+  }));
+  const pendingRequests = data?.pendingRequests || [];
+  const recentHires = data?.recentHires || [];
+
+  if (isLoading) {
+    return (
+      <DashboardLayout role="hr">
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout role="hr">
+        <div className="flex flex-col items-center justify-center h-96 gap-4">
+          <AlertTriangle className="w-12 h-12 text-red-400" />
+          <p className="text-white/60">{error.message}</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout role="hr">
       <div className="space-y-6">
@@ -112,10 +137,10 @@ export default function HRDashboard() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard title="Total Employees" value="58" change="+5.4%" icon={Users} color="blue" delay={0} />
-          <StatCard title="Open Positions" value="6" change="+2" icon={Briefcase} color="green" delay={0.1} />
-          <StatCard title="Pending Leave" value="4" change="-12%" icon={Calendar} color="orange" delay={0.2} />
-          <StatCard title="Monthly Payroll" value="৳2.4M" change="+8.2%" icon={DollarSign} color="purple" delay={0.3} />
+          <StatCard title="Total Employees" value={String(data?.totalEmployees || 0)} change="+5.4%" icon={Users} color="blue" delay={0} />
+          <StatCard title="Open Positions" value={String(data?.openPositions || 0)} change="+2" icon={Briefcase} color="green" delay={0.1} />
+          <StatCard title="Pending Leave" value={String(data?.pendingLeave || 0)} change="-12%" icon={Calendar} color="orange" delay={0.2} />
+          <StatCard title="Monthly Payroll" value={data?.monthlyPayroll || "৳0"} change="+8.2%" icon={DollarSign} color="purple" delay={0.3} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

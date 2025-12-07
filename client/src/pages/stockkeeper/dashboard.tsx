@@ -4,37 +4,62 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   Boxes, Package, Truck, AlertTriangle,
-  ArrowUpRight, ArrowDownRight, TrendingUp, Clock
+  ArrowUpRight, ArrowDownRight, TrendingUp, Clock, Loader2
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 
-const stockMovement = [
-  { day: 'Mon', received: 120, dispatched: 85 },
-  { day: 'Tue', received: 95, dispatched: 110 },
-  { day: 'Wed', received: 150, dispatched: 125 },
-  { day: 'Thu', received: 80, dispatched: 90 },
-  { day: 'Fri', received: 200, dispatched: 175 },
-  { day: 'Sat', received: 60, dispatched: 45 },
-  { day: 'Sun', received: 30, dispatched: 25 },
-];
-
-const recentActivity = [
-  { id: 1, type: "received", product: "iPhone 15 Pro (50 units)", from: "Apple Warehouse", time: "10 min ago" },
-  { id: 2, type: "dispatched", product: "MacBook Air (15 units)", to: "Floor Display", time: "25 min ago" },
-  { id: 3, type: "alert", product: "AirPods Pro 2", message: "Low stock warning", time: "1 hour ago" },
-  { id: 4, type: "received", product: "Samsung TV (20 units)", from: "Samsung Distribution", time: "2 hours ago" },
-];
-
-const lowStockItems = [
-  { name: "MacBook Air M3", current: 8, minimum: 15, urgency: "high" },
-  { name: "Nike Air Max", current: 3, minimum: 10, urgency: "critical" },
-  { name: "Smart Watch Pro", current: 0, minimum: 15, urgency: "out" },
-  { name: "Coffee Maker", current: 5, minimum: 8, urgency: "medium" },
-];
+interface StockkeeperDashboardData {
+  totalSKUs: number;
+  receivedToday: number;
+  dispatchedToday: number;
+  stockAlerts: number;
+  stockMovement: { day: string; received: number; dispatched: number }[];
+  recentActivity: { id: number; type: string; product: string; from?: string; to?: string; message?: string; time: string }[];
+  lowStockItems: { name: string; current: number; minimum: number; urgency: string }[];
+}
 
 export default function StockkeeperDashboard() {
+  const { data, isLoading, error } = useQuery<StockkeeperDashboardData>({
+    queryKey: ["/api/stockkeeper/dashboard"],
+    queryFn: async () => {
+      const res = await fetch("/api/stockkeeper/dashboard", { credentials: "include" });
+      if (!res.ok) {
+        if (res.status === 401) throw new Error("Please log in to access this dashboard");
+        if (res.status === 403) throw new Error("You don't have permission to access this dashboard");
+        throw new Error("Failed to load dashboard");
+      }
+      return res.json();
+    },
+  });
+
+  const stockMovement = data?.stockMovement || [];
+  const recentActivity = data?.recentActivity || [];
+  const lowStockItems = data?.lowStockItems || [];
+
+  if (isLoading) {
+    return (
+      <DashboardLayout role="stockkeeper">
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout role="stockkeeper">
+        <div className="flex flex-col items-center justify-center h-96 gap-4">
+          <AlertTriangle className="w-12 h-12 text-red-400" />
+          <p className="text-white/60">{error.message}</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout role="stockkeeper">
       <div className="space-y-6">
@@ -76,7 +101,7 @@ export default function StockkeeperDashboard() {
                   </Badge>
                 </div>
                 <h3 className="text-sm text-white/60 mb-1">Total SKUs</h3>
-                <p className="text-3xl font-bold text-white">1,247</p>
+                <p className="text-3xl font-bold text-white">{(data?.totalSKUs || 0).toLocaleString()}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -90,7 +115,7 @@ export default function StockkeeperDashboard() {
                   </div>
                 </div>
                 <h3 className="text-sm text-white/60 mb-1">Received Today</h3>
-                <p className="text-3xl font-bold text-white">735</p>
+                <p className="text-3xl font-bold text-white">{data?.receivedToday || 0}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -104,7 +129,7 @@ export default function StockkeeperDashboard() {
                   </div>
                 </div>
                 <h3 className="text-sm text-white/60 mb-1">Dispatched Today</h3>
-                <p className="text-3xl font-bold text-white">655</p>
+                <p className="text-3xl font-bold text-white">{data?.dispatchedToday || 0}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -118,7 +143,7 @@ export default function StockkeeperDashboard() {
                   </div>
                 </div>
                 <h3 className="text-sm text-white/60 mb-1">Stock Alerts</h3>
-                <p className="text-3xl font-bold text-white">4</p>
+                <p className="text-3xl font-bold text-white">{data?.stockAlerts || 0}</p>
               </CardContent>
             </Card>
           </motion.div>

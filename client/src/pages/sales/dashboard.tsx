@@ -5,43 +5,23 @@ import { Badge } from "@/components/ui/badge";
 import { 
   DollarSign, Users, TrendingUp, Target,
   Phone, Mail, Calendar, CheckCircle2,
-  ArrowUpRight, ArrowDownRight, Plus, BarChart3
+  ArrowUpRight, ArrowDownRight, Plus, BarChart3, AlertTriangle, Loader2
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar } from "recharts";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 
-const salesData = [
-  { day: 'Mon', sales: 245000, deals: 12 },
-  { day: 'Tue', sales: 189000, deals: 8 },
-  { day: 'Wed', sales: 312000, deals: 15 },
-  { day: 'Thu', sales: 278000, deals: 11 },
-  { day: 'Fri', sales: 356000, deals: 18 },
-  { day: 'Sat', sales: 198000, deals: 9 },
-  { day: 'Sun', sales: 145000, deals: 6 },
-];
-
-const pipelineData = [
-  { stage: 'Lead', value: 45, amount: '৳2.8M' },
-  { stage: 'Qualified', value: 32, amount: '৳1.9M' },
-  { stage: 'Proposal', value: 18, amount: '৳1.2M' },
-  { stage: 'Negotiation', value: 12, amount: '৳850K' },
-  { stage: 'Closed Won', value: 8, amount: '৳620K' },
-];
-
-const recentDeals = [
-  { id: 1, customer: "TechCorp Ltd.", product: "Enterprise Package", value: "৳125,000", stage: "Closed Won", probability: "100%", closeDate: "Dec 5, 2024" },
-  { id: 2, customer: "Digital Solutions", product: "Premium Bundle", value: "৳85,000", stage: "Negotiation", probability: "75%", closeDate: "Dec 12, 2024" },
-  { id: 3, customer: "StartupXYZ", product: "Growth Pack", value: "৳45,000", stage: "Proposal", probability: "50%", closeDate: "Dec 15, 2024" },
-  { id: 4, customer: "MegaRetail Inc.", product: "Bulk Order", value: "৳320,000", stage: "Qualified", probability: "30%", closeDate: "Dec 20, 2024" },
-];
-
-const topPerformers = [
-  { name: "Ahmed Rahman", deals: 28, revenue: "৳1.2M", target: 95 },
-  { name: "Fatima Khan", deals: 24, revenue: "৳980K", target: 88 },
-  { name: "Rafiq Islam", deals: 21, revenue: "৳850K", target: 82 },
-  { name: "Marium Begum", deals: 18, revenue: "৳720K", target: 75 },
-];
+interface SalesDashboardData {
+  monthlyRevenue: string;
+  activeDeals: number;
+  newLeads: number;
+  winRate: string;
+  salesData: { day: string; sales: number; deals: number }[];
+  pipelineData: { stage: string; value: number; amount: string }[];
+  recentDeals: { id: number; customer: string; product: string; value: string; stage: string; probability: string; closeDate: string }[];
+  topPerformers: { name: string; deals: number; revenue: string; target: number }[];
+}
 
 function StatCard({ title, value, change, icon: Icon, color, delay = 0 }: {
   title: string;
@@ -85,6 +65,45 @@ function StatCard({ title, value, change, icon: Icon, color, delay = 0 }: {
 }
 
 export default function SalesDashboard() {
+  const { data, isLoading, error } = useQuery<SalesDashboardData>({
+    queryKey: ["/api/sales/dashboard"],
+    queryFn: async () => {
+      const res = await fetch("/api/sales/dashboard", { credentials: "include" });
+      if (!res.ok) {
+        if (res.status === 401) throw new Error("Please log in to access this dashboard");
+        if (res.status === 403) throw new Error("You don't have permission to access this dashboard");
+        throw new Error("Failed to load dashboard");
+      }
+      return res.json();
+    },
+  });
+
+  const salesData = data?.salesData || [];
+  const pipelineData = data?.pipelineData || [];
+  const recentDeals = data?.recentDeals || [];
+  const topPerformers = data?.topPerformers || [];
+
+  if (isLoading) {
+    return (
+      <DashboardLayout role="sales">
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="w-8 h-8 animate-spin text-green-500" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout role="sales">
+        <div className="flex flex-col items-center justify-center h-96 gap-4">
+          <AlertTriangle className="w-12 h-12 text-red-400" />
+          <p className="text-white/60">{error.message}</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout role="sales">
       <div className="space-y-6">
@@ -112,10 +131,10 @@ export default function SalesDashboard() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard title="Monthly Revenue" value="৳4.8M" change="+18.5%" icon={DollarSign} color="blue" delay={0} />
-          <StatCard title="Active Deals" value="79" change="+12" icon={Target} color="green" delay={0.1} />
-          <StatCard title="New Leads" value="156" change="+24.2%" icon={Users} color="orange" delay={0.2} />
-          <StatCard title="Win Rate" value="68%" change="+5.2%" icon={TrendingUp} color="purple" delay={0.3} />
+          <StatCard title="Monthly Revenue" value={data?.monthlyRevenue || "৳0"} change="+18.5%" icon={DollarSign} color="blue" delay={0} />
+          <StatCard title="Active Deals" value={String(data?.activeDeals || 0)} change="+12" icon={Target} color="green" delay={0.1} />
+          <StatCard title="New Leads" value={String(data?.newLeads || 0)} change="+24.2%" icon={Users} color="orange" delay={0.2} />
+          <StatCard title="Win Rate" value={data?.winRate || "0%"} change="+5.2%" icon={TrendingUp} color="purple" delay={0.3} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

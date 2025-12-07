@@ -5,43 +5,23 @@ import { Badge } from "@/components/ui/badge";
 import { 
   TrendingUp, Users, Eye, MousePointer,
   Share2, Target, BarChart3, Megaphone,
-  ArrowUpRight, ArrowDownRight, Calendar, Plus
+  ArrowUpRight, ArrowDownRight, Calendar, Plus, AlertTriangle, Loader2
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from "recharts";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 
-const trafficData = [
-  { day: 'Mon', visitors: 2400, pageViews: 4800 },
-  { day: 'Tue', visitors: 1398, pageViews: 3200 },
-  { day: 'Wed', visitors: 9800, pageViews: 15600 },
-  { day: 'Thu', visitors: 3908, pageViews: 6500 },
-  { day: 'Fri', visitors: 4800, pageViews: 8200 },
-  { day: 'Sat', visitors: 3800, pageViews: 6100 },
-  { day: 'Sun', visitors: 4300, pageViews: 7200 },
-];
-
-const trafficSources = [
-  { name: 'Organic Search', value: 45, color: '#3b82f6' },
-  { name: 'Social Media', value: 25, color: '#10b981' },
-  { name: 'Direct', value: 15, color: '#f59e0b' },
-  { name: 'Referral', value: 10, color: '#8b5cf6' },
-  { name: 'Email', value: 5, color: '#ec4899' },
-];
-
-const activeCampaigns = [
-  { id: 1, name: "Holiday Sale 2024", type: "Email + Social", status: "active", reach: "45.2K", conversions: 1240, budget: "৳50,000", spent: "৳32,500" },
-  { id: 2, name: "New Year Promo", type: "Social Media", status: "scheduled", reach: "-", conversions: 0, budget: "৳75,000", spent: "৳0" },
-  { id: 3, name: "Flash Friday", type: "Email", status: "active", reach: "28.5K", conversions: 856, budget: "৳25,000", spent: "৳18,200" },
-  { id: 4, name: "Combo Deals Push", type: "Display Ads", status: "active", reach: "92.1K", conversions: 2150, budget: "৳100,000", spent: "৳67,800" },
-];
-
-const topContent = [
-  { title: "iPhone 15 Pro Max Review", views: "12.5K", engagement: "8.2%", type: "Blog" },
-  { title: "Holiday Gift Guide 2024", views: "9.8K", engagement: "12.1%", type: "Blog" },
-  { title: "Unboxing: Samsung Galaxy S24", views: "8.2K", engagement: "15.3%", type: "Video" },
-  { title: "Tech Deals This Week", views: "6.5K", engagement: "6.8%", type: "Newsletter" },
-];
+interface MarketingDashboardData {
+  totalVisitors: string;
+  pageViews: string;
+  clickRate: string;
+  conversions: number;
+  trafficData: { day: string; visitors: number; pageViews: number }[];
+  trafficSources: { name: string; value: number; color: string }[];
+  activeCampaigns: { id: number; name: string; type: string; status: string; reach: string; conversions: number; budget: string; spent: string }[];
+  topContent: { title: string; views: string; engagement: string; type: string }[];
+}
 
 function StatCard({ title, value, change, icon: Icon, color, delay = 0 }: {
   title: string;
@@ -85,6 +65,45 @@ function StatCard({ title, value, change, icon: Icon, color, delay = 0 }: {
 }
 
 export default function MarketingDashboard() {
+  const { data, isLoading, error } = useQuery<MarketingDashboardData>({
+    queryKey: ["/api/marketing/dashboard"],
+    queryFn: async () => {
+      const res = await fetch("/api/marketing/dashboard", { credentials: "include" });
+      if (!res.ok) {
+        if (res.status === 401) throw new Error("Please log in to access this dashboard");
+        if (res.status === 403) throw new Error("You don't have permission to access this dashboard");
+        throw new Error("Failed to load dashboard");
+      }
+      return res.json();
+    },
+  });
+
+  const trafficData = data?.trafficData || [];
+  const trafficSources = data?.trafficSources || [];
+  const activeCampaigns = data?.activeCampaigns || [];
+  const topContent = data?.topContent || [];
+
+  if (isLoading) {
+    return (
+      <DashboardLayout role="marketing">
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout role="marketing">
+        <div className="flex flex-col items-center justify-center h-96 gap-4">
+          <AlertTriangle className="w-12 h-12 text-red-400" />
+          <p className="text-white/60">{error.message}</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout role="marketing">
       <div className="space-y-6">
@@ -112,10 +131,10 @@ export default function MarketingDashboard() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard title="Total Visitors" value="30.4K" change="+24.5%" icon={Users} color="blue" delay={0} />
-          <StatCard title="Page Views" value="51.6K" change="+18.2%" icon={Eye} color="green" delay={0.1} />
-          <StatCard title="Click Rate" value="4.8%" change="+0.8%" icon={MousePointer} color="orange" delay={0.2} />
-          <StatCard title="Conversions" value="4,246" change="+32.1%" icon={Target} color="purple" delay={0.3} />
+          <StatCard title="Total Visitors" value={data?.totalVisitors || "0"} change="+24.5%" icon={Users} color="blue" delay={0} />
+          <StatCard title="Page Views" value={data?.pageViews || "0"} change="+18.2%" icon={Eye} color="green" delay={0.1} />
+          <StatCard title="Click Rate" value={data?.clickRate || "0%"} change="+0.8%" icon={MousePointer} color="orange" delay={0.2} />
+          <StatCard title="Conversions" value={(data?.conversions || 0).toLocaleString()} change="+32.1%" icon={Target} color="purple" delay={0.3} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

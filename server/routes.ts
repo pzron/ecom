@@ -8,7 +8,7 @@ import { insertProductSchema, insertCategorySchema, insertReviewSchema, insertCa
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { generateChatResponse, searchProductsWithAI, type ChatMessage, type ProductContext } from "./openai";
-import { ensureAdmin, ensureAuthenticated, type AuthenticatedRequest } from "./api/security-middleware";
+import { ensureAdmin, ensureAuthenticated, ensureRole, type AuthenticatedRequest } from "./api/security-middleware";
 
 function generateOrderNumber(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
@@ -670,6 +670,259 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Affiliate dashboard error:", error);
       res.status(500).json({ message: "Failed to fetch affiliate dashboard" });
+    }
+  });
+
+  // ===== STORE OPERATIONS DASHBOARDS =====
+
+  // Manager Dashboard
+  app.get("/api/manager/dashboard", ensureRole("manager", "admin"), async (req: AuthenticatedRequest, res) => {
+    try {
+      const stats = await storage.getDashboardStats();
+      const managerData = {
+        todaySales: stats?.totalRevenue ? Math.round(stats.totalRevenue * 0.15) : 45230,
+        teamMembersActive: "8/10",
+        ordersProcessed: stats?.totalOrders ? Math.round(stats.totalOrders * 0.3) : 127,
+        avgProcessingTime: "4.2 min",
+        salesData: [
+          { name: 'Mon', sales: 4000, target: 3500 },
+          { name: 'Tue', sales: 3000, target: 3500 },
+          { name: 'Wed', sales: 5000, target: 3500 },
+          { name: 'Thu', sales: 2780, target: 3500 },
+          { name: 'Fri', sales: 1890, target: 3500 },
+          { name: 'Sat', sales: 6390, target: 4000 },
+          { name: 'Sun', sales: 3490, target: 3000 },
+        ],
+        teamPerformance: [
+          { name: 'Sarah', sales: 45, efficiency: 92 },
+          { name: 'Mike', sales: 38, efficiency: 88 },
+          { name: 'Emma', sales: 52, efficiency: 95 },
+          { name: 'John', sales: 41, efficiency: 85 },
+        ],
+        pendingApprovals: [
+          { id: 1, type: "Leave Request", employee: "Sarah Chen", date: "Dec 5-7", status: "pending" },
+          { id: 2, type: "Stock Order", description: "Electronics Restock", amount: "৳125,000", status: "pending" },
+          { id: 3, type: "Refund", customer: "John Doe", amount: "৳2,500", status: "pending" },
+          { id: 4, type: "Overtime", employee: "Mike Johnson", hours: "12 hrs", status: "pending" },
+        ],
+      };
+      res.json(managerData);
+    } catch (error) {
+      console.error("Manager dashboard error:", error);
+      res.status(500).json({ message: "Failed to fetch manager dashboard" });
+    }
+  });
+
+  // Cashier Dashboard
+  app.get("/api/cashier/dashboard", ensureRole("cashier", "manager", "admin"), async (req: AuthenticatedRequest, res) => {
+    try {
+      const stats = await storage.getDashboardStats();
+      const cashierData = {
+        todaySales: stats?.totalRevenue ? Math.round(stats.totalRevenue * 0.1) : 24560,
+        transactions: 47,
+        itemsSold: 156,
+        avgTime: "2.4 min",
+        recentTransactions: [
+          { id: "TXN-001", customer: "Walk-in Customer", amount: 1250, items: 3, method: "Cash", time: "2 min ago" },
+          { id: "TXN-002", customer: "Sarah Chen", amount: 3450, items: 5, method: "Card", time: "15 min ago" },
+          { id: "TXN-003", customer: "Mike Johnson", amount: 890, items: 2, method: "Mobile Pay", time: "32 min ago" },
+          { id: "TXN-004", customer: "Walk-in Customer", amount: 2100, items: 4, method: "Cash", time: "45 min ago" },
+        ],
+        shiftInfo: {
+          start: "6:00 AM",
+          end: "2:00 PM",
+          breakTaken: "30 min",
+        },
+      };
+      res.json(cashierData);
+    } catch (error) {
+      console.error("Cashier dashboard error:", error);
+      res.status(500).json({ message: "Failed to fetch cashier dashboard" });
+    }
+  });
+
+  // HR Dashboard
+  app.get("/api/hr/dashboard", ensureRole("hr", "manager", "admin"), async (req: AuthenticatedRequest, res) => {
+    try {
+      const hrData = {
+        totalEmployees: 58,
+        openPositions: 6,
+        pendingLeave: 4,
+        monthlyPayroll: 2400000,
+        headcountData: [
+          { month: 'Jul', employees: 42 },
+          { month: 'Aug', employees: 45 },
+          { month: 'Sep', employees: 48 },
+          { month: 'Oct', employees: 52 },
+          { month: 'Nov', employees: 55 },
+          { month: 'Dec', employees: 58 },
+        ],
+        departmentDistribution: [
+          { name: 'Sales', value: 18, color: '#3b82f6' },
+          { name: 'Marketing', value: 8, color: '#10b981' },
+          { name: 'Operations', value: 15, color: '#f59e0b' },
+          { name: 'Customer Service', value: 12, color: '#8b5cf6' },
+          { name: 'Admin', value: 5, color: '#ec4899' },
+        ],
+        pendingRequests: [
+          { id: 1, type: "Leave Request", employee: "Sarah Chen", department: "Sales", days: "3 days", status: "pending" },
+          { id: 2, type: "Leave Request", employee: "Mike Johnson", department: "Marketing", days: "5 days", status: "pending" },
+          { id: 3, type: "Overtime", employee: "Emma Davis", department: "Operations", hours: "8 hrs", status: "pending" },
+          { id: 4, type: "Leave Request", employee: "John Smith", department: "Customer Service", days: "2 days", status: "pending" },
+        ],
+        recentHires: [
+          { name: "Alex Thompson", role: "Sales Associate", department: "Sales", startDate: "Dec 1, 2024" },
+          { name: "Jessica Lee", role: "Marketing Specialist", department: "Marketing", startDate: "Nov 28, 2024" },
+          { name: "David Wilson", role: "Stock Keeper", department: "Operations", startDate: "Nov 25, 2024" },
+        ],
+      };
+      res.json(hrData);
+    } catch (error) {
+      console.error("HR dashboard error:", error);
+      res.status(500).json({ message: "Failed to fetch HR dashboard" });
+    }
+  });
+
+  // Stockkeeper Dashboard
+  app.get("/api/stockkeeper/dashboard", ensureRole("stockkeeper", "manager", "admin"), async (req: AuthenticatedRequest, res) => {
+    try {
+      const stockData = {
+        totalProducts: 1247,
+        lowStockItems: 23,
+        pendingReceiving: 8,
+        recentTransfers: 5,
+        inventoryValue: 4500000,
+        stockMovement: [
+          { day: 'Mon', received: 120, shipped: 95 },
+          { day: 'Tue', received: 85, shipped: 110 },
+          { day: 'Wed', received: 200, shipped: 180 },
+          { day: 'Thu', received: 150, shipped: 120 },
+          { day: 'Fri', received: 180, shipped: 200 },
+          { day: 'Sat', received: 90, shipped: 75 },
+          { day: 'Sun', received: 50, shipped: 40 },
+        ],
+        lowStockAlerts: [
+          { id: 1, product: "iPhone 15 Pro", sku: "IPH-15-PRO", current: 5, minimum: 20, category: "Electronics" },
+          { id: 2, product: "MacBook Air M3", sku: "MBA-M3-256", current: 3, minimum: 15, category: "Electronics" },
+          { id: 3, product: "AirPods Pro 2", sku: "APP-2-WHT", current: 12, minimum: 50, category: "Accessories" },
+          { id: 4, product: "Samsung S24 Ultra", sku: "SAM-S24-U", current: 8, minimum: 25, category: "Electronics" },
+        ],
+        pendingReceivingOrders: [
+          { id: "PO-001", supplier: "Tech Distributors", items: 45, expectedDate: "Dec 8, 2024", status: "In Transit" },
+          { id: "PO-002", supplier: "Electronics Hub", items: 120, expectedDate: "Dec 9, 2024", status: "Processing" },
+          { id: "PO-003", supplier: "Mobile World", items: 80, expectedDate: "Dec 10, 2024", status: "Pending" },
+        ],
+      };
+      res.json(stockData);
+    } catch (error) {
+      console.error("Stockkeeper dashboard error:", error);
+      res.status(500).json({ message: "Failed to fetch stockkeeper dashboard" });
+    }
+  });
+
+  // Office Dashboard
+  app.get("/api/office/dashboard", ensureRole("office", "manager", "admin"), async (req: AuthenticatedRequest, res) => {
+    try {
+      const officeData = {
+        pendingDocuments: 12,
+        openTickets: 8,
+        scheduledMeetings: 4,
+        unreadMessages: 23,
+        recentDocuments: [
+          { id: 1, name: "Q4 Sales Report", type: "Report", author: "Finance Team", date: "Dec 5, 2024", status: "Final" },
+          { id: 2, name: "Employee Handbook 2025", type: "Policy", author: "HR Department", date: "Dec 3, 2024", status: "Draft" },
+          { id: 3, name: "Vendor Contract - TechCorp", type: "Contract", author: "Legal", date: "Dec 1, 2024", status: "Pending Signature" },
+          { id: 4, name: "Marketing Budget Proposal", type: "Proposal", author: "Marketing", date: "Nov 29, 2024", status: "Under Review" },
+        ],
+        upcomingMeetings: [
+          { id: 1, title: "Weekly Team Sync", time: "10:00 AM", date: "Today", attendees: 8 },
+          { id: 2, title: "Vendor Review", time: "2:00 PM", date: "Today", attendees: 4 },
+          { id: 3, title: "Q1 Planning", time: "11:00 AM", date: "Tomorrow", attendees: 12 },
+        ],
+        supportTickets: [
+          { id: "TKT-101", subject: "Printer not working", priority: "Medium", status: "Open", created: "2 hours ago" },
+          { id: "TKT-102", subject: "Email access issue", priority: "High", status: "In Progress", created: "4 hours ago" },
+          { id: "TKT-103", subject: "Software installation", priority: "Low", status: "Open", created: "1 day ago" },
+        ],
+      };
+      res.json(officeData);
+    } catch (error) {
+      console.error("Office dashboard error:", error);
+      res.status(500).json({ message: "Failed to fetch office dashboard" });
+    }
+  });
+
+  // Marketing Dashboard
+  app.get("/api/marketing/dashboard", ensureRole("marketing", "manager", "admin"), async (req: AuthenticatedRequest, res) => {
+    try {
+      const stats = await storage.getDashboardStats();
+      const marketingData = {
+        activeCampaigns: 5,
+        totalReach: 125000,
+        engagementRate: "4.8%",
+        conversionRate: "3.2%",
+        monthlyBudget: 500000,
+        budgetSpent: 320000,
+        campaignPerformance: [
+          { name: 'Social Media', reach: 45000, conversions: 1200, roi: "320%" },
+          { name: 'Email Marketing', reach: 28000, conversions: 850, roi: "450%" },
+          { name: 'Google Ads', reach: 35000, conversions: 920, roi: "280%" },
+          { name: 'Influencer', reach: 17000, conversions: 430, roi: "180%" },
+        ],
+        socialMetrics: [
+          { platform: 'Facebook', followers: 45000, growth: "+12%", engagement: "4.2%" },
+          { platform: 'Instagram', followers: 38000, growth: "+18%", engagement: "6.8%" },
+          { platform: 'Twitter', followers: 12000, growth: "+5%", engagement: "2.1%" },
+          { platform: 'LinkedIn', followers: 8500, growth: "+8%", engagement: "3.4%" },
+        ],
+        upcomingCampaigns: [
+          { id: 1, name: "Holiday Sale 2024", startDate: "Dec 15", budget: 100000, status: "Scheduled" },
+          { id: 2, name: "New Year Promo", startDate: "Dec 28", budget: 75000, status: "Planning" },
+          { id: 3, name: "Winter Clearance", startDate: "Jan 5", budget: 50000, status: "Draft" },
+        ],
+      };
+      res.json(marketingData);
+    } catch (error) {
+      console.error("Marketing dashboard error:", error);
+      res.status(500).json({ message: "Failed to fetch marketing dashboard" });
+    }
+  });
+
+  // Sales Dashboard
+  app.get("/api/sales/dashboard", ensureRole("sales", "manager", "admin"), async (req: AuthenticatedRequest, res) => {
+    try {
+      const stats = await storage.getDashboardStats();
+      const salesData = {
+        totalRevenue: stats?.totalRevenue || 2450000,
+        monthlyTarget: 3000000,
+        achievedPercent: stats?.totalRevenue ? Math.round((stats.totalRevenue / 3000000) * 100) : 82,
+        activeLeads: 145,
+        closedDeals: 38,
+        pipelineValue: 1800000,
+        salesByRep: [
+          { name: 'Sarah Chen', deals: 12, revenue: 580000, target: 600000 },
+          { name: 'Mike Johnson', deals: 9, revenue: 420000, target: 500000 },
+          { name: 'Emma Davis', deals: 15, revenue: 720000, target: 700000 },
+          { name: 'John Smith', deals: 8, revenue: 380000, target: 450000 },
+        ],
+        pipelineStages: [
+          { stage: 'Prospecting', deals: 45, value: 450000 },
+          { stage: 'Qualification', deals: 32, value: 380000 },
+          { stage: 'Proposal', deals: 18, value: 520000 },
+          { stage: 'Negotiation', deals: 12, value: 280000 },
+          { stage: 'Closing', deals: 8, value: 170000 },
+        ],
+        recentDeals: [
+          { id: 1, customer: "TechCorp Ltd", value: 125000, status: "Won", date: "Dec 5, 2024" },
+          { id: 2, customer: "Global Systems", value: 89000, status: "Won", date: "Dec 4, 2024" },
+          { id: 3, customer: "Innovate Inc", value: 156000, status: "Pending", date: "Dec 3, 2024" },
+          { id: 4, customer: "Prime Solutions", value: 72000, status: "Won", date: "Dec 2, 2024" },
+        ],
+      };
+      res.json(salesData);
+    } catch (error) {
+      console.error("Sales dashboard error:", error);
+      res.status(500).json({ message: "Failed to fetch sales dashboard" });
     }
   });
 
