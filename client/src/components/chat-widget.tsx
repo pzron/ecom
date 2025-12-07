@@ -7,14 +7,38 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
-import { PRODUCTS, categories } from "@/data/products";
 import { Link } from "wouter";
+
+interface Product {
+  id: number;
+  name: string;
+  price: string;
+  originalPrice?: string | null;
+  image?: string | null;
+  rating: string;
+  reviews: number;
+  category?: string | null;
+  categorySlug?: string | null;
+  description?: string | null;
+  shortDescription?: string | null;
+  colors?: { name: string; value: string }[] | null;
+  sizes?: string[] | null;
+  tags?: string[] | null;
+  inStock?: boolean;
+  isNew?: boolean;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
-  products?: typeof PRODUCTS;
+  products?: Product[];
   timestamp: Date;
 }
 
@@ -31,7 +55,10 @@ const suggestedPrompts = [
   "Compare AirPods vs Sony headphones",
 ];
 
-function ProductCard({ product }: { product: typeof PRODUCTS[0] }) {
+function ProductCard({ product }: { product: Product }) {
+  const price = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
+  const originalPrice = product.originalPrice ? (typeof product.originalPrice === 'string' ? parseFloat(product.originalPrice) : product.originalPrice) : null;
+  
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
@@ -53,9 +80,9 @@ function ProductCard({ product }: { product: typeof PRODUCTS[0] }) {
         </div>
         <div className="flex items-center justify-between mt-1">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-purple-400">${product.price}</span>
-            {product.originalPrice && (
-              <span className="text-xs text-white/40 line-through">${product.originalPrice}</span>
+            <span className="text-sm font-bold text-purple-400">${price.toFixed(2)}</span>
+            {originalPrice && (
+              <span className="text-xs text-white/40 line-through">${originalPrice.toFixed(2)}</span>
             )}
           </div>
           <Link href={`/products/${product.id}`}>
@@ -115,6 +142,8 @@ export function ChatWidget() {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -127,11 +156,33 @@ export function ChatWidget() {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const searchProducts = (query: string): typeof PRODUCTS => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [productsRes, categoriesRes] = await Promise.all([
+          fetch('/api/products', { credentials: 'include' }),
+          fetch('/api/categories', { credentials: 'include' })
+        ]);
+        if (productsRes.ok) {
+          const productsData = await productsRes.json();
+          setProducts(productsData);
+        }
+        if (categoriesRes.ok) {
+          const categoriesData = await categoriesRes.json();
+          setCategories(categoriesData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch products/categories:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const searchProducts = (query: string): Product[] => {
     const lowercaseQuery = query.toLowerCase();
-    return PRODUCTS.filter(product => 
+    return products.filter(product => 
       product.name.toLowerCase().includes(lowercaseQuery) ||
-      product.category.toLowerCase().includes(lowercaseQuery) ||
+      product.category?.toLowerCase().includes(lowercaseQuery) ||
       product.description?.toLowerCase().includes(lowercaseQuery) ||
       product.shortDescription?.toLowerCase().includes(lowercaseQuery) ||
       product.tags?.some(tag => tag.toLowerCase().includes(lowercaseQuery))
@@ -139,14 +190,16 @@ export function ChatWidget() {
   };
 
   const getProductDetails = (productName: string): string => {
-    const product = PRODUCTS.find(p => 
+    const product = products.find(p => 
       p.name.toLowerCase().includes(productName.toLowerCase())
     );
     if (product) {
-      let details = `The ${product.name} is priced at $${product.price}`;
-      if (product.originalPrice) {
-        const discount = Math.round((1 - product.price / product.originalPrice) * 100);
-        details += ` (${discount}% off from $${product.originalPrice})`;
+      const price = parseFloat(product.price);
+      const originalPrice = product.originalPrice ? parseFloat(product.originalPrice) : null;
+      let details = `The ${product.name} is priced at $${price.toFixed(2)}`;
+      if (originalPrice) {
+        const discount = Math.round((1 - price / originalPrice) * 100);
+        details += ` (${discount}% off from $${originalPrice.toFixed(2)})`;
       }
       details += `. It has a ${product.rating} star rating from ${product.reviews} reviews.`;
       if (product.shortDescription) {
@@ -170,10 +223,10 @@ export function ChatWidget() {
       c.slug.toLowerCase().includes(categoryQuery.toLowerCase())
     );
     if (category) {
-      const categoryProducts = PRODUCTS.filter(p => p.categorySlug === category.slug);
+      const categoryProducts = products.filter(p => p.categorySlug === category.slug);
       return `We have ${categoryProducts.length} products in our ${category.name} category. Would you like me to show you some options?`;
     }
-    return "";
+    return ""
   };
 
   const speakText = (text: string) => {
@@ -283,7 +336,7 @@ export function ChatWidget() {
     setIsListening(false);
   };
 
-  const generateResponse = (userMessage: string): { content: string; products?: typeof PRODUCTS } => {
+  const generateResponse = (userMessage: string): { content: string; products?: Product[] } => {
     const lowercaseMessage = userMessage.toLowerCase();
     
     if (lowercaseMessage.includes("headphone") || lowercaseMessage.includes("audio") || lowercaseMessage.includes("sony") || lowercaseMessage.includes("earphone")) {
@@ -368,30 +421,34 @@ export function ChatWidget() {
     }
 
     if (lowercaseMessage.includes("deal") || lowercaseMessage.includes("sale") || lowercaseMessage.includes("discount") || lowercaseMessage.includes("cheap") || lowercaseMessage.includes("save")) {
-      const products = PRODUCTS.filter(p => p.originalPrice).sort((a, b) => {
-        const discountA = a.originalPrice ? (1 - a.price / a.originalPrice) : 0;
-        const discountB = b.originalPrice ? (1 - b.price / b.originalPrice) : 0;
+      const dealsProducts = products.filter(p => p.originalPrice).sort((a, b) => {
+        const priceA = parseFloat(a.price);
+        const priceB = parseFloat(b.price);
+        const origA = a.originalPrice ? parseFloat(a.originalPrice) : priceA;
+        const origB = b.originalPrice ? parseFloat(b.originalPrice) : priceB;
+        const discountA = origA ? (1 - priceA / origA) : 0;
+        const discountB = origB ? (1 - priceB / origB) : 0;
         return discountB - discountA;
       }).slice(0, 3);
       return {
         content: "Hot deals alert! Here are some products with amazing discounts right now. You can save up to 25% on select items:",
-        products: products.length > 0 ? products : undefined
+        products: dealsProducts.length > 0 ? dealsProducts : undefined
       };
     }
 
     if (lowercaseMessage.includes("trending") || lowercaseMessage.includes("popular") || lowercaseMessage.includes("best") || lowercaseMessage.includes("top rated")) {
-      const products = PRODUCTS.sort((a, b) => b.rating - a.rating).slice(0, 3);
+      const trendingProducts = [...products].sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating)).slice(0, 3);
       return {
         content: "Here are our top-rated trending products that customers absolutely love! These have the highest ratings and reviews:",
-        products
+        products: trendingProducts
       };
     }
 
     if (lowercaseMessage.includes("new") || lowercaseMessage.includes("latest") || lowercaseMessage.includes("arrival")) {
-      const products = PRODUCTS.filter(p => p.isNew).slice(0, 3);
+      const newProducts = products.filter(p => p.isNew).slice(0, 3);
       return {
         content: "Check out our latest arrivals! These are the newest products just added to our collection:",
-        products: products.length > 0 ? products : undefined
+        products: newProducts.length > 0 ? newProducts : undefined
       };
     }
 
