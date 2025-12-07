@@ -1,8 +1,41 @@
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { categories as staticCategories, products as staticProducts, type Category, type Product } from "@/data/products";
 import { Search, Mic, MicOff, Grid, List, Star, ShoppingCart, Heart, X, ChevronLeft, SlidersHorizontal, Zap, Eye, Loader2 } from "lucide-react";
+
+interface Product {
+  id: number;
+  name: string;
+  slug: string;
+  category: string;
+  categorySlug: string;
+  price: number;
+  originalPrice?: number;
+  rating: number;
+  reviews: number;
+  image: string;
+  images: string[];
+  description?: string;
+  shortDescription?: string;
+  isNew: boolean;
+  isBestseller: boolean;
+  isFeatured: boolean;
+  inStock: boolean;
+  stock: number;
+  vendorName?: string;
+  tags: string[];
+  badgeColor?: string;
+  has3D?: boolean;
+}
+
+interface Category {
+  name: string;
+  slug: string;
+  icon: string;
+  iconName: string;
+  gradient: string;
+  image?: string;
+}
 import { Input } from "@/components/ui/input";
 import { Link, useLocation, useSearch } from "wouter";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -258,69 +291,94 @@ export default function ProductsPage() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
-  const [products, setProducts] = useState<Product[]>(staticProducts);
-  const [categories, setCategories] = useState<Category[]>(staticCategories);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [categoriesError, setCategoriesError] = useState<string | null>(null);
+  const [isApiEmpty, setIsApiEmpty] = useState(false);
   
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        setLoadError(null);
         const response = await fetch('/api/products', { credentials: 'include' });
-        if (response.ok) {
-          const data = await response.json();
-          if (Array.isArray(data) && data.length > 0) {
-            const formattedProducts: Product[] = data.map((p: any) => ({
-              id: p.id,
-              name: p.name,
-              slug: p.slug || p.name.toLowerCase().replace(/\s+/g, '-'),
-              category: p.category?.name || p.categoryName || 'General',
-              categorySlug: p.category?.slug || p.categorySlug || 'general',
-              price: parseFloat(p.price) || 0,
-              originalPrice: p.originalPrice ? parseFloat(p.originalPrice) : undefined,
-              rating: parseFloat(p.rating) || 4.5,
-              reviews: p.reviewCount || Math.floor(Math.random() * 500),
-              image: p.images?.[0] || p.image || '/placeholder.jpg',
-              images: p.images || [],
-              description: p.description,
-              shortDescription: p.shortDescription,
-              isNew: p.isNew || false,
-              isBestseller: p.isBestseller || false,
-              isFeatured: p.isFeatured || false,
-              inStock: p.inStock ?? true,
-              stock: p.stock || 0,
-              vendorName: p.vendor?.storeName,
-              tags: p.tags || [],
-              badgeColor: ['purple', 'pink', 'cyan', 'emerald', 'amber'][Math.floor(Math.random() * 5)],
-            }));
-            setProducts(formattedProducts);
-          }
+        if (!response.ok) {
+          setLoadError('Failed to load products. Please try again.');
+          setIsLoadingProducts(false);
+          return;
         }
+        const data = await response.json();
+        if (!Array.isArray(data)) {
+          setLoadError('Invalid products data received.');
+          setIsLoadingProducts(false);
+          return;
+        }
+        if (data.length === 0) {
+          setIsApiEmpty(true);
+          setIsLoadingProducts(false);
+          return;
+        }
+        const formattedProducts: Product[] = data.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          slug: p.slug || p.name.toLowerCase().replace(/\s+/g, '-'),
+          category: p.category?.name || p.categoryName || 'General',
+          categorySlug: p.category?.slug || p.categorySlug || 'general',
+          price: parseFloat(p.price) || 0,
+          originalPrice: p.originalPrice ? parseFloat(p.originalPrice) : undefined,
+          rating: parseFloat(p.rating) || 4.5,
+          reviews: p.reviewCount || Math.floor(Math.random() * 500),
+          image: p.images?.[0] || p.image || '/placeholder.jpg',
+          images: p.images || [],
+          description: p.description,
+          shortDescription: p.shortDescription,
+          isNew: p.isNew || false,
+          isBestseller: p.isBestseller || false,
+          isFeatured: p.isFeatured || false,
+          inStock: p.inStock ?? true,
+          stock: p.stock || 0,
+          vendorName: p.vendor?.storeName,
+          tags: p.tags || [],
+          badgeColor: ['purple', 'pink', 'cyan', 'emerald', 'amber'][Math.floor(Math.random() * 5)],
+        }));
+        setProducts(formattedProducts);
+        setIsApiEmpty(false);
+        setIsLoadingProducts(false);
       } catch (error) {
         console.error('Failed to fetch products:', error);
-      } finally {
+        setLoadError('Failed to load products. Please try again.');
         setIsLoadingProducts(false);
       }
     };
     
     const fetchCategories = async () => {
       try {
+        setCategoriesError(null);
         const response = await fetch('/api/categories', { credentials: 'include' });
-        if (response.ok) {
-          const data = await response.json();
-          if (Array.isArray(data) && data.length > 0) {
-            const formattedCategories: Category[] = data.map((c: any) => ({
-              name: c.name,
-              slug: c.slug,
-              icon: c.icon || '📦',
-              iconName: c.iconName || 'Package',
-              gradient: c.gradient || 'from-purple-600 to-pink-500',
-              image: c.image,
-            }));
-            setCategories(formattedCategories);
-          }
+        if (!response.ok) {
+          setCategoriesError('Failed to load categories');
+          setIsLoadingCategories(false);
+          return;
         }
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const formattedCategories: Category[] = data.map((c: any) => ({
+            name: c.name,
+            slug: c.slug,
+            icon: c.icon || '📦',
+            iconName: c.iconName || 'Package',
+            gradient: c.gradient || 'from-purple-600 to-pink-500',
+            image: c.image,
+          }));
+          setCategories(formattedCategories);
+        }
+        setIsLoadingCategories(false);
       } catch (error) {
         console.error('Failed to fetch categories:', error);
+        setCategoriesError('Failed to load categories');
+        setIsLoadingCategories(false);
       }
     };
     
@@ -430,7 +488,7 @@ export default function ProductsPage() {
       
       return matchesCategory && matchesSearch && matchesPrice && matchesRating;
     });
-  }, [selectedCategory, searchQuery, priceRange, minRating]);
+  }, [products, selectedCategory, searchQuery, priceRange, minRating]);
 
   const sortedProducts = useMemo(() => {
     return [...filteredProducts].sort((a, b) => {
@@ -723,7 +781,54 @@ export default function ProductsPage() {
           </AnimatePresence>
 
           <div className="flex-1 w-full">
-            {sortedProducts.length === 0 ? (
+            {isLoadingProducts ? (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center justify-center py-20"
+              >
+                <Loader2 className="w-12 h-12 animate-spin text-purple-500 mb-4" />
+                <p className="text-white/60">Loading products...</p>
+              </motion.div>
+            ) : loadError ? (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center py-20 px-4"
+              >
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-500/10 flex items-center justify-center">
+                  <X className="w-8 h-8 text-red-400" />
+                </div>
+                <h3 className="text-2xl font-heading font-bold text-white mb-3">Error Loading Products</h3>
+                <p className="text-muted-foreground mb-8 max-w-sm mx-auto">{loadError}</p>
+                <Button 
+                  onClick={() => window.location.reload()}
+                  className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 font-medium"
+                >
+                  Try Again
+                </Button>
+              </motion.div>
+            ) : isApiEmpty ? (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center py-20 px-4"
+              >
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-white/5 flex items-center justify-center">
+                  <Search className="w-8 h-8 text-white/40" />
+                </div>
+                <h3 className="text-2xl font-heading font-bold text-white mb-3">No products available</h3>
+                <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
+                  There are currently no products in the store. Please check back later.
+                </p>
+                <Button 
+                  onClick={() => window.location.reload()}
+                  className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 font-medium"
+                >
+                  Refresh
+                </Button>
+              </motion.div>
+            ) : sortedProducts.length === 0 ? (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

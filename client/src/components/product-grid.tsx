@@ -1,5 +1,4 @@
 import { Link } from "wouter";
-import { homeProducts, categories, type Product } from "@/data/products";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +7,53 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/hooks/use-cart";
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+
+interface DbProduct {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  price: number;
+  originalPrice: number | null;
+  categoryId: number | null;
+  images: string[];
+  rating: number;
+  reviewCount: number;
+  isNew: boolean;
+  isBestseller: boolean;
+  isFeatured: boolean;
+  isActive: boolean;
+  vendorName?: string | null;
+  badgeColor?: string | null;
+  has3D?: boolean;
+}
+
+interface DbCategory {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon: string | null;
+  imageUrl: string | null;
+  parentId: number | null;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  originalPrice?: number | null;
+  image: string;
+  rating: number;
+  reviews: number;
+  isNew: boolean;
+  isBestseller: boolean;
+  vendorName?: string;
+  badgeColor?: string;
+  has3D?: boolean;
+  categorySlug: string;
+}
 
 function generateWeightedRowPattern(length: number): number[] {
   const pattern: number[] = [];
@@ -394,13 +440,61 @@ function DynamicRow({ products, startIndex, itemCount, rowIndex = 0 }: DynamicRo
 
 export function ProductGrid() {
   const [visibleProducts, setVisibleProducts] = useState(60);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [viewMode, setViewMode] = useState<"mixed" | "grid">("mixed");
   const [dynamicPattern, setDynamicPattern] = useState<number[]>(() => generateWeightedRowPattern(20));
   const [shuffleKey, setShuffleKey] = useState(0);
   const { toast } = useToast();
   const patternIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const shuffleIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const { data: dbProducts = [], isLoading: productsLoading, isError: productsError } = useQuery<DbProduct[]>({
+    queryKey: ["/api/products"],
+    queryFn: async () => {
+      const res = await fetch("/api/products");
+      if (!res.ok) throw new Error("Failed to fetch products");
+      return res.json();
+    },
+  });
+
+  const { data: dbCategories = [], isLoading: categoriesLoading, isError: categoriesError } = useQuery<DbCategory[]>({
+    queryKey: ["/api/categories"],
+    queryFn: async () => {
+      const res = await fetch("/api/categories");
+      if (!res.ok) throw new Error("Failed to fetch categories");
+      return res.json();
+    },
+  });
+
+  const categoryMap = useMemo(() => {
+    const map: Record<number, DbCategory> = {};
+    dbCategories.forEach(cat => {
+      map[cat.id] = cat;
+    });
+    return map;
+  }, [dbCategories]);
+
+  const homeProducts: Product[] = useMemo(() => {
+    return dbProducts.map(p => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      originalPrice: p.originalPrice,
+      image: p.images?.[0] || "",
+      rating: p.rating,
+      reviews: p.reviewCount,
+      isNew: p.isNew,
+      isBestseller: p.isBestseller,
+      vendorName: p.vendorName || undefined,
+      badgeColor: p.badgeColor || undefined,
+      has3D: p.has3D,
+      categorySlug: p.categoryId && categoryMap[p.categoryId] ? categoryMap[p.categoryId].slug : "general",
+    }));
+  }, [dbProducts, categoryMap]);
+
+  const categories = useMemo(() => {
+    return dbCategories.filter(cat => !cat.slug.includes("-sub-"));
+  }, [dbCategories]);
 
   useEffect(() => {
     if (viewMode === "mixed") {
@@ -428,7 +522,7 @@ export function ProductGrid() {
       grouped[product.categorySlug].push(product);
     });
     return grouped;
-  }, []);
+  }, [homeProducts]);
 
   const featuredCategories = useMemo(() => {
     const categoryOrder = ["electronics", "cosmetics-items", "fashion", "health-items", "tea-coffee", "shoes"];
@@ -440,7 +534,7 @@ export function ProductGrid() {
         category: categories.find(c => c.slug === slug),
         products: categorizedProducts[slug].slice(0, 8)
       }));
-  }, [categorizedProducts]);
+  }, [categorizedProducts, categories]);
 
   const mixedProducts = useMemo(() => {
     const result: Product[] = [];
@@ -458,7 +552,7 @@ export function ProductGrid() {
       }
     }
     return shuffleKey > 0 ? shuffleArray(result) : result;
-  }, [categorizedProducts, visibleProducts, shuffleKey]);
+  }, [categorizedProducts, visibleProducts, shuffleKey, homeProducts.length]);
 
   const rows = useMemo(() => {
     const result: { start: number; count: number }[] = [];
@@ -476,20 +570,58 @@ export function ProductGrid() {
   }, [visibleProducts, mixedProducts.length, dynamicPattern]);
 
   const loadMore = useCallback(() => {
-    setIsLoading(true);
+    setIsLoadingMore(true);
     setTimeout(() => {
       setVisibleProducts(prev => Math.min(prev + 60, homeProducts.length));
-      setIsLoading(false);
+      setIsLoadingMore(false);
       toast({
         title: "Products Loaded!",
         description: "More products have been loaded successfully.",
         duration: 2000,
       });
     }, 400);
-  }, [toast]);
+  }, [toast, homeProducts.length]);
 
   const totalProducts = homeProducts.length;
   const remainingProducts = Math.max(0, totalProducts - visibleProducts);
+
+  if (productsLoading || categoriesLoading) {
+    return (
+      <section className="py-10 px-4 bg-gradient-to-b from-transparent via-purple-950/10 to-transparent">
+        <div className="container mx-auto max-w-[1900px]">
+          <div className="flex items-center justify-center py-20">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full"
+            />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (productsError || categoriesError) {
+    return (
+      <section className="py-10 px-4 bg-gradient-to-b from-transparent via-purple-950/10 to-transparent">
+        <div className="container mx-auto max-w-[1900px]">
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
+              <span className="text-2xl">⚠️</span>
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Unable to Load Products</h3>
+            <p className="text-white/60 mb-4">Please try refreshing the page.</p>
+            <Button 
+              onClick={() => window.location.reload()}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90"
+            >
+              Refresh Page
+            </Button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-10 px-4 bg-gradient-to-b from-transparent via-purple-950/10 to-transparent">
@@ -617,17 +749,17 @@ export function ProductGrid() {
             </p>
             <Button 
               onClick={loadMore}
-              disabled={isLoading}
+              disabled={isLoadingMore}
               className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full px-10 py-3 font-semibold shadow-lg shadow-purple-500/30 transition-all hover:scale-105"
             >
-              {isLoading ? (
+              {isLoadingMore ? (
                 <motion.div 
                   animate={{ rotate: 360 }} 
                   transition={{ duration: 1, repeat: Infinity }}
                   className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
                 />
               ) : null}
-              {isLoading ? "Loading..." : `Load More (${remainingProducts.toLocaleString()} remaining)`}
+              {isLoadingMore ? "Loading..." : `Load More (${remainingProducts.toLocaleString()} remaining)`}
             </Button>
           </motion.div>
         )}

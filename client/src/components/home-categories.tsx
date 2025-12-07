@@ -54,7 +54,7 @@ interface Category {
 }
 
 export function HomeCategories() {
-  const { data: categories = [], isLoading } = useQuery<Category[]>({
+  const { data: categories = [], isLoading, isError } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
     queryFn: async () => {
       const res = await fetch("/api/categories");
@@ -79,6 +79,10 @@ export function HomeCategories() {
         </div>
       </section>
     );
+  }
+
+  if (isError || mainCategories.length === 0) {
+    return null;
   }
 
   return (

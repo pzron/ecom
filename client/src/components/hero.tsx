@@ -1,9 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { Link } from "wouter";
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { homeProducts } from "@/data/products";
+import { useState, useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+
+interface DbProduct {
+  id: number;
+  name: string;
+  images: string[];
+}
 
 const heroImages = [
   "https://myvertexbd.com/image/thumb/68d6d93e99754.webp",
@@ -184,8 +190,17 @@ function GlowingOrb({ position, color, size, delay }: {
 
 export function Hero() {
   const [isHovered, setIsHovered] = useState(false);
-  const [productCount, setProductCount] = useState(18);
+  const [productCount] = useState(18);
   const [currentHeroImage, setCurrentHeroImage] = useState(0);
+
+  const { data: dbProducts = [], isLoading: productsLoading, isError } = useQuery<DbProduct[]>({
+    queryKey: ["/api/products/featured", { limit: 30 }],
+    queryFn: async () => {
+      const res = await fetch("/api/products/featured?limit=30");
+      if (!res.ok) throw new Error("Failed to fetch products");
+      return res.json();
+    },
+  });
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -195,13 +210,18 @@ export function Hero() {
   }, []);
 
   const floatingProducts = useMemo(() => {
-    const shuffled = [...homeProducts].sort(() => Math.random() - 0.5);
+    const products = dbProducts.map(p => ({
+      id: p.id,
+      image: p.images?.[0] || "",
+      name: p.name,
+    }));
+    const shuffled = [...products].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, productCount).map((product, i) => ({
       id: `${product.id}-${i}`,
       image: product.image,
       name: product.name,
     }));
-  }, [productCount]);
+  }, [dbProducts, productCount]);
 
   const particles = useMemo(() => Array.from({ length: 30 }, (_, i) => i), []);
 
@@ -249,15 +269,25 @@ export function Hero() {
       ))}
 
       <div className="absolute inset-0 z-[1] pointer-events-none">
-        {floatingProducts.map((product, index) => (
-          <FloatingProduct
-            key={product.id}
-            image={product.image}
-            name={product.name}
-            index={index}
-            totalProducts={floatingProducts.length}
-          />
-        ))}
+        {productsLoading ? (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30">
+            <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+          </div>
+        ) : isError ? (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-50 text-center">
+            <p className="text-xs text-white/40">Featured products unavailable</p>
+          </div>
+        ) : (
+          floatingProducts.map((product, index) => (
+            <FloatingProduct
+              key={product.id}
+              image={product.image}
+              name={product.name}
+              index={index}
+              totalProducts={floatingProducts.length}
+            />
+          ))
+        )}
       </div>
 
       <div className="absolute right-4 md:right-10 lg:right-20 top-1/2 -translate-y-1/2 z-[5] hidden md:block">

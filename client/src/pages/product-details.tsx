@@ -3,24 +3,62 @@ import { ProductViewer } from "@/components/3d/product-viewer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { products, getProductById } from "@/data/products";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ShoppingCart, Heart, Share2, ShieldCheck, Truck, 
   RotateCcw, Zap, Box, Cuboid, ScanFace, Check, Star, Minus, Plus, Sparkles, Play, Image, ChevronLeft, ChevronRight,
-  Gift, ShoppingBasket, Percent
+  Gift, ShoppingBasket, Percent, Loader2
 } from "lucide-react";
 import { useRoute, Link } from "wouter";
 import { useState, useMemo } from "react";
 import { useCart } from "@/hooks/use-cart";
-import { getRelatedCombos, hasAvailableCombos } from "@/lib/combo-utils";
+import { getRelatedCombos } from "@/lib/combo-utils";
+import { useQuery } from "@tanstack/react-query";
+
+interface DbProduct {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  shortDescription?: string | null;
+  price: number;
+  originalPrice: number | null;
+  categoryId: number | null;
+  images: string[];
+  rating: number;
+  reviewCount: number;
+  stock?: number | null;
+  isNew: boolean;
+  isBestseller: boolean;
+  isFeatured: boolean;
+  isActive: boolean;
+  vendorName?: string | null;
+  has3D?: boolean;
+  model3dType?: string;
+  colors?: { name: string; value: string }[];
+  sizes?: string[];
+  category?: string;
+}
 
 export default function ProductDetails() {
   const [match, params] = useRoute("/product/:id");
-  const product = getProductById(params?.id || "") || products[0];
+  const productId = params?.id || "";
+
+  const { data: product, isLoading, isError, error } = useQuery<DbProduct | null>({
+    queryKey: ["/api/products", productId],
+    queryFn: async () => {
+      const res = await fetch(`/api/products/${productId}`);
+      if (res.status === 404) {
+        return null;
+      }
+      if (!res.ok) throw new Error("Failed to fetch product");
+      return res.json();
+    },
+    enabled: !!productId,
+  });
   
-  const [selectedColor, setSelectedColor] = useState(product.colors?.[0]?.value || "#D3C1E7");
-  const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || "");
+  const [selectedColor, setSelectedColor] = useState("#D3C1E7");
+  const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -29,23 +67,70 @@ export default function ProductDetails() {
   
   const { addItem } = useCart();
   
-  const relatedCombos = useMemo(() => getRelatedCombos(product.id, 4), [product.id]);
+  const relatedCombos = useMemo(() => product ? getRelatedCombos(product.id, 4) : [], [product?.id]);
   const hasCombos = relatedCombos.length > 0;
 
   const handleAddToCart = () => {
+    if (!product) return;
     setIsAddingToCart(true);
     addItem({
       id: product.id,
       name: product.name,
       price: product.price,
       originalPrice: product.originalPrice,
-      image: product.image,
+      image: product.images?.[0] || "",
       selectedColor,
       selectedSize,
     }, quantity);
     
     setTimeout(() => setIsAddingToCart(false), 1500);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0f] text-foreground flex items-center justify-center">
+        <Navbar />
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full"
+        />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0f] text-foreground flex items-center justify-center">
+        <Navbar />
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-400 mb-4">Failed to Load Product</h1>
+          <p className="text-white/60 mb-6">Something went wrong while loading this product. Please try again.</p>
+          <Link href="/products">
+            <Button className="bg-gradient-to-r from-purple-500 to-pink-500">
+              Browse Products
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0f] text-foreground flex items-center justify-center">
+        <Navbar />
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Product Not Found</h1>
+          <Link href="/products">
+            <Button className="bg-gradient-to-r from-purple-500 to-pink-500">
+              Browse Products
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const colors = product.colors || [
     { name: "Default", value: "#D3C1E7" },
@@ -54,6 +139,8 @@ export default function ProductDetails() {
   ];
 
   const sizes = product.sizes || [];
+  const productImage = product.images?.[0] || "";
+  const productImages = product.images?.length ? product.images : [productImage, productImage, productImage, productImage];
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-foreground selection:bg-primary selection:text-white pb-20">
@@ -140,7 +227,7 @@ export default function ProductDetails() {
               transition={{ delay: 0.1 }}
               className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 md:gap-4"
             >
-              {(product.images || [product.image, product.image, product.image, product.image]).map((img, i) => (
+              {productImages.map((img, i) => (
                 <div 
                   key={i} 
                   onClick={() => setActiveImageIndex(i)}
@@ -423,7 +510,7 @@ export default function ProductDetails() {
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 mt-6 border-t border-white/10">
                   <div className="text-center p-4 rounded-xl bg-white/5 border border-white/10">
-                    <div className="text-2xl font-bold text-purple-400">{product.reviews.toLocaleString()}</div>
+                    <div className="text-2xl font-bold text-purple-400">{product.reviewCount.toLocaleString()}</div>
                     <div className="text-sm text-white/50">Reviews</div>
                   </div>
                   <div className="text-center p-4 rounded-xl bg-white/5 border border-white/10">
