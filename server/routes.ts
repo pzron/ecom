@@ -1310,5 +1310,139 @@ export async function registerRoutes(
     }
   });
 
+  // ===== AI CHAT & SEARCH ROUTES =====
+
+  // AI Chat endpoint for customer support
+  app.post("/api/chat", async (req, res) => {
+    try {
+      const { messages, includeProducts } = req.body;
+      
+      if (!messages || !Array.isArray(messages)) {
+        return res.status(400).json({ message: "Messages array required" });
+      }
+
+      // Get product context if requested
+      let productContext: ProductContext[] = [];
+      if (includeProducts) {
+        const dbProducts = await storage.getProducts({ limit: 20 });
+        productContext = dbProducts.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          price: parseFloat(p.price?.toString() || "0"),
+          originalPrice: p.originalPrice ? parseFloat(p.originalPrice.toString()) : undefined,
+          category: p.category || "General",
+          description: p.description,
+          rating: parseFloat(p.rating?.toString() || "4.5"),
+          inStock: p.stockQuantity > 0
+        }));
+      }
+
+      const chatMessages: ChatMessage[] = messages.map((m: any) => ({
+        role: m.role as "user" | "assistant",
+        content: m.content
+      }));
+
+      const response = await generateChatResponse(chatMessages, productContext);
+      
+      res.json({ response });
+    } catch (error) {
+      console.error("Chat API error:", error);
+      res.status(500).json({ message: "Failed to generate response" });
+    }
+  });
+
+  // AI-powered product search
+  app.post("/api/ai/search", async (req, res) => {
+    try {
+      const { query } = req.body;
+      
+      if (!query) {
+        return res.status(400).json({ message: "Search query required" });
+      }
+
+      // Get all products for AI to analyze
+      const dbProducts = await storage.getProducts({ limit: 100 });
+      
+      // Create a map for quick ID lookup
+      const productMap = new Map<string, any>();
+      dbProducts.forEach((p: any) => {
+        productMap.set(p.id, p);
+        productMap.set(String(p.id), p);
+      });
+      
+      const productContext: ProductContext[] = dbProducts.map((p: any) => ({
+        id: String(p.id),
+        name: p.name,
+        price: parseFloat(p.price?.toString() || "0"),
+        originalPrice: p.originalPrice ? parseFloat(p.originalPrice.toString()) : undefined,
+        category: p.category || "General",
+        description: p.description,
+        rating: parseFloat(p.rating?.toString() || "4.5"),
+        inStock: p.stockQuantity > 0
+      }));
+
+      const result = await searchProductsWithAI(query, productContext);
+      
+      // Fetch full product details for recommended IDs with validation
+      let recommendedProducts = result.recommendedIds
+        .map(id => productMap.get(id) || productMap.get(String(id)))
+        .filter(Boolean);
+
+      // Fallback: if AI returned no valid matches, do a simple text search
+      if (recommendedProducts.length === 0) {
+        const lowercaseQuery = query.toLowerCase();
+        recommendedProducts = dbProducts.filter((p: any) =>
+          p.name?.toLowerCase().includes(lowercaseQuery) ||
+          p.description?.toLowerCase().includes(lowercaseQuery) ||
+          p.category?.toLowerCase().includes(lowercaseQuery)
+        ).slice(0, 5);
+      }
+
+      res.json({
+        answer: result.answer,
+        products: recommendedProducts
+      });
+    } catch (error) {
+      console.error("AI Search error:", error);
+      res.status(500).json({ message: "Failed to perform AI search" });
+    }
+  });
+
+  // Get AI search suggestions based on query
+  app.get("/api/ai/suggestions", async (req, res) => {
+    try {
+      const { q } = req.query;
+      
+      if (!q || typeof q !== 'string') {
+        return res.json({ suggestions: [] });
+      }
+
+      // Get products matching the query for suggestions
+      const products = await storage.getProducts({ search: q, limit: 5 });
+      const categories = await storage.getCategories();
+      
+      const suggestions: string[] = [];
+      
+      // Add matching product names
+      products.forEach((p: any) => {
+        if (suggestions.length < 5) {
+          suggestions.push(p.name);
+        }
+      });
+      
+      // Add matching category names
+      categories.forEach((c: any) => {
+        if (c.name.toLowerCase().includes(q.toLowerCase()) && suggestions.length < 8) {
+          suggestions.push(`Browse ${c.name}`);
+        }
+      });
+
+      res.json({ suggestions });
+    } catch (error) {
+      console.error("Suggestions error:", error);
+      res.json({ suggestions: [] });
+    }
+  });
+
   return httpServer;
 }
