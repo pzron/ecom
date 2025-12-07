@@ -7,6 +7,7 @@ import { users, products, vendors } from "@shared/schema";
 import { insertProductSchema, insertCategorySchema, insertReviewSchema, insertCartItemSchema, insertOrderSchema } from "@shared/schema";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import { generateChatResponse, searchProductsWithAI, type ChatMessage, type ProductContext } from "./openai";
 
 function generateOrderNumber(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
@@ -701,6 +702,76 @@ export async function registerRoutes(
       res.json(analytics);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // ===== AI CHAT ENDPOINT =====
+  app.post("/api/chat", async (req, res) => {
+    try {
+      const { messages, includeProducts } = req.body;
+      
+      if (!messages || !Array.isArray(messages)) {
+        return res.status(400).json({ message: "Messages array is required" });
+      }
+
+      let productContext: ProductContext[] | undefined;
+      
+      if (includeProducts) {
+        const allProducts = await storage.getProducts({ limit: 20 });
+        productContext = allProducts.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          price: parseFloat(p.price),
+          originalPrice: p.originalPrice ? parseFloat(p.originalPrice) : undefined,
+          category: p.category?.name || 'General',
+          description: p.shortDescription || p.description,
+          rating: parseFloat(p.rating) || 4.5,
+          inStock: p.stock > 0
+        }));
+      }
+
+      const response = await generateChatResponse(messages as ChatMessage[], productContext);
+      res.json({ response, timestamp: new Date().toISOString() });
+    } catch (error) {
+      console.error("Chat error:", error);
+      res.status(500).json({ message: "Failed to generate response" });
+    }
+  });
+
+  app.post("/api/search/ai", async (req, res) => {
+    try {
+      const { query } = req.body;
+      
+      if (!query) {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+
+      const allProducts = await storage.getProducts({ limit: 50 });
+      const productContext: ProductContext[] = allProducts.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        price: parseFloat(p.price),
+        originalPrice: p.originalPrice ? parseFloat(p.originalPrice) : undefined,
+        category: p.category?.name || 'General',
+        description: p.shortDescription || p.description,
+        rating: parseFloat(p.rating) || 4.5,
+        inStock: p.stock > 0
+      }));
+
+      const result = await searchProductsWithAI(query, productContext);
+      
+      const recommendedProducts = allProducts.filter((p: any) => 
+        result.recommendedIds.includes(p.id)
+      );
+
+      res.json({ 
+        answer: result.answer, 
+        products: recommendedProducts,
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error) {
+      console.error("AI Search error:", error);
+      res.status(500).json({ message: "Failed to perform AI search" });
     }
   });
 

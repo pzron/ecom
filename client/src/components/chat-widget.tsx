@@ -465,7 +465,7 @@ export function ChatWidget() {
     };
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
 
     const userMessage: Message = {
@@ -480,22 +480,71 @@ export function ChatWidget() {
     setInput("");
     setIsTyping(true);
 
-    setTimeout(() => {
-      const response = generateResponse(currentInput);
+    try {
+      const chatMessages = [...messages, userMessage].map(m => ({
+        role: m.role,
+        content: m.content
+      }));
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ 
+          messages: chatMessages,
+          includeProducts: true 
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const matchedProducts = searchProducts(currentInput);
+        
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: data.response,
+          products: matchedProducts.length > 0 ? matchedProducts : undefined,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        
+        if (voiceEnabled) {
+          speakText(data.response);
+        }
+      } else {
+        const fallback = generateResponse(currentInput);
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: fallback.content,
+          products: fallback.products,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        
+        if (voiceEnabled) {
+          speakText(fallback.content);
+        }
+      }
+    } catch (error) {
+      console.error("Chat error:", error);
+      const fallback = generateResponse(currentInput);
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: response.content,
-        products: response.products,
+        content: fallback.content,
+        products: fallback.products,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, assistantMessage]);
-      setIsTyping(false);
       
       if (voiceEnabled) {
-        speakText(response.content);
+        speakText(fallback.content);
       }
-    }, 800 + Math.random() * 400);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleQuickAction = (action: string) => {
