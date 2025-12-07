@@ -512,7 +512,7 @@ export function ProductGrid() {
                 variant={viewMode === "mixed" ? "default" : "outline"}
                 size="icon"
                 onClick={() => setViewMode("mixed")}
-                className={`w-10 h-10 rounded-full ${viewMode === "mixed" ? "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/25" : "border-white/20 text-white/70 hover:bg-white/10 backdrop-blur-sm"}`}
+                className={`w-10 h-10 rounded-full ${viewMode === "mixed" ? "bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 shadow-lg shadow-cyan-500/25" : "border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 backdrop-blur-sm"}`}
                 title="Mixed View"
               >
                 <LayoutGrid className="w-5 h-5" />

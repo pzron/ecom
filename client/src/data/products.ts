@@ -650,6 +650,15 @@ const colorPalettes = [
 
 const animations: ("rotate" | "bounce" | "pulse" | "glow" | "float")[] = ["rotate", "bounce", "pulse", "glow", "float"];
 
+const brandNames = [
+  "Bcare", "VertexBD", "Deshi", "Sonali", "Rangpur", "Dhaka Premium", "Bengal Gold", "Chittagong Choice",
+  "Sylhet Select", "Khulna Quality", "Rajshahi Royal", "Bogra Best", "Comilla Classic", "Narayanganj Nice",
+  "Mymensingh Magic", "Jessore Joy", "Dinajpur Delight", "Pabna Pure", "Tangail Top", "Gazipur Great",
+  "Narsingdi Natural", "Manikganj Master", "Faridpur Fine", "Kushtia King", "Satkhira Select", "Barisal Best",
+  "Noakhali Noble", "Feni Fresh", "Lakshmipur Luxury", "Chandpur Choice", "Brahmanbaria Bright", "Habiganj Happy",
+  "Sunamganj Super", "Netrokona Nice", "Sherpur Special", "Jamalpur Joy", "Kishoreganj King", "Patuakhali Pure"
+];
+
 const productAdjectives = [
   "Premium", "Professional", "Advanced", "Ultra", "Pro", "Elite", "Deluxe", "Supreme", "Essential", "Classic",
   "Modern", "Luxury", "Natural", "Organic", "Pure", "Fresh", "Smart", "Compact", "Portable", "Wireless",
@@ -1001,13 +1010,22 @@ function generateProductDescription(categoryType: string, productName: string, c
   return `${baseDescription}\n\nThe ${productName} from our ${categoryName} collection represents the pinnacle of quality and value. Whether you're a first-time buyer or a loyal customer, you'll appreciate the attention to detail and superior craftsmanship that goes into every product we offer.`;
 }
 
-function generateMultipleImages(productId: number): string[] {
+function generateMultipleImages(productId: number, random: () => number): string[] {
   const totalImages = categoryImageUrls.length;
   const images: string[] = [];
+  const usedIndices = new Set<number>();
   
-  for (let i = 0; i < 4; i++) {
-    const imageIndex = (productId + i * 7) % totalImages;
-    images.push(categoryImageUrls[imageIndex]);
+  const primaryIndex = productId % totalImages;
+  images.push(categoryImageUrls[primaryIndex]);
+  usedIndices.add(primaryIndex);
+  
+  while (images.length < 4 && usedIndices.size < totalImages) {
+    const offset = Math.floor(random() * totalImages);
+    const imageIndex = (primaryIndex + offset) % totalImages;
+    if (!usedIndices.has(imageIndex)) {
+      images.push(categoryImageUrls[imageIndex]);
+      usedIndices.add(imageIndex);
+    }
   }
   
   return images;
@@ -1033,12 +1051,12 @@ function generateProducts(count: number = 10000): Product[] {
       const productsPerCategory = Math.ceil(count / totalCategories) + 5;
       
       for (let i = 0; i < productsPerCategory && generatedProducts.length < count; i++) {
+        const brand = brandNames[Math.floor(random() * brandNames.length)];
         const adj1 = productAdjectives[Math.floor(random() * productAdjectives.length)];
-        const adj2 = productAdjectives[Math.floor(random() * productAdjectives.length)];
         const noun = nouns[Math.floor(random() * nouns.length)];
         const variant = Math.floor(random() * 10000);
         
-        const productName = `${adj1} ${adj2} ${noun}`;
+        const productName = `${brand} ${adj1} ${noun}`;
         const productSlug = `${productName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}-${variant}`;
         
         if (usedSlugs.has(productSlug)) continue;
@@ -1056,7 +1074,7 @@ function generateProducts(count: number = 10000): Product[] {
         
         const imageIndex = productId % categoryImageUrls.length;
         const image = categoryImageUrls[imageIndex];
-        const images = generateMultipleImages(productId);
+        const images = generateMultipleImages(productId, random);
         
         const shortDescription = `${productName} - Premium quality ${noun.toLowerCase()} with excellent features designed for ${category.name}. Trusted by thousands of satisfied customers.`;
         const fullDescription = generateProductDescription(categoryType, productName, category.name, random);

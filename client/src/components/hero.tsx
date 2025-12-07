@@ -1,9 +1,20 @@
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { homeProducts } from "@/data/products";
+
+const heroImages = [
+  "https://myvertexbd.com/image/thumb/68d6d93e99754.webp",
+  "https://myvertexbd.com/image/thumb/68d6d3bd6bf3a.webp",
+  "https://myvertexbd.com/image/thumb/68d6d4cb6df63.webp",
+  "https://myvertexbd.com/image/thumb/66c4ade538f4c.webp",
+  "https://myvertexbd.com/image/thumb/68d6d77169f44.webp",
+  "https://myvertexbd.com/image/thumb/68d6d9193c50c.webp",
+  "https://myvertexbd.com/image/thumb/690a66b9db934.webp",
+  "https://myvertexbd.com/image/thumb/68d6d995e21b6.webp",
+];
 
 const glowColors = [
   "rgba(168, 85, 247, 0.6)",
@@ -174,6 +185,14 @@ function GlowingOrb({ position, color, size, delay }: {
 export function Hero() {
   const [isHovered, setIsHovered] = useState(false);
   const [productCount, setProductCount] = useState(18);
+  const [currentHeroImage, setCurrentHeroImage] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHeroImage((prev) => (prev + 1) % heroImages.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   const floatingProducts = useMemo(() => {
     const shuffled = [...homeProducts].sort(() => Math.random() - 0.5);
@@ -241,7 +260,91 @@ export function Hero() {
         ))}
       </div>
 
-      <div className="container relative z-10 px-4 flex flex-col items-center text-center">
+      <div className="absolute right-4 md:right-10 lg:right-20 top-1/2 -translate-y-1/2 z-[5] hidden md:block">
+        <motion.div
+          className="relative"
+          style={{ perspective: "1200px" }}
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentHeroImage}
+              className="relative w-48 lg:w-64 xl:w-72 h-48 lg:h-64 xl:h-72"
+              initial={{ opacity: 0, rotateY: -90, scale: 0.8 }}
+              animate={{ 
+                opacity: 1, 
+                rotateY: [0, 5, -5, 0],
+                scale: 1,
+                rotateX: [0, -3, 3, 0],
+              }}
+              exit={{ opacity: 0, rotateY: 90, scale: 0.8 }}
+              transition={{ 
+                duration: 0.8,
+                rotateY: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+                rotateX: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+              }}
+              style={{ transformStyle: "preserve-3d" }}
+            >
+              <motion.div
+                className="absolute inset-0 rounded-3xl overflow-hidden border-2 border-purple-500/40 shadow-2xl"
+                style={{
+                  boxShadow: "0 25px 50px -12px rgba(168, 85, 247, 0.5), 0 0 60px rgba(236, 72, 153, 0.3)",
+                  transform: "translateZ(20px)",
+                }}
+              >
+                <img
+                  src={heroImages[currentHeroImage]}
+                  alt="Featured Product"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/20 via-transparent to-pink-600/20" />
+                <motion.div
+                  className="absolute inset-0"
+                  animate={{
+                    background: [
+                      "linear-gradient(45deg, rgba(168, 85, 247, 0.2) 0%, transparent 50%)",
+                      "linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, transparent 50%)",
+                      "linear-gradient(225deg, rgba(6, 182, 212, 0.2) 0%, transparent 50%)",
+                      "linear-gradient(315deg, rgba(168, 85, 247, 0.2) 0%, transparent 50%)",
+                    ],
+                  }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                />
+              </motion.div>
+
+              <motion.div
+                className="absolute -inset-4 rounded-[2rem] blur-xl opacity-60"
+                animate={{
+                  background: [
+                    "radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, transparent 70%)",
+                    "radial-gradient(circle, rgba(236, 72, 153, 0.4) 0%, transparent 70%)",
+                    "radial-gradient(circle, rgba(6, 182, 212, 0.4) 0%, transparent 70%)",
+                    "radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, transparent 70%)",
+                  ],
+                }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              />
+            </motion.div>
+          </AnimatePresence>
+
+          <div className="flex justify-center mt-4 gap-2">
+            {heroImages.map((_, idx) => (
+              <motion.button
+                key={idx}
+                onClick={() => setCurrentHeroImage(idx)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  idx === currentHeroImage 
+                    ? "bg-gradient-to-r from-purple-400 to-pink-400 w-6" 
+                    : "bg-white/30 hover:bg-white/50"
+                }`}
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.9 }}
+              />
+            ))}
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="container relative z-10 px-4 flex flex-col items-center text-center md:items-start md:text-left md:pl-8 lg:pl-16">
         <motion.div className="relative">
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
