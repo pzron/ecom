@@ -43,6 +43,9 @@ export default function CheckoutPage() {
   const [orderStatus, setOrderStatus] = useState("pending");
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
+  const [orderError, setOrderError] = useState<string | null>(null);
+  const { user } = useAuthStore();
   const [paymentDetails, setPaymentDetails] = useState({
     bkashPhone: "",
     nagadPhone: "",
@@ -87,58 +90,117 @@ export default function CheckoutPage() {
     setFormData(prev => ({ ...prev, latitude: lat, longitude: lng, location }));
   };
 
+  const createOrderInBackend = async () => {
+    const orderPayload = {
+      userId: user?.id || undefined,
+      items: items.map(item => ({
+        productId: item.product.id,
+        quantity: item.quantity,
+      })),
+      shippingAddress: {
+        fullName: `${formData.firstName} ${formData.lastName}`,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        country: formData.country,
+        postalCode: formData.zipCode,
+      },
+      couponCode: paymentDetails.promoCode || undefined,
+      paymentMethod: formData.paymentMethod,
+    };
+
+    const response = await fetch("/api/orders/create-with-calculations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(orderPayload),
+    });
+
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.message || "Failed to create order");
+    }
+
+    const result = await response.json();
+    return result;
+  };
+
   const handleBankingPayment = async (provider: string, phone: string) => {
     setIsProcessing(true);
+    setOrderError(null);
     setOrderStatus("validating");
     
-    await new Promise(r => setTimeout(r, 1500));
-    setOrderStatus("payment_initiated");
-    
-    // Simulate API call to bKash/Nagad/Rocket
-    await new Promise(r => setTimeout(r, 2000));
-    
-    alert(`${provider.toUpperCase()} Payment Link Sent!\n\nPhone: ${phone}\n\nPlease complete payment in your banking app.`);
-    
-    setOrderStatus("processing");
-    await new Promise(r => setTimeout(r, 2500));
-    setOrderStatus("confirmed");
-    await new Promise(r => setTimeout(r, 1500));
-    setOrderStatus("shipped");
-    await new Promise(r => setTimeout(r, 1000));
-    setShowSuccess(true);
-    clearCart();
-    await new Promise(r => setTimeout(r, 3000));
-    navigate("/");
+    try {
+      await new Promise(r => setTimeout(r, 800));
+      setOrderStatus("payment_initiated");
+      
+      alert(`${provider.toUpperCase()} Payment Link Sent!\n\nPhone: ${phone}\n\nPlease complete payment in your banking app.`);
+      
+      setOrderStatus("processing");
+      const result = await createOrderInBackend();
+      
+      if (result.success && result.order) {
+        setCreatedOrderId(result.order.orderNumber || result.order.id);
+        setOrderStatus("confirmed");
+        await new Promise(r => setTimeout(r, 800));
+        setOrderStatus("shipped");
+        await new Promise(r => setTimeout(r, 500));
+        setShowSuccess(true);
+        clearCart();
+        await new Promise(r => setTimeout(r, 3000));
+        navigate("/");
+      } else {
+        throw new Error(result.error || "Order creation failed");
+      }
+    } catch (error) {
+      setOrderError(error instanceof Error ? error.message : "Failed to place order");
+      setIsProcessing(false);
+      setOrderStatus("pending");
+    }
   };
 
   const handleCryptoPayment = async () => {
     setIsProcessing(true);
+    setOrderError(null);
     setOrderStatus("validating");
     
-    await new Promise(r => setTimeout(r, 1500));
-    setOrderStatus("wallet_connect");
-    
-    // Simulate Web3 wallet connection
-    const providers: any = {
-      metamask: "MetaMask",
-      coinbase: "Coinbase Wallet",
-    };
-    
-    alert(`Connecting to ${providers[paymentDetails.cryptoNetwork]}...\n\nPlease approve the transaction in your wallet.`);
-    
-    setOrderStatus("processing");
-    await new Promise(r => setTimeout(r, 2500));
-    setOrderStatus("confirmed");
-    await new Promise(r => setTimeout(r, 1500));
-    setOrderStatus("shipped");
-    await new Promise(r => setTimeout(r, 1000));
-    setShowSuccess(true);
-    clearCart();
-    await new Promise(r => setTimeout(r, 3000));
-    navigate("/");
+    try {
+      await new Promise(r => setTimeout(r, 800));
+      setOrderStatus("wallet_connect");
+      
+      const providers: any = {
+        metamask: "MetaMask",
+        coinbase: "Coinbase Wallet",
+      };
+      
+      alert(`Connecting to ${providers[paymentDetails.cryptoNetwork]}...\n\nPlease approve the transaction in your wallet.`);
+      
+      setOrderStatus("processing");
+      const result = await createOrderInBackend();
+      
+      if (result.success && result.order) {
+        setCreatedOrderId(result.order.orderNumber || result.order.id);
+        setOrderStatus("confirmed");
+        await new Promise(r => setTimeout(r, 800));
+        setOrderStatus("shipped");
+        await new Promise(r => setTimeout(r, 500));
+        setShowSuccess(true);
+        clearCart();
+        await new Promise(r => setTimeout(r, 3000));
+        navigate("/");
+      } else {
+        throw new Error(result.error || "Order creation failed");
+      }
+    } catch (error) {
+      setOrderError(error instanceof Error ? error.message : "Failed to place order");
+      setIsProcessing(false);
+      setOrderStatus("pending");
+    }
   };
 
   const handlePlaceOrder = async () => {
+    setOrderError(null);
+    
     if (formData.paymentMethod === "banking") {
       const provider = paymentDetails.bkashPhone ? "bkash" : paymentDetails.nagadPhone ? "nagad" : "rocket";
       const phone = paymentDetails.bkashPhone || paymentDetails.nagadPhone || paymentDetails.rocketPhone;
@@ -148,18 +210,32 @@ export default function CheckoutPage() {
     } else {
       setIsProcessing(true);
       setOrderStatus("validating");
-      await new Promise(r => setTimeout(r, 1500));
-      setOrderStatus("processing");
-      await new Promise(r => setTimeout(r, 2000));
-      setOrderStatus("confirmed");
-      setCompletedSteps([...completedSteps, "step-4"]);
-      await new Promise(r => setTimeout(r, 1500));
-      setOrderStatus("shipped");
-      await new Promise(r => setTimeout(r, 1000));
-      setShowSuccess(true);
-      clearCart();
-      await new Promise(r => setTimeout(r, 3000));
-      navigate("/");
+      
+      try {
+        await new Promise(r => setTimeout(r, 800));
+        setOrderStatus("processing");
+        
+        const result = await createOrderInBackend();
+        
+        if (result.success && result.order) {
+          setCreatedOrderId(result.order.orderNumber || result.order.id);
+          setOrderStatus("confirmed");
+          setCompletedSteps([...completedSteps, "step-4"]);
+          await new Promise(r => setTimeout(r, 1000));
+          setOrderStatus("shipped");
+          await new Promise(r => setTimeout(r, 500));
+          setShowSuccess(true);
+          clearCart();
+          await new Promise(r => setTimeout(r, 3000));
+          navigate("/");
+        } else {
+          throw new Error(result.error || "Order creation failed");
+        }
+      } catch (error) {
+        setOrderError(error instanceof Error ? error.message : "Failed to place order");
+        setIsProcessing(false);
+        setOrderStatus("pending");
+      }
     }
   };
 
@@ -209,7 +285,7 @@ export default function CheckoutPage() {
           </motion.p>
 
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="text-lg text-primary mb-8 font-semibold">
-            Order ID: #NX{Math.random().toString(36).substr(2, 9).toUpperCase()}
+            Order ID: #{createdOrderId || `NX${Math.random().toString(36).substr(2, 9).toUpperCase()}`}
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
@@ -605,6 +681,18 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 </motion.div>
+              </motion.div>
+            )}
+
+            {/* Error Message */}
+            {orderError && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                className="bg-red-500/20 border border-red-500/30 rounded-lg p-4 flex items-center gap-3"
+              >
+                <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                <p className="text-red-200 text-sm">{orderError}</p>
               </motion.div>
             )}
 
