@@ -7,17 +7,38 @@ import {
   User, Package, Heart, Award, Settings, LogOut, MapPin, CreditCard, Clock,
   ChevronRight, Edit2, Trash2, Plus, Bell, Shield, 
   Mail, Phone, Calendar, Truck, MapPinCheck, RotateCcw,
-  Lock, Check, AlertCircle, CheckCircle, Circle, Key, DollarSign, FileText
+  Lock, Check, AlertCircle, CheckCircle, Circle, Key, DollarSign, FileText, Eye, EyeOff, X
 } from "lucide-react";
 import { useAuthStore } from "@/stores/auth";
 import { useState } from "react";
+import { validatePassword } from "@/lib/validation";
 
 export default function ProfilePage() {
   const [, navigate] = useLocation();
-  const { user, logout, isAuthenticated, submitAffiliateApplication, approveAffiliateApplication } = useAuthStore();
+  const { user, logout, isAuthenticated, submitAffiliateApplication, approveAffiliateApplication, updateProfile, changePassword } = useAuthStore();
   const [activeNav, setActiveNav] = useState("overview");
   const [editMode, setEditMode] = useState(false);
   const [showAffiliateModal, setShowAffiliateModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  
+  const [profileForm, setProfileForm] = useState({
+    name: user?.name || "",
+    phone: user?.phone || "",
+  });
+  
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  
   const [affiliateFormData, setAffiliateFormData] = useState({
     phone: "",
     address: "",
@@ -31,6 +52,60 @@ export default function ProfilePage() {
     monthlyVisitors: "",
     primaryAudience: "",
   });
+  
+  const passwordValidation = validatePassword(passwordForm.newPassword);
+  
+  const handleSaveProfile = async () => {
+    setIsSavingProfile(true);
+    setSaveMessage(null);
+    const result = await updateProfile({
+      name: profileForm.name,
+      phone: profileForm.phone,
+    });
+    setIsSavingProfile(false);
+    if (result.success) {
+      setSaveMessage({ type: 'success', text: 'Profile updated successfully!' });
+      setEditMode(false);
+      setTimeout(() => setSaveMessage(null), 3000);
+    } else {
+      setSaveMessage({ type: 'error', text: result.message });
+    }
+  };
+  
+  const handleChangePassword = async () => {
+    setPasswordError("");
+    setPasswordSuccess("");
+    
+    if (!passwordForm.currentPassword.trim()) {
+      setPasswordError("Current password is required");
+      return;
+    }
+    
+    if (!passwordValidation.valid) {
+      setPasswordError("New password doesn't meet requirements");
+      return;
+    }
+    
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError("New passwords don't match");
+      return;
+    }
+    
+    setIsSavingPassword(true);
+    const result = await changePassword(passwordForm.currentPassword, passwordForm.newPassword);
+    setIsSavingPassword(false);
+    
+    if (result.success) {
+      setPasswordSuccess("Password changed successfully!");
+      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setTimeout(() => {
+        setShowPasswordModal(false);
+        setPasswordSuccess("");
+      }, 2000);
+    } else {
+      setPasswordError(result.message);
+    }
+  };
 
   if (!isAuthenticated) {
     return (
@@ -180,16 +255,31 @@ export default function ProfilePage() {
                       </motion.button>
                     </div>
 
+                    {saveMessage && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -10 }} 
+                        animate={{ opacity: 1, y: 0 }} 
+                        className={`p-3 rounded-lg flex items-center gap-2 ${saveMessage.type === 'success' ? 'bg-green-500/20 border border-green-500/30' : 'bg-red-500/20 border border-red-500/30'}`}
+                      >
+                        {saveMessage.type === 'success' ? <CheckCircle className="w-5 h-5 text-green-400" /> : <AlertCircle className="w-5 h-5 text-red-400" />}
+                        <span className={saveMessage.type === 'success' ? 'text-green-200' : 'text-red-200'}>{saveMessage.text}</span>
+                      </motion.div>
+                    )}
+
                     {editMode ? (
                       <div className="space-y-4">
                         <div><label className="text-sm font-semibold text-white mb-2 block">Full Name</label>
-                          <input type="text" defaultValue={user?.name} className="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-2.5 text-white placeholder:text-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" /></div>
+                          <input type="text" value={profileForm.name} onChange={(e) => setProfileForm({...profileForm, name: e.target.value})} className="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-2.5 text-white placeholder:text-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" /></div>
                         <div><label className="text-sm font-semibold text-white mb-2 block">Email</label>
-                          <input type="email" defaultValue={user?.email} className="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-2.5 text-white placeholder:text-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" /></div>
+                          <input type="email" value={user?.email} disabled className="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-2.5 text-white/50 cursor-not-allowed" /></div>
                         <div><label className="text-sm font-semibold text-white mb-2 block">Phone</label>
-                          <input type="tel" defaultValue="+1 (555) 000-0000" className="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-2.5 text-white placeholder:text-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" /></div>
-                        <div className="flex gap-2"><Button onClick={() => setEditMode(false)} className="flex-1 bg-primary hover:bg-primary/90">Save</Button>
-                          <Button onClick={() => setEditMode(false)} variant="outline" className="flex-1">Cancel</Button></div>
+                          <input type="tel" value={profileForm.phone} onChange={(e) => setProfileForm({...profileForm, phone: e.target.value})} placeholder="+1 (555) 000-0000" className="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-2.5 text-white placeholder:text-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" /></div>
+                        <div className="flex gap-2">
+                          <Button onClick={handleSaveProfile} disabled={isSavingProfile} className="flex-1 bg-primary hover:bg-primary/90">
+                            {isSavingProfile ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity }} className="w-4 h-4 border-2 border-white border-t-transparent rounded-full" /> : "Save"}
+                          </Button>
+                          <Button onClick={() => { setEditMode(false); setProfileForm({ name: user?.name || "", phone: user?.phone || "" }); }} variant="outline" className="flex-1">Cancel</Button>
+                        </div>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -523,7 +613,7 @@ export default function ProfilePage() {
                     {/* Security - Change Password */}
                     <div>
                       <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> Security</h3>
-                      <motion.button whileHover={{ scale: 1.02 }} className="w-full flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all">
+                      <motion.button onClick={() => setShowPasswordModal(true)} whileHover={{ scale: 1.02 }} className="w-full flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all">
                         <div className="flex items-center gap-3">
                           <Key className="w-5 h-5 text-primary" />
                           <div className="text-left">
@@ -584,6 +674,147 @@ export default function ProfilePage() {
           </motion.div>
         </div>
       </main>
+
+      {/* Password Change Modal */}
+      {showPasswordModal && (
+        <motion.div 
+          initial={{ opacity: 0 }} 
+          animate={{ opacity: 1 }} 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowPasswordModal(false); }}
+        >
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }} 
+            animate={{ scale: 1, opacity: 1 }} 
+            className="bg-gradient-to-br from-slate-900 to-slate-800 border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <Lock className="w-5 h-5 text-primary" /> Change Password
+              </h3>
+              <motion.button 
+                whileHover={{ scale: 1.1 }} 
+                onClick={() => { setShowPasswordModal(false); setPasswordError(""); setPasswordSuccess(""); }}
+                className="p-2 hover:bg-white/10 rounded-lg transition-all"
+              >
+                <X className="w-5 h-5 text-white/60" />
+              </motion.button>
+            </div>
+
+            {passwordError && (
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-red-400" />
+                <span className="text-red-200 text-sm">{passwordError}</span>
+              </motion.div>
+            )}
+
+            {passwordSuccess && (
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-4 p-3 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-400" />
+                <span className="text-green-200 text-sm">{passwordSuccess}</span>
+              </motion.div>
+            )}
+
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-white/80">Current Password</label>
+                <div className="relative">
+                  <input 
+                    type={showCurrentPassword ? "text" : "password"} 
+                    value={passwordForm.currentPassword}
+                    onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
+                    placeholder="Enter current password"
+                    className="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-2.5 pr-10 text-white placeholder:text-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60 transition-colors"
+                  >
+                    {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-white/80">New Password</label>
+                <div className="relative">
+                  <input 
+                    type={showNewPassword ? "text" : "password"} 
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                    placeholder="Enter new password"
+                    className="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-2.5 pr-10 text-white placeholder:text-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60 transition-colors"
+                  >
+                    {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+
+                {passwordForm.newPassword && (
+                  <div className="mt-2 space-y-1">
+                    {[
+                      { label: '8+ characters', valid: passwordForm.newPassword.length >= 8 },
+                      { label: 'Uppercase letter', valid: /[A-Z]/.test(passwordForm.newPassword) },
+                      { label: 'Lowercase letter', valid: /[a-z]/.test(passwordForm.newPassword) },
+                      { label: 'Number', valid: /[0-9]/.test(passwordForm.newPassword) },
+                      { label: 'Special character', valid: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(passwordForm.newPassword) },
+                    ].map((req, i) => (
+                      <div key={i} className="flex items-center gap-2 text-xs">
+                        {req.valid ? <Check className="w-3 h-3 text-green-400" /> : <X className="w-3 h-3 text-white/30" />}
+                        <span className={req.valid ? 'text-green-400' : 'text-white/40'}>{req.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-white/80">Confirm New Password</label>
+                <input 
+                  type="password" 
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                  placeholder="Confirm new password"
+                  className={`w-full bg-black/40 border rounded-lg px-4 py-2.5 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-primary/30 ${
+                    passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword 
+                      ? 'border-red-500/50 focus:border-red-500' 
+                      : 'border-white/20 focus:border-primary'
+                  }`}
+                />
+                {passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword && (
+                  <p className="text-xs text-red-400">Passwords don't match</p>
+                )}
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button 
+                  onClick={handleChangePassword} 
+                  disabled={isSavingPassword || !passwordForm.currentPassword.trim() || !passwordValidation.valid || passwordForm.newPassword !== passwordForm.confirmPassword}
+                  className="flex-1 bg-gradient-to-r from-primary to-secondary hover:opacity-90"
+                >
+                  {isSavingPassword ? (
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity }} className="w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                  ) : (
+                    "Update Password"
+                  )}
+                </Button>
+                <Button 
+                  onClick={() => { setShowPasswordModal(false); setPasswordError(""); setPasswordSuccess(""); setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" }); }}
+                  variant="outline" 
+                  className="flex-1 border-white/20 text-white hover:bg-white/5"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 }
