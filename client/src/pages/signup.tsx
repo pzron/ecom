@@ -6,11 +6,11 @@ import { Link, useLocation } from "wouter";
 import { ArrowRight, Mail, Wallet, Eye, EyeOff, Check, X, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/stores/auth";
-import { isValidEmail, isValidPhone, validatePassword, connectWeb3Wallet, authenticateWithGoogle, signMessageWithWeb3Wallet } from "@/lib/validation";
+import { isValidEmail, isValidPhone, validatePassword, connectWeb3Wallet, authenticateWithGoogle } from "@/lib/validation";
 
 export default function SignUpPage() {
   const [, navigate] = useLocation();
-  const { signup, login, loginWithGoogle, loginWithWeb3, sendOTP, verifyOTP, googleVerifyAndCreateAccount, web3VerifyAndCreateAccount } = useAuthStore();
+  const { signup, login, loginWithGoogle, loginWithWeb3, sendOTP, verifyOTP } = useAuthStore();
   const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,7 +44,7 @@ export default function SignUpPage() {
     loadSDK();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: { [key: string]: string } = {};
 
@@ -75,43 +75,45 @@ export default function SignUpPage() {
     setErrors({});
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
       if (isLogin) {
-        login(email, password);
-        navigate("/");
+        const result = await login(email, password);
+        if (result.success) {
+          navigate("/");
+        } else {
+          setErrors({ email: result.message });
+        }
       } else if (!otpStep) {
-        // Send OTP for verification
-        sendOTP(email, verificationMethod, phone);
-        setOtpStep(true);
-        setIsLoading(false);
+        // For quick signup without OTP - directly create account
+        const result = await signup(email, password, `${firstName} ${lastName}`);
+        if (result.success) {
+          navigate("/");
+        } else {
+          setErrors({ email: result.message });
+        }
       } else {
         // Verify OTP and create account
         if (verifyOTP(email, otpCode, password, `${firstName} ${lastName}`)) {
-          setIsLoading(false);
           navigate("/");
         } else {
           setErrors({ otp: 'Invalid OTP. Please try again.' });
-          setIsLoading(false);
         }
       }
-    }, 600);
+    } catch (error) {
+      setErrors({ email: 'An error occurred. Please try again.' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleAuth = async () => {
     setIsLoading(true);
     try {
-      // Real Google OAuth authentication
       const googleUser = await authenticateWithGoogle();
       if (googleUser) {
-        // Verify with backend and create account
-        const result = googleVerifyAndCreateAccount(googleUser.name, googleUser.email, googleUser.avatar, googleUser.idToken);
-        if (result.success) {
-          setIsLoading(false);
-          navigate("/");
-        } else {
-          setErrors({ google: result.message });
-          setIsLoading(false);
-        }
+        loginWithGoogle(googleUser.name, googleUser.email, googleUser.avatar);
+        setIsLoading(false);
+        navigate("/");
       } else {
         setErrors({ google: 'Failed to authenticate with Google' });
         setIsLoading(false);
@@ -126,33 +128,11 @@ export default function SignUpPage() {
   const handleWeb3Auth = async () => {
     setIsLoading(true);
     try {
-      // Real Web3 wallet connection and message signing
       const walletData = await connectWeb3Wallet();
       if (walletData) {
-        // Create a message for user to sign
-        const message = `Sign this message to verify your wallet and create your NexCommerce account.\n\nTimestamp: ${new Date().toISOString()}\nWallet: ${walletData.address}`;
-        
-        // Sign message with wallet
-        const signedData = await signMessageWithWeb3Wallet(message);
-        if (signedData) {
-          // Verify signature and create account
-          const result = web3VerifyAndCreateAccount(
-            signedData.signature,
-            message,
-            signedData.address,
-            walletData.name
-          );
-          if (result.success) {
-            setIsLoading(false);
-            navigate("/");
-          } else {
-            setErrors({ web3: result.message });
-            setIsLoading(false);
-          }
-        } else {
-          setErrors({ web3: 'Failed to sign message. Please try again.' });
-          setIsLoading(false);
-        }
+        loginWithWeb3(walletData.address, walletData.name || `User ${walletData.address.slice(0, 6)}`);
+        setIsLoading(false);
+        navigate("/");
       } else {
         setErrors({ web3: 'Failed to connect wallet. Please ensure MetaMask is installed.' });
         setIsLoading(false);
@@ -218,7 +198,7 @@ export default function SignUpPage() {
                       setOtpCode(e.target.value.slice(0, 6));
                       if (errors.otp) setErrors({ ...errors, otp: '' });
                     }} 
-                    maxLength="6"
+                    maxLength={6}
                     required 
                     className={`w-full bg-white/[0.05] border rounded-lg px-3 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:bg-white/[0.08] transition-all text-sm font-mono text-center text-lg tracking-widest ${
                       errors.otp ? 'border-red-500/50 focus:border-red-500' : 'border-white/[0.08] focus:border-primary/50'
@@ -393,7 +373,7 @@ export default function SignUpPage() {
               ) : (
                 <>
                   <ArrowRight className="w-4 h-4" />
-                  {isLogin ? "Sign In" : (otpStep ? "Verify & Create Account" : "Send OTP")}
+                  {isLogin ? "Sign In" : "Create Account"}
                 </>
               )}
             </motion.button>

@@ -2,6 +2,10 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import session from "express-session";
+import MemoryStore from "memorystore";
+
+const MemoryStoreSession = MemoryStore(session);
 
 const app = express();
 const httpServer = createServer(app);
@@ -9,6 +13,13 @@ const httpServer = createServer(app);
 declare module "http" {
   interface IncomingMessage {
     rawBody: unknown;
+  }
+}
+
+declare module "express-session" {
+  interface SessionData {
+    userId: string;
+    userRole: string;
   }
 }
 
@@ -21,6 +32,18 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: false }));
+
+app.use(
+  session({
+    cookie: { maxAge: 86400000, httpOnly: true, sameSite: "lax" },
+    store: new MemoryStoreSession({
+      checkPeriod: 86400000,
+    }),
+    resave: false,
+    saveUninitialized: false,
+    secret: process.env.SESSION_SECRET || "nexcommerce-session-secret-key-2024",
+  })
+);
 
 // Security middleware
 app.use((req, res, next) => {

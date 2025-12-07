@@ -178,12 +178,16 @@ interface User {
 interface AuthStore {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => void;
-  signup: (email: string, password: string, name: string) => void;
+  isLoading: boolean;
+  error: string | null;
+  login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
+  signup: (email: string, password: string, name: string) => Promise<{ success: boolean; message: string }>;
   loginWithGoogle: (name: string, email: string, avatar: string) => void;
   loginWithWeb3: (walletAddress: string, name: string) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateUser: (data: Partial<User>) => void;
+  updateProfile: (data: Partial<User>) => Promise<{ success: boolean; message: string }>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
   submitAffiliateApplication: (formData: any) => void;
   approveAffiliateApplication: () => void;
   sendOTP: (email: string, method: 'email' | 'phone', phone?: string) => { success: boolean; otp: string };
@@ -193,6 +197,7 @@ interface AuthStore {
   setRole: (role: UserRole) => void;
   getPermissions: () => RolePermissions | null;
   hasPermission: (permission: keyof RolePermissions) => boolean;
+  clearError: () => void;
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -200,41 +205,79 @@ export const useAuthStore = create<AuthStore>()(
     (set, get) => ({
       user: null,
       isAuthenticated: false,
-      login: (email: string, password: string) => {
-        let role: UserRole = 'customer';
-        if (email.includes('admin')) role = 'admin';
-        else if (email.includes('manager')) role = 'manager';
-        else if (email.includes('cashier')) role = 'cashier';
-        else if (email.includes('stock')) role = 'stockkeeper';
-        else if (email.includes('office')) role = 'office_member';
-        
-        set({
-          user: {
-            id: Math.random().toString(36).substr(2, 9),
-            email,
-            name: email.split('@')[0],
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-            role,
-            authMethod: 'email',
-            employeeId: role !== 'customer' ? `EMP-${Math.random().toString(36).substr(2, 6).toUpperCase()}` : undefined,
-            department: role === 'manager' ? 'Management' : role === 'cashier' ? 'Sales' : role === 'stockkeeper' ? 'Warehouse' : role === 'office_member' ? 'Administration' : undefined,
-          },
-          isAuthenticated: true,
-        });
+      isLoading: false,
+      error: null,
+
+      login: async (email: string, password: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, password }),
+          });
+          
+          const data = await response.json();
+          
+          if (!response.ok) {
+            set({ isLoading: false, error: data.message });
+            return { success: false, message: data.message };
+          }
+
+          set({
+            user: {
+              ...data.user,
+              authMethod: 'email',
+            },
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          });
+          
+          return { success: true, message: data.message };
+        } catch (error) {
+          const message = 'Failed to login. Please try again.';
+          set({ isLoading: false, error: message });
+          return { success: false, message };
+        }
       },
-      signup: (email: string, password: string, name: string) => {
-        set({
-          user: {
-            id: Math.random().toString(36).substr(2, 9),
-            email,
-            name,
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
-            role: 'customer',
-            authMethod: 'email',
-          },
-          isAuthenticated: true,
-        });
+
+      signup: async (email: string, password: string, name: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await fetch('/api/auth/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, password, name }),
+          });
+          
+          const data = await response.json();
+          
+          if (!response.ok) {
+            set({ isLoading: false, error: data.message });
+            return { success: false, message: data.message };
+          }
+
+          set({
+            user: {
+              ...data.user,
+              authMethod: 'email',
+            },
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          });
+          
+          return { success: true, message: data.message };
+        } catch (error) {
+          const message = 'Failed to create account. Please try again.';
+          set({ isLoading: false, error: message });
+          return { success: false, message };
+        }
       },
+
       loginWithGoogle: (name: string, email: string, avatar: string) => {
         set({
           user: {
@@ -248,6 +291,7 @@ export const useAuthStore = create<AuthStore>()(
           isAuthenticated: true,
         });
       },
+
       loginWithWeb3: (walletAddress: string, name: string) => {
         set({
           user: {
@@ -262,14 +306,74 @@ export const useAuthStore = create<AuthStore>()(
           isAuthenticated: true,
         });
       },
-      logout: () => {
-        set({ user: null, isAuthenticated: false });
+
+      logout: async () => {
+        try {
+          await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+        } catch (error) {
+          console.error('Logout error:', error);
+        }
+        set({ user: null, isAuthenticated: false, error: null });
       },
+
       updateUser: (data: Partial<User>) => {
         set((state) => ({
           user: state.user ? { ...state.user, ...data } : null,
         }));
       },
+
+      updateProfile: async (data: Partial<User>) => {
+        const { user } = get();
+        if (!user) return { success: false, message: 'Not authenticated' };
+
+        try {
+          const response = await fetch('/api/auth/profile', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(data),
+          });
+          
+          const result = await response.json();
+          
+          if (!response.ok) {
+            return { success: false, message: result.message };
+          }
+
+          set((state) => ({
+            user: state.user ? { ...state.user, ...result.user } : null,
+          }));
+          
+          return { success: true, message: result.message };
+        } catch (error) {
+          return { success: false, message: 'Failed to update profile' };
+        }
+      },
+
+      changePassword: async (currentPassword: string, newPassword: string) => {
+        const { user } = get();
+        if (!user) return { success: false, message: 'Not authenticated' };
+
+        try {
+          const response = await fetch('/api/auth/change-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ currentPassword, newPassword }),
+          });
+          
+          const result = await response.json();
+          
+          if (!response.ok) {
+            return { success: false, message: result.message };
+          }
+          
+          return { success: true, message: result.message };
+        } catch (error) {
+          return { success: false, message: 'Failed to change password' };
+        }
+      },
+
       submitAffiliateApplication: (formData: any) => {
         set((state) => ({
           user: state.user ? { 
@@ -285,6 +389,7 @@ export const useAuthStore = create<AuthStore>()(
           } : null,
         }));
       },
+
       approveAffiliateApplication: () => {
         set((state) => ({
           user: state.user ? {
@@ -294,12 +399,14 @@ export const useAuthStore = create<AuthStore>()(
           } : null,
         }));
       },
+
       sendOTP: (email: string, method: 'email' | 'phone', phone?: string) => {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         console.log(`OTP sent to ${method === 'email' ? email : phone}: ${otp}`);
         (window as any).__otpStore = { otp, email, timestamp: Date.now() };
         return { success: true, otp };
       },
+
       verifyOTP: (email: string, otp: string, password: string, name: string) => {
         const stored = (window as any).__otpStore;
         if (!stored || stored.otp !== otp || stored.email !== email) {
@@ -318,30 +425,37 @@ export const useAuthStore = create<AuthStore>()(
         });
         return true;
       },
+
       googleVerifyAndCreateAccount: (idToken: string) => {
         console.log('Google ID Token received for verification:', idToken.substring(0, 20) + '...');
         return { success: true, message: 'Google account verified and approved' };
       },
+
       web3VerifyAndCreateAccount: (signature: string, message: string, walletAddress: string) => {
         console.log('Web3 Signature verification - Address:', walletAddress);
         console.log('Signed message:', message.substring(0, 50) + '...');
         return { success: true, message: 'Web3 wallet verified and approved' };
       },
+
       setRole: (role: UserRole) => {
         set((state) => ({
           user: state.user ? { ...state.user, role } : null,
         }));
       },
+
       getPermissions: () => {
         const { user } = get();
         if (!user) return null;
         return ROLE_PERMISSIONS[user.role];
       },
+
       hasPermission: (permission: keyof RolePermissions) => {
         const { user } = get();
         if (!user) return false;
         return ROLE_PERMISSIONS[user.role][permission];
       },
+
+      clearError: () => set({ error: null }),
     }),
     {
       name: 'auth-store',

@@ -6,6 +6,7 @@ import { desc, eq } from "drizzle-orm";
 import { users, products, vendors } from "@shared/schema";
 import { insertProductSchema, insertCategorySchema, insertReviewSchema, insertCartItemSchema, insertOrderSchema } from "@shared/schema";
 import { z } from "zod";
+import bcrypt from "bcryptjs";
 
 function generateOrderNumber(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
@@ -18,6 +19,287 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   
+  // ===== AUTHENTICATION ROUTES =====
+  
+  // Password strength validation
+  function validatePassword(password: string): { valid: boolean; message: string } {
+    if (password.length < 8) {
+      return { valid: false, message: "Password must be at least 8 characters" };
+    }
+    if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+      return { valid: false, message: "Password must contain letters and numbers" };
+    }
+    return { valid: true, message: "" };
+  }
+
+  // Rate limiting map for auth endpoints
+  const authAttempts = new Map<string, { count: number; lastAttempt: number }>();
+  const MAX_AUTH_ATTEMPTS = 5;
+  const AUTH_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+
+  function checkRateLimit(ip: string): boolean {
+    const now = Date.now();
+    const attempt = authAttempts.get(ip);
+    if (!attempt) {
+      authAttempts.set(ip, { count: 1, lastAttempt: now });
+      return true;
+    }
+    if (now - attempt.lastAttempt > AUTH_WINDOW_MS) {
+      authAttempts.set(ip, { count: 1, lastAttempt: now });
+      return true;
+    }
+    if (attempt.count >= MAX_AUTH_ATTEMPTS) {
+      return false;
+    }
+    attempt.count++;
+    attempt.lastAttempt = now;
+    return true;
+  }
+
+  function resetRateLimit(ip: string): void {
+    authAttempts.delete(ip);
+  }
+
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const clientIp = req.ip || req.socket.remoteAddress || "unknown";
+      if (!checkRateLimit(clientIp)) {
+        return res.status(429).json({ message: "Too many attempts. Please try again later." });
+      }
+
+      const { email, password, name, phone } = req.body;
+      
+      if (!email || !password || !name) {
+        return res.status(400).json({ message: "Email, password, and name are required" });
+      }
+
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.valid) {
+        return res.status(400).json({ message: passwordValidation.message });
+      }
+
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already registered" });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 12);
+      const username = email.split('@')[0] + '_' + Date.now().toString(36);
+
+      const newUser = await storage.createUser({
+        username,
+        email,
+        password: hashedPassword,
+        fullName: name,
+        phone: phone || null,
+        role: "customer",
+      });
+
+      // Set session
+      req.session.userId = newUser.id;
+      req.session.userRole = newUser.role;
+
+      const userResponse = {
+        id: newUser.id,
+        email: newUser.email,
+        name: newUser.fullName || newUser.username,
+        role: newUser.role,
+        avatar: newUser.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${newUser.email}`,
+        phone: newUser.phone,
+        address: newUser.address,
+        city: newUser.city,
+        country: newUser.country,
+        postalCode: newUser.postalCode,
+      };
+
+      resetRateLimit(clientIp);
+      res.status(201).json({ user: userResponse, message: "Account created successfully" });
+    } catch (error) {
+      console.error("Signup error:", error);
+      res.status(500).json({ message: "Failed to create account" });
+    }
+  });
+
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const clientIp = req.ip || req.socket.remoteAddress || "unknown";
+      if (!checkRateLimit(clientIp)) {
+        return res.status(429).json({ message: "Too many attempts. Please try again later." });
+      }
+
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Set session
+      req.session.userId = user.id;
+      req.session.userRole = user.role;
+
+      const userResponse = {
+        id: user.id,
+        email: user.email,
+        name: user.fullName || user.username,
+        role: user.role,
+        avatar: user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`,
+        phone: user.phone,
+        address: user.address,
+        city: user.city,
+        country: user.country,
+        postalCode: user.postalCode,
+        walletAddress: user.walletAddress,
+      };
+
+      resetRateLimit(clientIp);
+      res.json({ user: userResponse, message: "Login successful" });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Failed to login" });
+    }
+  });
+
+  app.post("/api/auth/logout", async (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Logout error:", err);
+        return res.status(500).json({ message: "Failed to logout" });
+      }
+      res.clearCookie("connect.sid");
+      res.json({ message: "Logout successful" });
+    });
+  });
+
+  app.get("/api/auth/me", async (req, res) => {
+    try {
+      // Use session-based userId instead of query parameter
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        req.session.destroy(() => {});
+        return res.status(401).json({ message: "Session invalid" });
+      }
+
+      const userResponse = {
+        id: user.id,
+        email: user.email,
+        name: user.fullName || user.username,
+        role: user.role,
+        avatar: user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`,
+        phone: user.phone,
+        address: user.address,
+        city: user.city,
+        country: user.country,
+        postalCode: user.postalCode,
+        walletAddress: user.walletAddress,
+      };
+
+      res.json({ user: userResponse });
+    } catch (error) {
+      console.error("Get user error:", error);
+      res.status(500).json({ message: "Failed to get user" });
+    }
+  });
+
+  app.put("/api/auth/profile", async (req, res) => {
+    try {
+      // Use session-based userId instead of body parameter
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { name, phone, address, city, country, postalCode, avatar } = req.body;
+
+      // Only allow specific fields to be updated (prevent mass assignment)
+      const mappedData: any = {};
+      if (name !== undefined) mappedData.fullName = name;
+      if (phone !== undefined) mappedData.phone = phone;
+      if (address !== undefined) mappedData.address = address;
+      if (city !== undefined) mappedData.city = city;
+      if (country !== undefined) mappedData.country = country;
+      if (postalCode !== undefined) mappedData.postalCode = postalCode;
+      if (avatar !== undefined) mappedData.avatarUrl = avatar;
+
+      const user = await storage.updateUser(userId, mappedData);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const userResponse = {
+        id: user.id,
+        email: user.email,
+        name: user.fullName || user.username,
+        role: user.role,
+        avatar: user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`,
+        phone: user.phone,
+        address: user.address,
+        city: user.city,
+        country: user.country,
+        postalCode: user.postalCode,
+        walletAddress: user.walletAddress,
+      };
+
+      res.json({ user: userResponse, message: "Profile updated successfully" });
+    } catch (error) {
+      console.error("Update profile error:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  app.post("/api/auth/change-password", async (req, res) => {
+    try {
+      // Use session-based userId instead of body parameter
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { currentPassword, newPassword } = req.body;
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current and new password are required" });
+      }
+
+      const passwordValidation = validatePassword(newPassword);
+      if (!passwordValidation.valid) {
+        return res.status(400).json({ message: passwordValidation.message });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+      await storage.updateUser(userId, { password: hashedPassword });
+
+      res.json({ message: "Password changed successfully" });
+    } catch (error) {
+      console.error("Change password error:", error);
+      res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+
+  // ===== PRODUCT ROUTES =====
   app.get("/api/products", async (req, res) => {
     try {
       const { categoryId, limit, offset, search } = req.query;
