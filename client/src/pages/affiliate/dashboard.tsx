@@ -6,27 +6,33 @@ import {
   Trophy, Share2, Wallet, TrendingUp, Target, 
   Gift, Copy, BarChart2, DollarSign, Users, Link2,
   ArrowUpRight, ArrowDownRight, Sparkles, Zap, Crown,
-  Star, RefreshCw, ExternalLink, MousePointer
+  Star, RefreshCw, ExternalLink, MousePointer, Loader2, AlertTriangle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuthStore } from "@/stores/auth";
 
-const earningsData = [
-  { name: 'Mon', earnings: 120, clicks: 340 },
-  { name: 'Tue', earnings: 180, clicks: 420 },
-  { name: 'Wed', earnings: 340, clicks: 780 },
-  { name: 'Thu', earnings: 280, clicks: 620 },
-  { name: 'Fri', earnings: 450, clicks: 890 },
-  { name: 'Sat', earnings: 380, clicks: 720 },
-  { name: 'Sun', earnings: 420, clicks: 850 },
-];
+interface AffiliateDashboardData {
+  affiliate: any;
+  totalEarnings: number;
+  pendingEarnings: number;
+  totalClicks: number;
+  totalConversions: number;
+  tier: string;
+  conversionRate: string;
+  campaigns: any[];
+  earningsData: { name: string; earnings: number; clicks: number }[];
+}
 
-const activeCampaigns = [
-  { name: "Summer Tech Sale", commission: "15%", clicks: 1240, conversions: 89, earnings: "৳450", status: "active", trend: "+23%" },
-  { name: "iPhone 15 Pro Launch", commission: "10%", clicks: 892, conversions: 156, earnings: "৳890", status: "active", trend: "+45%" },
-  { name: "Gaming Week Promo", commission: "12%", clicks: 450, conversions: 34, earnings: "৳120", status: "active", trend: "+12%" },
-  { name: "Black Friday Early", commission: "20%", clicks: 2100, conversions: 234, earnings: "৳1,240", status: "featured", trend: "+67%" },
+const defaultEarningsData = [
+  { name: 'Mon', earnings: 0, clicks: 0 },
+  { name: 'Tue', earnings: 0, clicks: 0 },
+  { name: 'Wed', earnings: 0, clicks: 0 },
+  { name: 'Thu', earnings: 0, clicks: 0 },
+  { name: 'Fri', earnings: 0, clicks: 0 },
+  { name: 'Sat', earnings: 0, clicks: 0 },
+  { name: 'Sun', earnings: 0, clicks: 0 },
 ];
 
 const leaderboard = [
@@ -138,12 +144,93 @@ function RankBadge({ rank, badge }: { rank: number; badge: string }) {
 
 export default function AffiliateDashboard() {
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
+  const [dashboardData, setDashboardData] = useState<AffiliateDashboardData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuthStore();
+
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/affiliate/dashboard', {
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to fetch dashboard data');
+      }
+      
+      const data = await response.json();
+      setDashboardData(data);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
   const copyLink = (campaignName: string) => {
-    navigator.clipboard.writeText(`https://nexcommerce.com/ref/${campaignName.toLowerCase().replace(/ /g, '-')}`);
+    const code = dashboardData?.affiliate?.affiliateCode || 'PARTNER';
+    navigator.clipboard.writeText(`https://nexcommerce.com/ref/${code}/${campaignName.toLowerCase().replace(/ /g, '-')}`);
     setCopiedLink(campaignName);
     setTimeout(() => setCopiedLink(null), 2000);
   };
+
+  const earningsData = dashboardData?.earningsData || defaultEarningsData;
+  const totalEarnings = dashboardData?.totalEarnings || 0;
+  const pendingEarnings = dashboardData?.pendingEarnings || 0;
+  const totalClicks = dashboardData?.totalClicks || 0;
+  const totalConversions = dashboardData?.totalConversions || 0;
+  const tier = dashboardData?.tier || 'bronze';
+  const conversionRate = dashboardData?.conversionRate || "0";
+  const campaigns = dashboardData?.campaigns || [];
+  const affiliateCode = dashboardData?.affiliate?.affiliateCode || 'PARTNER';
+
+  const activeCampaigns = campaigns.length > 0 ? campaigns.map((c: any) => ({
+    name: c.name,
+    commission: `${c.commissionRate || 5}%`,
+    clicks: c.clicks || 0,
+    conversions: c.conversions || 0,
+    earnings: `৳${c.earnings || 0}`,
+    status: c.isActive ? 'active' : 'inactive',
+    trend: '+0%',
+  })) : [
+    { name: "Welcome Campaign", commission: "5%", clicks: 0, conversions: 0, earnings: "৳0", status: "active", trend: "+0%" },
+  ];
+
+  if (isLoading) {
+    return (
+      <DashboardLayout role="affiliate">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin text-yellow-500 mx-auto mb-4" />
+            <p className="text-white/60">Loading affiliate dashboard...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout role="affiliate">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <AlertTriangle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-white mb-2">Access Issue</h2>
+            <p className="text-white/60 mb-4">{error}</p>
+            <Button onClick={fetchDashboardData}>Try Again</Button>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout role="affiliate">
@@ -228,17 +315,17 @@ export default function AffiliateDashboard() {
 
             <div className="flex gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">156</div>
+                <div className="text-2xl font-bold text-white">{totalConversions}</div>
                 <div className="text-xs text-white/60">Referrals</div>
               </div>
               <div className="w-px bg-white/10" />
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">4.2%</div>
+                <div className="text-2xl font-bold text-white">{conversionRate}%</div>
                 <div className="text-xs text-white/60">Conv. Rate</div>
               </div>
               <div className="w-px bg-white/10" />
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-400">৳12.4K</div>
+                <div className="text-2xl font-bold text-green-400">৳{(totalEarnings / 1000).toFixed(1)}K</div>
                 <div className="text-xs text-white/60">Earnings</div>
               </div>
             </div>
@@ -248,7 +335,7 @@ export default function AffiliateDashboard() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <AffiliateKPI 
             title="Total Earnings" 
-            value="৳12,450" 
+            value={`৳${totalEarnings.toLocaleString()}`} 
             change="+24.5%" 
             icon={DollarSign} 
             color="green"
@@ -256,7 +343,7 @@ export default function AffiliateDashboard() {
           />
           <AffiliateKPI 
             title="Total Clicks" 
-            value="4,582" 
+            value={totalClicks.toLocaleString()} 
             change="+18.2%" 
             icon={MousePointer} 
             color="cyan"
@@ -264,15 +351,15 @@ export default function AffiliateDashboard() {
           />
           <AffiliateKPI 
             title="Conversions" 
-            value="234" 
+            value={totalConversions.toString()} 
             change="+32.1%" 
             icon={Target} 
             color="pink"
             delay={0.2}
           />
           <AffiliateKPI 
-            title="Active Links" 
-            value="12" 
+            title="Active Campaigns" 
+            value={activeCampaigns.length.toString()} 
             change="+2" 
             icon={Link2} 
             color="purple"

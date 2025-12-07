@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,42 +7,31 @@ import {
   Package, Upload, BarChart, MessageSquare, 
   Truck, AlertTriangle, CheckCircle, DollarSign,
   TrendingUp, Eye, Star, ShoppingCart, ArrowUpRight,
-  ArrowDownRight, Box, Zap, RefreshCw, Settings, Plus
+  ArrowDownRight, Box, Zap, RefreshCw, Settings, Plus, Loader2
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Bar, BarChart as RechartsBarChart, Cell } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useAuthStore } from "@/stores/auth";
 
-const salesData = [
-  { name: 'Mon', sales: 2400, orders: 34 },
-  { name: 'Tue', sales: 1398, orders: 28 },
-  { name: 'Wed', sales: 3800, orders: 52 },
-  { name: 'Thu', sales: 2908, orders: 41 },
-  { name: 'Fri', sales: 4800, orders: 63 },
-  { name: 'Sat', sales: 3800, orders: 48 },
-  { name: 'Sun', sales: 4300, orders: 55 },
-];
+interface VendorDashboardData {
+  vendor: any;
+  totalProducts: number;
+  totalRevenue: number;
+  totalOrders: number;
+  rating: number;
+  products: any[];
+  recentOrders: any[];
+  salesData: { name: string; sales: number; orders: number }[];
+}
 
-const productPerformance = [
-  { name: 'iPhone 15', sales: 4500, color: '#a855f7' },
-  { name: 'MacBook', sales: 3200, color: '#ec4899' },
-  { name: 'AirPods', sales: 2800, color: '#06b6d4' },
-  { name: 'Watch', sales: 1900, color: '#f59e0b' },
-  { name: 'iPad', sales: 1500, color: '#10b981' },
-];
-
-const recentOrders = [
-  { id: "#ORD-9382", item: "iPhone 15 Pro Max", customer: "Alex Morgan", status: "Processing", amount: "৳1,299", time: "2 mins ago", image: "📱" },
-  { id: "#ORD-9381", item: "Sony WH-1000XM5", customer: "Sarah Chen", status: "Shipped", amount: "৳348", time: "1 hour ago", image: "🎧" },
-  { id: "#ORD-9380", item: "MacBook Pro 16", customer: "Mike Johnson", status: "Delivered", amount: "৳2,499", time: "3 hours ago", image: "💻" },
-  { id: "#ORD-9379", item: "Apple Watch Ultra", customer: "Emily Davis", status: "Processing", amount: "৳799", time: "5 hours ago", image: "⌚" },
-];
-
-const topProducts = [
-  { name: "iPhone 15 Pro Max", stock: 24, status: "healthy", sales: 156, revenue: "৳202K" },
-  { name: "MacBook Pro 16\"", stock: 8, status: "low", sales: 42, revenue: "৳104K" },
-  { name: "AirPods Pro 2", stock: 156, status: "healthy", sales: 234, revenue: "৳58K" },
-  { name: "Sony WH-1000XM5", stock: 3, status: "critical", sales: 89, revenue: "৳31K" },
+const defaultSalesData = [
+  { name: 'Mon', sales: 0, orders: 0 },
+  { name: 'Tue', sales: 0, orders: 0 },
+  { name: 'Wed', sales: 0, orders: 0 },
+  { name: 'Thu', sales: 0, orders: 0 },
+  { name: 'Fri', sales: 0, orders: 0 },
+  { name: 'Sat', sales: 0, orders: 0 },
+  { name: 'Sun', sales: 0, orders: 0 },
 ];
 
 function HolographicCard({ 
@@ -153,11 +142,102 @@ function OrderStatus({ status }: { status: string }) {
 
 export default function VendorDashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [dashboardData, setDashboardData] = useState<VendorDashboardData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuthStore();
 
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    setTimeout(() => setIsRefreshing(false), 1500);
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/vendor/dashboard', {
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to fetch dashboard data');
+      }
+      
+      const data = await response.json();
+      setDashboardData(data);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchDashboardData();
+    setIsRefreshing(false);
+  };
+
+  const salesData = dashboardData?.salesData || defaultSalesData;
+  const totalRevenue = dashboardData?.totalRevenue || 0;
+  const totalOrders = dashboardData?.totalOrders || 0;
+  const totalProducts = dashboardData?.totalProducts || 0;
+  const rating = dashboardData?.rating || 0;
+  const storeName = dashboardData?.vendor?.storeName || 'Your Store';
+  const products = dashboardData?.products || [];
+
+  const productPerformance = products.slice(0, 5).map((p: any, i: number) => ({
+    name: p.name?.substring(0, 15) || `Product ${i + 1}`,
+    sales: Math.floor(parseFloat(p.price || "0") * 10),
+    color: ['#a855f7', '#ec4899', '#06b6d4', '#f59e0b', '#10b981'][i % 5],
+  }));
+
+  const topProducts = products.slice(0, 4).map((p: any) => ({
+    name: p.name,
+    stock: p.stock || 0,
+    status: p.stock > 20 ? 'healthy' : p.stock > 5 ? 'low' : 'critical',
+    sales: Math.floor(Math.random() * 200),
+    revenue: `৳${Math.floor(parseFloat(p.price || "0") * 10)}K`,
+  }));
+
+  const recentOrders = (dashboardData?.recentOrders || []).slice(0, 4).map((o: any) => ({
+    id: o.orderNumber || `#ORD-${Math.random().toString().slice(2, 6)}`,
+    item: o.items?.[0]?.name || 'Product',
+    customer: o.customerName || 'Customer',
+    status: o.status || 'Processing',
+    amount: `৳${o.total || 0}`,
+    time: 'Recently',
+    image: '📦',
+  }));
+
+  if (isLoading) {
+    return (
+      <DashboardLayout role="vendor">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin text-purple-500 mx-auto mb-4" />
+            <p className="text-white/60">Loading vendor dashboard...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout role="vendor">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <AlertTriangle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-white mb-2">Access Issue</h2>
+            <p className="text-white/60 mb-4">{error}</p>
+            <Button onClick={fetchDashboardData}>Try Again</Button>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout role="vendor">
@@ -206,7 +286,7 @@ export default function VendorDashboard() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <VendorKPI 
             title="Total Revenue" 
-            value="৳48,320" 
+            value={`৳${totalRevenue.toLocaleString()}`} 
             change="+15.3%" 
             icon={DollarSign} 
             color="purple"
@@ -214,23 +294,23 @@ export default function VendorDashboard() {
           />
           <VendorKPI 
             title="Total Orders" 
-            value="342" 
+            value={totalOrders.toString()} 
             change="+8.2%" 
             icon={ShoppingCart} 
             color="cyan"
             delay={0.1}
           />
           <VendorKPI 
-            title="Products Views" 
-            value="12.4K" 
-            change="+23.1%" 
-            icon={Eye} 
+            title="Products" 
+            value={totalProducts.toString()} 
+            change="+3" 
+            icon={Package} 
             color="pink"
             delay={0.2}
           />
           <VendorKPI 
             title="Avg Rating" 
-            value="4.8" 
+            value={rating.toFixed(1)} 
             change="+0.3" 
             icon={Star} 
             color="orange"

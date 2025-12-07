@@ -50,11 +50,14 @@ export interface IStorage {
   getVendors(): Promise<Vendor[]>;
   getVendor(id: string): Promise<Vendor | undefined>;
   createVendor(vendor: InsertVendor): Promise<Vendor>;
+  getVendorByUserId(userId: string): Promise<Vendor | undefined>;
 
   getAffiliates(): Promise<Affiliate[]>;
   getAffiliate(id: string): Promise<Affiliate | undefined>;
   getAffiliateByCode(code: string): Promise<Affiliate | undefined>;
   createAffiliate(affiliate: InsertAffiliate): Promise<Affiliate>;
+  getAffiliateByUserId(userId: string): Promise<Affiliate | undefined>;
+  getAffiliateCampaigns(affiliateId: string): Promise<AffiliateCampaign[]>;
 
   getCoupon(code: string): Promise<Coupon | undefined>;
   validateCoupon(code: string, subtotal: number): Promise<{ valid: boolean; discount: number; message?: string }>;
@@ -314,6 +317,11 @@ export class DatabaseStorage implements IStorage {
     return newVendor;
   }
 
+  async getVendorByUserId(userId: string): Promise<Vendor | undefined> {
+    const [vendor] = await db.select().from(vendors).where(eq(vendors.userId, userId));
+    return vendor || undefined;
+  }
+
   async getAffiliates(): Promise<Affiliate[]> {
     return db.select().from(affiliates).where(eq(affiliates.isActive, true));
   }
@@ -331,6 +339,15 @@ export class DatabaseStorage implements IStorage {
   async createAffiliate(affiliate: InsertAffiliate): Promise<Affiliate> {
     const [newAffiliate] = await db.insert(affiliates).values(affiliate).returning();
     return newAffiliate;
+  }
+
+  async getAffiliateByUserId(userId: string): Promise<Affiliate | undefined> {
+    const [affiliate] = await db.select().from(affiliates).where(eq(affiliates.userId, userId));
+    return affiliate || undefined;
+  }
+
+  async getAffiliateCampaigns(affiliateId: string): Promise<AffiliateCampaign[]> {
+    return db.select().from(affiliateCampaigns).where(eq(affiliateCampaigns.affiliateId, affiliateId));
   }
 
   async getCoupon(code: string): Promise<Coupon | undefined> {
