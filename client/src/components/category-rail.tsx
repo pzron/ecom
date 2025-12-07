@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { categories } from "@/data/products";
+import { useQuery } from "@tanstack/react-query";
 import * as Icons from "lucide-react";
 
 const categoryColors = [
@@ -17,12 +17,58 @@ const categoryColors = [
   "from-fuchsia-500/30 to-fuchsia-500/10 border-fuchsia-500/30 text-fuchsia-400",
 ];
 
+const iconMap: Record<string, string> = {
+  "💊": "Pill",
+  "💄": "Sparkles",
+  "⚡": "Zap",
+  "👔": "Shirt",
+  "🏠": "Home",
+  "🏋️": "Dumbbell",
+  "🎮": "Gamepad2",
+  "🧸": "Baby",
+  "🐾": "PawPrint",
+  "📚": "BookOpen",
+  "🍔": "ChefHat",
+  "🚗": "Car",
+};
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  icon?: string | null;
+}
+
 export function CategoryRail() {
+  const { data: categories = [], isLoading } = useQuery<Category[]>({
+    queryKey: ["/api/categories"],
+    queryFn: async () => {
+      const res = await fetch("/api/categories");
+      if (!res.ok) throw new Error("Failed to fetch categories");
+      return res.json();
+    },
+  });
+
+  const mainCategories = categories.filter((cat: Category) => !cat.slug.includes("-sub-"));
+
+  if (isLoading) {
+    return (
+      <div className="w-full py-12 border-y border-white/5 bg-black/20 backdrop-blur-sm overflow-hidden">
+        <div className="flex justify-center items-center h-24">
+          <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  const displayCategories = [...mainCategories, ...mainCategories];
+
   return (
     <div className="w-full py-12 border-y border-white/5 bg-black/20 backdrop-blur-sm overflow-hidden">
       <div className="flex animate-scroll gap-4 md:gap-8 min-w-max px-4">
-        {[...categories, ...categories].map((cat, idx) => {
-          const Icon = (Icons as any)[cat.icon] || Icons.Box;
+        {displayCategories.map((cat, idx) => {
+          const iconName = iconMap[cat.icon || ""] || "Box";
+          const Icon = (Icons as any)[iconName] || Icons.Box;
           const colorClass = categoryColors[idx % categoryColors.length];
           return (
             <Link
