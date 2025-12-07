@@ -3,11 +3,12 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { desc, eq } from "drizzle-orm";
-import { users, products, vendors } from "@shared/schema";
+import { users, products, vendors, orders, orderItems } from "@shared/schema";
 import { insertProductSchema, insertCategorySchema, insertReviewSchema, insertCartItemSchema, insertOrderSchema } from "@shared/schema";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { generateChatResponse, searchProductsWithAI, type ChatMessage, type ProductContext } from "./openai";
+import { ensureAdmin, ensureAuthenticated, type AuthenticatedRequest } from "./api/security-middleware";
 
 function generateOrderNumber(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
@@ -682,7 +683,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/admin/dashboard", async (req, res) => {
+  app.get("/api/admin/dashboard", ensureAdmin, async (req, res) => {
     try {
       const stats = await storage.getDashboardStats();
       
@@ -882,7 +883,7 @@ export async function registerRoutes(
 
 
   // ===== ADMIN USER MANAGEMENT =====
-  app.get("/api/admin/users", async (req, res) => {
+  app.get("/api/admin/users", ensureAdmin, async (req, res) => {
     try {
       const allUsers = await db.select().from(users).orderBy(desc(users.createdAt));
       res.json(allUsers);
@@ -891,7 +892,7 @@ export async function registerRoutes(
     }
   });
 
-  app.put("/api/admin/users/:id/role", async (req, res) => {
+  app.put("/api/admin/users/:id/role", ensureAdmin, async (req, res) => {
     try {
       const { role } = req.body;
       const updated = await storage.updateUser(req.params.id, { role });
@@ -901,7 +902,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/admin/users/:id", async (req, res) => {
+  app.delete("/api/admin/users/:id", ensureAdmin, async (req, res) => {
     try {
       const user = await storage.getUser(req.params.id);
       if (user) {
@@ -914,7 +915,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/admin/vendors", async (req, res) => {
+  app.get("/api/admin/vendors", ensureAdmin, async (req, res) => {
     try {
       const allVendors = await storage.getVendors();
       res.json(allVendors);
@@ -943,7 +944,7 @@ export async function registerRoutes(
   });
 
   // ===== ROLE MANAGEMENT =====
-  app.get("/api/admin/roles", async (req, res) => {
+  app.get("/api/admin/roles", ensureAdmin, async (req, res) => {
     try {
       const defaultRoles = [
         { id: "admin", name: "Admin", powers: ["Full Access", "Manage Users", "Manage Products", "View Analytics"] },
@@ -957,7 +958,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/admin/roles", async (req, res) => {
+  app.post("/api/admin/roles", ensureAdmin, async (req, res) => {
     try {
       const { name, powers } = req.body;
       const newRole = {
@@ -972,7 +973,7 @@ export async function registerRoutes(
   });
 
   // ===== VENDOR REQUESTS =====
-  app.get("/api/admin/vendor-requests", async (req, res) => {
+  app.get("/api/admin/vendor-requests", ensureAdmin, async (req, res) => {
     try {
       const vendors = await storage.getVendors();
       const pendingVendors = vendors.filter((v: any) => !v.isVerified);
@@ -982,7 +983,7 @@ export async function registerRoutes(
     }
   });
 
-  app.put("/api/admin/vendor-requests/:id/approve", async (req, res) => {
+  app.put("/api/admin/vendor-requests/:id/approve", ensureAdmin, async (req, res) => {
     try {
       const vendor = await storage.getVendor(req.params.id);
       if (vendor) {
@@ -996,7 +997,7 @@ export async function registerRoutes(
   });
 
   // ===== AFFILIATE REQUESTS =====
-  app.get("/api/admin/affiliate-requests", async (req, res) => {
+  app.get("/api/admin/affiliate-requests", ensureAdmin, async (req, res) => {
     try {
       const affiliates = await storage.getAffiliates();
       const pendingAffiliates = affiliates.filter((a: any) => !a.isVerified);
@@ -1006,7 +1007,7 @@ export async function registerRoutes(
     }
   });
 
-  app.put("/api/admin/affiliate-requests/:id/approve", async (req, res) => {
+  app.put("/api/admin/affiliate-requests/:id/approve", ensureAdmin, async (req, res) => {
     try {
       const affiliate = await storage.getAffiliate(req.params.id);
       if (affiliate) {
@@ -1016,6 +1017,43 @@ export async function registerRoutes(
       }
     } catch (error) {
       res.status(500).json({ message: "Failed to approve affiliate" });
+    }
+  });
+
+  // ===== ADMIN ORDERS MANAGEMENT =====
+  app.get("/api/admin/orders", ensureAdmin, async (req, res) => {
+    try {
+      const allOrders = await db.select().from(orders).orderBy(desc(orders.createdAt));
+      res.json(allOrders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  app.put("/api/admin/orders/:id/status", ensureAdmin, async (req, res) => {
+    try {
+      const { status } = req.body;
+      const updated = await storage.updateOrderStatus(req.params.id, status);
+      if (updated) {
+        res.json(updated);
+      } else {
+        res.status(404).json({ message: "Order not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update order status" });
+    }
+  });
+
+  app.get("/api/admin/orders/:id", ensureAdmin, async (req, res) => {
+    try {
+      const order = await storage.getOrder(req.params.id);
+      if (order) {
+        res.json(order);
+      } else {
+        res.status(404).json({ message: "Order not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch order" });
     }
   });
 

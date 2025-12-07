@@ -1,5 +1,107 @@
 // Security middleware for authentication, rate limiting, and input validation
 import { Request, Response, NextFunction } from "express";
+import { storage } from "../storage";
+
+export interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
+// ===== AUTHENTICATION & AUTHORIZATION MIDDLEWARE =====
+
+export async function ensureAuthenticated(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const userId = req.session?.userId;
+    if (!userId) {
+      res.status(401).json({ message: "Not authenticated" });
+      return;
+    }
+
+    const user = await storage.getUser(userId);
+    if (!user) {
+      req.session?.destroy(() => {});
+      res.status(401).json({ message: "Session invalid" });
+      return;
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error("Auth middleware error:", error);
+    res.status(500).json({ message: "Authentication error" });
+  }
+}
+
+export async function ensureAdmin(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const userId = req.session?.userId;
+    if (!userId) {
+      res.status(401).json({ message: "Not authenticated" });
+      return;
+    }
+
+    const user = await storage.getUser(userId);
+    if (!user) {
+      req.session?.destroy(() => {});
+      res.status(401).json({ message: "Session invalid" });
+      return;
+    }
+
+    if (user.role !== "admin") {
+      res.status(403).json({ message: "Access denied. Admin role required." });
+      return;
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error("Admin middleware error:", error);
+    res.status(500).json({ message: "Authorization error" });
+  }
+}
+
+export function ensureRole(...allowedRoles: string[]) {
+  return async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        res.status(401).json({ message: "Not authenticated" });
+        return;
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        req.session?.destroy(() => {});
+        res.status(401).json({ message: "Session invalid" });
+        return;
+      }
+
+      if (!allowedRoles.includes(user.role)) {
+        res.status(403).json({ 
+          message: `Access denied. Required roles: ${allowedRoles.join(", ")}` 
+        });
+        return;
+      }
+
+      req.user = user;
+      next();
+    } catch (error) {
+      console.error("Role middleware error:", error);
+      res.status(500).json({ message: "Authorization error" });
+    }
+  };
+}
 
 // Rate limiting store (in production, use Redis)
 const rateLimitStore: Record<string, { count: number; resetTime: number }> = {};

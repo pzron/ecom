@@ -21,6 +21,7 @@ import ComboBuilderPage from "@/pages/combo-builder";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminUsers from "@/pages/admin/users";
 import AdminProducts from "@/pages/admin/products";
+import AdminOrders from "@/pages/admin/orders";
 import AdminAnalytics from "@/pages/admin/analytics";
 import AdminSettings from "@/pages/admin/settings";
 import AdminRoles from "@/pages/admin/roles";
@@ -106,6 +107,7 @@ function Router() {
       <Route path="/hair/users" component={AdminUsers} />
       <Route path="/hair/roles" component={AdminRoles} />
       <Route path="/hair/products" component={AdminProducts} />
+      <Route path="/hair/orders" component={AdminOrders} />
       <Route path="/hair/analytics" component={AdminAnalytics} />
       <Route path="/hair/settings" component={AdminSettings} />
 
