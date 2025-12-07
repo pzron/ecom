@@ -1,8 +1,10 @@
 import { Navbar } from "@/components/navbar";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { CreditCard, Wallet, Lock, Check, Truck, MapPin, User, Mail, Phone, Gift, Zap, ShieldCheck, ChevronRight, MapPinIcon, Smartphone, Banknote, PartyPopper, AlertCircle, Tag, Globe, Clock } from "lucide-react";
-import { useLocation } from "wouter";
+import { CreditCard, Wallet, Lock, Check, Truck, MapPin, User, Mail, Phone, Gift, Zap, ShieldCheck, ChevronRight, MapPinIcon, Smartphone, Banknote, PartyPopper, AlertCircle, Tag, Globe, Clock, ShoppingBag } from "lucide-react";
+import { useLocation, Link } from "wouter";
+import { useCart } from "@/hooks/use-cart";
+import { useAuthStore } from "@/stores/auth";
 
 interface PaymentMethod {
   id: string;

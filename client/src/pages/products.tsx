@@ -1,17 +1,19 @@
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { categories, products, type Category, type Product } from "@/data/products";
+import { categories as staticCategories, products as staticProducts, type Category, type Product } from "@/data/products";
 import { Search, Mic, MicOff, Grid, List, Star, ShoppingCart, Heart, X, ChevronLeft, SlidersHorizontal, Zap, Eye, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Link, useLocation, useSearch } from "wouter";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Footer } from "@/components/layout/footer";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
+import { useWishlist } from "@/stores/wishlist";
+import { useAuthStore } from "@/stores/auth";
 
 const colorGradients: Record<string, { bg: string; border: string; badge: string; hover: string }> = {
   purple: { bg: "from-purple-950/40 to-indigo-950/20", border: "border-purple-500/30", badge: "bg-gradient-to-r from-purple-500 to-indigo-500", hover: "hover:border-purple-500/60 hover:from-purple-900/50" },
@@ -34,8 +36,10 @@ interface ProductCardProps {
 function ProductCard({ product, index }: ProductCardProps) {
   const { addItem } = useCart();
   const { toast } = useToast();
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist();
   const [isHovered, setIsHovered] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const isWishlisted = isInWishlist(product.id);
 
   const colorKey = (product.badgeColor || "purple") as keyof typeof colorGradients;
   const gradient = colorGradients[colorKey] || colorGradients.purple;
@@ -109,18 +113,41 @@ function ProductCard({ product, index }: ProductCardProps) {
             >
               <Button 
                 size="icon" 
-                className="h-7 w-7 rounded-full bg-white/10 backdrop-blur-xl hover:bg-white/20 text-white border border-white/20 transition-all hover:scale-110"
+                className={`h-7 w-7 rounded-full backdrop-blur-xl border transition-all hover:scale-110 ${
+                  isWishlisted 
+                    ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400 border-red-500/30' 
+                    : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
+                }`}
                 onClick={(e) => { 
                   e.preventDefault(); 
                   e.stopPropagation();
-                  toast({
-                    title: "Added to Wishlist!",
-                    description: `${product.name} saved to your wishlist.`,
-                    duration: 2000,
-                  });
+                  if (isWishlisted) {
+                    removeFromWishlist(product.id);
+                    toast({
+                      title: "Removed from Wishlist",
+                      description: `${product.name} removed from your wishlist.`,
+                      duration: 2000,
+                    });
+                  } else {
+                    addToWishlist({
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      originalPrice: product.originalPrice,
+                      image: product.image,
+                      category: product.category,
+                      rating: product.rating,
+                      inStock: product.inStock,
+                    });
+                    toast({
+                      title: "Added to Wishlist!",
+                      description: `${product.name} saved to your wishlist.`,
+                      duration: 2000,
+                    });
+                  }
                 }}
               >
-                <Heart className="w-3 h-3" />
+                <Heart className={`w-3 h-3 ${isWishlisted ? 'fill-current' : ''}`} />
               </Button>
               <Button 
                 size="icon" 
@@ -230,6 +257,76 @@ export default function ProductsPage() {
   const recognitionRef = useRef<any>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  
+  const [products, setProducts] = useState<Product[]>(staticProducts);
+  const [categories, setCategories] = useState<Category[]>(staticCategories);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('/api/products', { credentials: 'include' });
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data) && data.length > 0) {
+            const formattedProducts: Product[] = data.map((p: any) => ({
+              id: p.id,
+              name: p.name,
+              slug: p.slug || p.name.toLowerCase().replace(/\s+/g, '-'),
+              category: p.category?.name || p.categoryName || 'General',
+              categorySlug: p.category?.slug || p.categorySlug || 'general',
+              price: parseFloat(p.price) || 0,
+              originalPrice: p.originalPrice ? parseFloat(p.originalPrice) : undefined,
+              rating: parseFloat(p.rating) || 4.5,
+              reviews: p.reviewCount || Math.floor(Math.random() * 500),
+              image: p.images?.[0] || p.image || '/placeholder.jpg',
+              images: p.images || [],
+              description: p.description,
+              shortDescription: p.shortDescription,
+              isNew: p.isNew || false,
+              isBestseller: p.isBestseller || false,
+              isFeatured: p.isFeatured || false,
+              inStock: p.inStock ?? true,
+              stock: p.stock || 0,
+              vendorName: p.vendor?.storeName,
+              tags: p.tags || [],
+              badgeColor: ['purple', 'pink', 'cyan', 'emerald', 'amber'][Math.floor(Math.random() * 5)],
+            }));
+            setProducts(formattedProducts);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+    
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories', { credentials: 'include' });
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data) && data.length > 0) {
+            const formattedCategories: Category[] = data.map((c: any) => ({
+              name: c.name,
+              slug: c.slug,
+              icon: c.icon || '📦',
+              iconName: c.iconName || 'Package',
+              gradient: c.gradient || 'from-purple-600 to-pink-500',
+              image: c.image,
+            }));
+            setCategories(formattedCategories);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      }
+    };
+    
+    fetchProducts();
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     setSelectedCategory(categoryFromUrl);
