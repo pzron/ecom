@@ -48,13 +48,13 @@ export default function StockkeeperDashboard() {
             <p className="text-white/60">Warehouse and inventory management</p>
           </div>
           <div className="flex gap-3">
-            <Link href="/stockkeeper/receiving">
+            <Link href="/spoon/stockkeeper/receiving">
               <Button variant="outline" className="border-white/10 bg-white/5">
                 <Truck className="w-4 h-4 mr-2" />
                 Receive Stock
               </Button>
             </Link>
-            <Link href="/stockkeeper/inventory">
+            <Link href="/spoon/stockkeeper/inventory">
               <Button className="bg-gradient-to-r from-orange-500 to-yellow-500">
                 <Boxes className="w-4 h-4 mr-2" />
                 View Inventory
@@ -190,7 +190,7 @@ export default function StockkeeperDashboard() {
                     <AlertTriangle className="w-5 h-5 text-red-400" />
                     Low Stock Alerts
                   </CardTitle>
-                  <Link href="/stockkeeper/alerts">
+                  <Link href="/spoon/stockkeeper/alerts">
                     <Button variant="ghost" size="sm" className="text-orange-400 hover:text-orange-300">
                       View All
                     </Button>

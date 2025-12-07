@@ -60,11 +60,32 @@ import OfficeReports from "@/pages/office/reports";
 import OfficeSupport from "@/pages/office/support";
 import OfficeCommunications from "@/pages/office/communications";
 
+import HRDashboard from "@/pages/hr/dashboard";
+import HREmployees from "@/pages/hr/employees";
+import HRRecruitment from "@/pages/hr/recruitment";
+import HRPayroll from "@/pages/hr/payroll";
+import HRAttendance from "@/pages/hr/attendance";
+import HRLeave from "@/pages/hr/leave";
+
+import MarketingDashboard from "@/pages/marketing/dashboard";
+import MarketingCampaigns from "@/pages/marketing/campaigns";
+import MarketingSocial from "@/pages/marketing/social";
+import MarketingAnalytics from "@/pages/marketing/analytics";
+import MarketingContent from "@/pages/marketing/content";
+
+import SalesDashboard from "@/pages/sales/dashboard";
+import SalesLeads from "@/pages/sales/leads";
+import SalesDeals from "@/pages/sales/deals";
+import SalesPipeline from "@/pages/sales/pipeline";
+import SalesCustomers from "@/pages/sales/customers";
+import SalesReports from "@/pages/sales/reports";
+
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
+      {/* Customer Routes */}
       <Route path="/" component={Home} />
       <Route path="/products" component={ProductsPage} />
       <Route path="/product/:id" component={ProductDetails} />
@@ -79,54 +100,84 @@ function Router() {
       <Route path="/combo" component={ComboPage} />
       <Route path="/combo/builder" component={ComboBuilderPage} />
 
-      <Route path="/admin" component={AdminDashboard} />
-      <Route path="/admin/dashboard" component={AdminDashboard} />
-      <Route path="/admin/users" component={AdminUsers} />
-      <Route path="/admin/roles" component={AdminRoles} />
-      <Route path="/admin/products" component={AdminProducts} />
-      <Route path="/admin/analytics" component={AdminAnalytics} />
-      <Route path="/admin/settings" component={AdminSettings} />
+      {/* Admin Routes - /hair/ */}
+      <Route path="/hair" component={AdminDashboard} />
+      <Route path="/hair/dashboard" component={AdminDashboard} />
+      <Route path="/hair/users" component={AdminUsers} />
+      <Route path="/hair/roles" component={AdminRoles} />
+      <Route path="/hair/products" component={AdminProducts} />
+      <Route path="/hair/analytics" component={AdminAnalytics} />
+      <Route path="/hair/settings" component={AdminSettings} />
 
-      <Route path="/affiliate" component={AffiliateDashboard} />
-      <Route path="/affiliate/dashboard" component={AffiliateDashboard} />
-      <Route path="/affiliate/campaigns" component={AffiliateCampaigns} />
-      <Route path="/affiliate/earnings" component={AffiliateEarnings} />
-      <Route path="/affiliate/profile" component={AffiliateProfile} />
+      {/* Vendor & Affiliate Routes - /so/ */}
+      <Route path="/so" component={VendorDashboard} />
+      <Route path="/so/vendor" component={VendorDashboard} />
+      <Route path="/so/vendor/dashboard" component={VendorDashboard} />
+      <Route path="/so/vendor/products" component={VendorProducts} />
+      <Route path="/so/vendor/sales" component={VendorSales} />
+      <Route path="/so/vendor/settings" component={VendorSettings} />
+      <Route path="/so/affiliate" component={AffiliateDashboard} />
+      <Route path="/so/affiliate/dashboard" component={AffiliateDashboard} />
+      <Route path="/so/affiliate/campaigns" component={AffiliateCampaigns} />
+      <Route path="/so/affiliate/earnings" component={AffiliateEarnings} />
+      <Route path="/so/affiliate/profile" component={AffiliateProfile} />
 
-      <Route path="/vendor" component={VendorDashboard} />
-      <Route path="/vendor/dashboard" component={VendorDashboard} />
-      <Route path="/vendor/products" component={VendorProducts} />
-      <Route path="/vendor/sales" component={VendorSales} />
-      <Route path="/vendor/settings" component={VendorSettings} />
+      {/* Store Management Routes - /spoon/ */}
+      <Route path="/spoon" component={ManagerDashboard} />
+      <Route path="/spoon/manager" component={ManagerDashboard} />
+      <Route path="/spoon/manager/dashboard" component={ManagerDashboard} />
+      <Route path="/spoon/manager/team" component={ManagerTeam} />
+      <Route path="/spoon/manager/sales" component={ManagerSales} />
+      <Route path="/spoon/manager/inventory" component={ManagerInventory} />
+      <Route path="/spoon/manager/reports" component={ManagerReports} />
+      <Route path="/spoon/manager/schedules" component={ManagerSchedules} />
 
-      <Route path="/manager" component={ManagerDashboard} />
-      <Route path="/manager/dashboard" component={ManagerDashboard} />
-      <Route path="/manager/team" component={ManagerTeam} />
-      <Route path="/manager/sales" component={ManagerSales} />
-      <Route path="/manager/inventory" component={ManagerInventory} />
-      <Route path="/manager/reports" component={ManagerReports} />
-      <Route path="/manager/schedules" component={ManagerSchedules} />
+      <Route path="/spoon/cashier" component={CashierDashboard} />
+      <Route path="/spoon/cashier/dashboard" component={CashierDashboard} />
+      <Route path="/spoon/cashier/pos" component={CashierPOS} />
+      <Route path="/spoon/cashier/transactions" component={CashierTransactions} />
+      <Route path="/spoon/cashier/summary" component={CashierSummary} />
+      <Route path="/spoon/cashier/orders" component={CashierOrders} />
 
-      <Route path="/cashier" component={CashierDashboard} />
-      <Route path="/cashier/dashboard" component={CashierDashboard} />
-      <Route path="/cashier/pos" component={CashierPOS} />
-      <Route path="/cashier/transactions" component={CashierTransactions} />
-      <Route path="/cashier/summary" component={CashierSummary} />
-      <Route path="/cashier/orders" component={CashierOrders} />
+      <Route path="/spoon/stockkeeper" component={StockkeeperDashboard} />
+      <Route path="/spoon/stockkeeper/dashboard" component={StockkeeperDashboard} />
+      <Route path="/spoon/stockkeeper/inventory" component={StockkeeperInventory} />
+      <Route path="/spoon/stockkeeper/receiving" component={StockkeeperReceiving} />
+      <Route path="/spoon/stockkeeper/transfers" component={StockkeeperTransfers} />
+      <Route path="/spoon/stockkeeper/alerts" component={StockkeeperAlerts} />
 
-      <Route path="/stockkeeper" component={StockkeeperDashboard} />
-      <Route path="/stockkeeper/dashboard" component={StockkeeperDashboard} />
-      <Route path="/stockkeeper/inventory" component={StockkeeperInventory} />
-      <Route path="/stockkeeper/receiving" component={StockkeeperReceiving} />
-      <Route path="/stockkeeper/transfers" component={StockkeeperTransfers} />
-      <Route path="/stockkeeper/alerts" component={StockkeeperAlerts} />
+      <Route path="/spoon/office" component={OfficeDashboard} />
+      <Route path="/spoon/office/dashboard" component={OfficeDashboard} />
+      <Route path="/spoon/office/documents" component={OfficeDocuments} />
+      <Route path="/spoon/office/reports" component={OfficeReports} />
+      <Route path="/spoon/office/support" component={OfficeSupport} />
+      <Route path="/spoon/office/communications" component={OfficeCommunications} />
 
-      <Route path="/office" component={OfficeDashboard} />
-      <Route path="/office/dashboard" component={OfficeDashboard} />
-      <Route path="/office/documents" component={OfficeDocuments} />
-      <Route path="/office/reports" component={OfficeReports} />
-      <Route path="/office/support" component={OfficeSupport} />
-      <Route path="/office/communications" component={OfficeCommunications} />
+      {/* HR Routes */}
+      <Route path="/spoon/hr" component={HRDashboard} />
+      <Route path="/spoon/hr/dashboard" component={HRDashboard} />
+      <Route path="/spoon/hr/employees" component={HREmployees} />
+      <Route path="/spoon/hr/recruitment" component={HRRecruitment} />
+      <Route path="/spoon/hr/payroll" component={HRPayroll} />
+      <Route path="/spoon/hr/attendance" component={HRAttendance} />
+      <Route path="/spoon/hr/leave" component={HRLeave} />
+
+      {/* Marketing Routes */}
+      <Route path="/spoon/marketing" component={MarketingDashboard} />
+      <Route path="/spoon/marketing/dashboard" component={MarketingDashboard} />
+      <Route path="/spoon/marketing/campaigns" component={MarketingCampaigns} />
+      <Route path="/spoon/marketing/social" component={MarketingSocial} />
+      <Route path="/spoon/marketing/analytics" component={MarketingAnalytics} />
+      <Route path="/spoon/marketing/content" component={MarketingContent} />
+
+      {/* Sales Routes */}
+      <Route path="/spoon/sales" component={SalesDashboard} />
+      <Route path="/spoon/sales/dashboard" component={SalesDashboard} />
+      <Route path="/spoon/sales/leads" component={SalesLeads} />
+      <Route path="/spoon/sales/deals" component={SalesDeals} />
+      <Route path="/spoon/sales/pipeline" component={SalesPipeline} />
+      <Route path="/spoon/sales/customers" component={SalesCustomers} />
+      <Route path="/spoon/sales/reports" component={SalesReports} />
 
       <Route component={NotFound} />
     </Switch>

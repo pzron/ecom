@@ -17,9 +17,9 @@ const recentTransactions = [
 ];
 
 const quickActions = [
-  { label: "New Sale", icon: ShoppingCart, href: "/cashier/pos", color: "from-green-500 to-emerald-500" },
-  { label: "Refund", icon: Receipt, href: "/cashier/transactions", color: "from-orange-500 to-amber-500" },
-  { label: "Daily Report", icon: TrendingUp, href: "/cashier/summary", color: "from-blue-500 to-cyan-500" },
+  { label: "New Sale", icon: ShoppingCart, href: "/spoon/cashier/pos", color: "from-green-500 to-emerald-500" },
+  { label: "Refund", icon: Receipt, href: "/spoon/cashier/transactions", color: "from-orange-500 to-amber-500" },
+  { label: "Daily Report", icon: TrendingUp, href: "/spoon/cashier/summary", color: "from-blue-500 to-cyan-500" },
 ];
 
 export default function CashierDashboard() {
@@ -35,7 +35,7 @@ export default function CashierDashboard() {
             <h1 className="text-3xl font-heading font-bold text-white">Cashier Dashboard</h1>
             <p className="text-white/60">Welcome back! Ready to serve customers.</p>
           </div>
-          <Link href="/cashier/pos">
+          <Link href="/spoon/cashier/pos">
             <Button className="bg-gradient-to-r from-green-500 to-emerald-500 text-lg px-6">
               <CreditCard className="w-5 h-5 mr-2" />
               Open POS
@@ -118,7 +118,7 @@ export default function CashierDashboard() {
                     <Receipt className="w-5 h-5 text-green-400" />
                     Recent Transactions
                   </CardTitle>
-                  <Link href="/cashier/transactions">
+                  <Link href="/spoon/cashier/transactions">
                     <Button variant="ghost" size="sm" className="text-green-400 hover:text-green-300">
                       View All
                     </Button>

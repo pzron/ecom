@@ -50,13 +50,13 @@ export default function OfficeDashboard() {
             <p className="text-white/60">Administrative tasks and customer support</p>
           </div>
           <div className="flex gap-3">
-            <Link href="/office/support">
+            <Link href="/spoon/office/support">
               <Button variant="outline" className="border-white/10 bg-white/5">
                 <Headphones className="w-4 h-4 mr-2" />
                 Support Queue
               </Button>
             </Link>
-            <Link href="/office/reports">
+            <Link href="/spoon/office/reports">
               <Button className="bg-gradient-to-r from-indigo-500 to-violet-500">
                 <BarChart3 className="w-4 h-4 mr-2" />
                 View Reports
@@ -134,7 +134,7 @@ export default function OfficeDashboard() {
                     <Headphones className="w-5 h-5 text-indigo-400" />
                     Recent Support Tickets
                   </CardTitle>
-                  <Link href="/office/support">
+                  <Link href="/spoon/office/support">
                     <Button variant="ghost" size="sm" className="text-indigo-400 hover:text-indigo-300">
                       View All
                     </Button>
@@ -215,7 +215,7 @@ export default function OfficeDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link href="/office/documents">
+          <Link href="/spoon/office/documents">
             <Card className="bg-gradient-to-br from-indigo-500/10 to-violet-500/10 border-indigo-500/20 hover:border-indigo-500/40 transition-colors cursor-pointer">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
@@ -231,7 +231,7 @@ export default function OfficeDashboard() {
             </Card>
           </Link>
           
-          <Link href="/office/reports">
+          <Link href="/spoon/office/reports">
             <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/20 hover:border-purple-500/40 transition-colors cursor-pointer">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
@@ -247,7 +247,7 @@ export default function OfficeDashboard() {
             </Card>
           </Link>
           
-          <Link href="/office/communications">
+          <Link href="/spoon/office/communications">
             <Card className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border-cyan-500/20 hover:border-cyan-500/40 transition-colors cursor-pointer">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">

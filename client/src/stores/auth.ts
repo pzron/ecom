@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type UserRole = 'customer' | 'affiliate' | 'vendor' | 'admin' | 'manager' | 'cashier' | 'stockkeeper' | 'office_member';
+export type UserRole = 'customer' | 'affiliate' | 'vendor' | 'admin' | 'manager' | 'cashier' | 'stockkeeper' | 'office_member' | 'hr' | 'marketing' | 'sales';
 
 export interface RolePermissions {
   canManageUsers: boolean;
@@ -148,6 +148,54 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
     canManageStock: false,
     canManageDocuments: false,
     canManageSupport: false,
+  },
+  hr: {
+    canManageUsers: true,
+    canManageProducts: false,
+    canManageOrders: false,
+    canViewAnalytics: true,
+    canManageInventory: false,
+    canProcessPayments: false,
+    canManageReports: true,
+    canManageSettings: false,
+    canApproveRequests: true,
+    canManageTeam: true,
+    canAccessPOS: false,
+    canManageStock: false,
+    canManageDocuments: true,
+    canManageSupport: false,
+  },
+  marketing: {
+    canManageUsers: false,
+    canManageProducts: true,
+    canManageOrders: false,
+    canViewAnalytics: true,
+    canManageInventory: false,
+    canProcessPayments: false,
+    canManageReports: true,
+    canManageSettings: false,
+    canApproveRequests: false,
+    canManageTeam: false,
+    canAccessPOS: false,
+    canManageStock: false,
+    canManageDocuments: true,
+    canManageSupport: false,
+  },
+  sales: {
+    canManageUsers: false,
+    canManageProducts: true,
+    canManageOrders: true,
+    canViewAnalytics: true,
+    canManageInventory: false,
+    canProcessPayments: false,
+    canManageReports: true,
+    canManageSettings: false,
+    canApproveRequests: false,
+    canManageTeam: false,
+    canAccessPOS: false,
+    canManageStock: false,
+    canManageDocuments: false,
+    canManageSupport: true,
   },
 };
 
