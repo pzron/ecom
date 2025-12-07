@@ -54,6 +54,15 @@ const conversionData = [
 export default function AdminAnalytics() {
   const [timeRange, setTimeRange] = useState("30d");
 
+  const colorClasses: Record<string, { bg: string; text: string }> = {
+    purple: { bg: "bg-purple-500/20", text: "text-purple-400" },
+    pink: { bg: "bg-pink-500/20", text: "text-pink-400" },
+    blue: { bg: "bg-blue-500/20", text: "text-blue-400" },
+    green: { bg: "bg-green-500/20", text: "text-green-400" },
+    orange: { bg: "bg-orange-500/20", text: "text-orange-400" },
+    red: { bg: "bg-red-500/20", text: "text-red-400" },
+  };
+
   const StatCard = ({ icon: Icon, label, value, subtext, color }: any) => (
     <motion.div whileHover={{ y: -4 }} className="p-4 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10">
       <div className="flex items-start justify-between">
@@ -62,8 +71,8 @@ export default function AdminAnalytics() {
           <h3 className="text-2xl font-bold text-white mt-2">{value}</h3>
           {subtext && <p className="text-xs text-white/40 mt-1">{subtext}</p>}
         </div>
-        <div className={`p-3 rounded-lg bg-${color}-500/20`}>
-          <Icon className={`w-6 h-6 text-${color}-400`} />
+        <div className={`p-3 rounded-lg ${colorClasses[color]?.bg || "bg-purple-500/20"}`}>
+          <Icon className={`w-6 h-6 ${colorClasses[color]?.text || "text-purple-400"}`} />
         </div>
       </div>
     </motion.div>

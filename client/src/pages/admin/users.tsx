@@ -99,6 +99,14 @@ export default function AdminUsers() {
 
   if (loading) return <div className="text-white text-center py-12">Loading...</div>;
 
+  const colorClasses: Record<string, { bg: string; text: string }> = {
+    purple: { bg: "bg-purple-500/20", text: "text-purple-400" },
+    blue: { bg: "bg-blue-500/20", text: "text-blue-400" },
+    pink: { bg: "bg-pink-500/20", text: "text-pink-400" },
+    orange: { bg: "bg-orange-500/20", text: "text-orange-400" },
+    green: { bg: "bg-green-500/20", text: "text-green-400" },
+  };
+
   const StatCard = ({ icon: Icon, label, value, color }: any) => (
     <motion.div whileHover={{ y: -5 }} className="p-4 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10">
       <div className="flex items-center justify-between">
@@ -106,8 +114,8 @@ export default function AdminUsers() {
           <p className="text-white/60 text-sm">{label}</p>
           <p className="text-2xl font-bold text-white mt-1">{value}</p>
         </div>
-        <div className={`p-3 rounded-lg bg-${color}-500/20`}>
-          <Icon className={`w-6 h-6 text-${color}-400`} />
+        <div className={`p-3 rounded-lg ${colorClasses[color]?.bg || "bg-purple-500/20"}`}>
+          <Icon className={`w-6 h-6 ${colorClasses[color]?.text || "text-purple-400"}`} />
         </div>
       </div>
     </motion.div>
@@ -335,11 +343,19 @@ export default function AdminUsers() {
 
             {/* Existing Roles */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {roles.map((role: any) => (
+              {roles.map((role: any) => {
+                const roleColorMap: Record<string, string> = {
+                  green: "text-green-400",
+                  blue: "text-blue-400",
+                  pink: "text-pink-400",
+                  purple: "text-purple-400",
+                  indigo: "text-indigo-400",
+                };
+                return (
                 <motion.div key={role.id} whileHover={{ y: -4 }} className="p-4 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <Shield className={`w-5 h-5 text-${role.color}-400`} />
+                      <Shield className={`w-5 h-5 ${roleColorMap[role.color] || "text-purple-400"}`} />
                       <h4 className="text-white font-bold text-lg">{role.name}</h4>
                     </div>
                     {!["customer", "vendor", "affiliate", "admin"].includes(role.id) && (
@@ -362,7 +378,8 @@ export default function AdminUsers() {
                     </ul>
                   </div>
                 </motion.div>
-              ))}
+              );
+              })}
             </div>
           </div>
         )}
