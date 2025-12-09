@@ -83,7 +83,7 @@ export const subCategories: Record<string, string[]> = {
     "Leaf Blowers", "Chainsaws", "Hedge Trimmers", "Garden Hoses", "Sprinklers", "Watering Cans",
     "Fertilizers", "Pesticides", "Seeds", "Bulbs", "Soil", "Mulch", "Composters", "Raised Garden Beds",
     "Greenhouses", "Garden Sheds", "Patio Heaters", "Fire Pits", "Outdoor Grills", "BBQ Accessories",
-    "Outdoor Umbrellas", "Gazebos", "Pergolas", "Hammocks", "Outdoor Cushions", "Planters", "Bird Feeders",
+    "Outdoor Umbrellas", "Gazebos", "Pergolas", "Hammocks", "Outdoor Cushions", "Bird Feeders",
     "Bird Houses", "Garden Statues", "Fountains", "Pond Supplies", "Fencing", "Gates", "Mailboxes"
   ],
   "health-beauty": [
@@ -482,14 +482,18 @@ export const subCategories: Record<string, string[]> = {
 
 export function generateAllCategories() {
   const allCategories: { name: string; slug: string; icon: string; description: string; parentId?: string }[] = [];
+  const seenSlugs = new Set<string>();
   
   mainCategories.forEach((main) => {
-    allCategories.push({
-      name: main.name,
-      slug: main.slug,
-      icon: main.icon,
-      description: main.description
-    });
+    if (!seenSlugs.has(main.slug)) {
+      seenSlugs.add(main.slug);
+      allCategories.push({
+        name: main.name,
+        slug: main.slug,
+        icon: main.icon,
+        description: main.description
+      });
+    }
   });
 
   const subCategoryIcons: Record<string, string[]> = {
@@ -521,13 +525,16 @@ export function generateAllCategories() {
     
     subs.forEach((subName, index) => {
       const slug = `${main.slug}-${subName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')}`;
-      allCategories.push({
-        name: subName,
-        slug: slug,
-        icon: icons[index % icons.length],
-        description: `${subName} in ${main.name}`,
-        parentId: main.slug
-      });
+      if (!seenSlugs.has(slug)) {
+        seenSlugs.add(slug);
+        allCategories.push({
+          name: subName,
+          slug: slug,
+          icon: icons[index % icons.length],
+          description: `${subName} in ${main.name}`,
+          parentId: main.slug
+        });
+      }
     });
   });
 
