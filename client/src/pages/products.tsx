@@ -72,7 +72,7 @@ function ProductCard({ product, index }: ProductCardProps) {
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist();
   const [isHovered, setIsHovered] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const isWishlisted = isInWishlist(product.id);
+  const isWishlisted = isInWishlist(String(product.id));
 
   const colorKey = (product.badgeColor || "purple") as keyof typeof colorGradients;
   const gradient = colorGradients[colorKey] || colorGradients.purple;
@@ -84,7 +84,7 @@ function ProductCard({ product, index }: ProductCardProps) {
     setIsAddingToCart(true);
     
     addItem({
-      id: product.id,
+      id: String(product.id),
       name: product.name,
       price: product.price,
       originalPrice: product.originalPrice,
@@ -155,7 +155,7 @@ function ProductCard({ product, index }: ProductCardProps) {
                   e.preventDefault(); 
                   e.stopPropagation();
                   if (isWishlisted) {
-                    removeFromWishlist(product.id);
+                    removeFromWishlist(String(product.id));
                     toast({
                       title: "Removed from Wishlist",
                       description: `${product.name} removed from your wishlist.`,
@@ -163,7 +163,7 @@ function ProductCard({ product, index }: ProductCardProps) {
                     });
                   } else {
                     addToWishlist({
-                      id: product.id,
+                      id: String(product.id),
                       name: product.name,
                       price: product.price,
                       originalPrice: product.originalPrice,

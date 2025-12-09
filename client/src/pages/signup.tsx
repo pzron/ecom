@@ -162,7 +162,7 @@ export default function SignUpPage() {
           {/* Logo */}
           <Link href="/">
             <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-2 cursor-pointer mb-8 justify-center">
-              <img src="/attached_assets/logo.png" alt="NexCommerce" className="h-7 w-7" />
+              <img src="/logo.png" alt="NexCommerce" className="h-7 w-7" />
               <span className="font-heading font-bold text-lg tracking-wider bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 NexCommerce
               </span>

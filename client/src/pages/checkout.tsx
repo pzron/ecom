@@ -748,7 +748,7 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="space-y-3 py-4">
-                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="text-white">${total}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="text-white">${subtotal.toFixed(2)}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-muted-foreground">Delivery</span><span className="text-green-400 font-semibold">{deliveryCharge === 0 ? "FREE" : `+$${deliveryCharge.toFixed(2)}`}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-muted-foreground">Insurance</span><span className="text-white">$4.99</span></div>
                   <div className="flex justify-between text-sm"><span className="text-muted-foreground">COD Fee</span><span className="text-white">${paymentDetails.codCharge.toFixed(2)}</span></div>

@@ -507,13 +507,13 @@ export function ChatWidget() {
       };
     }
 
-    const products = searchProducts(userMessage);
-    if (products.length > 0) {
-      const firstProduct = products[0];
+    const matchedProducts = searchProducts(userMessage);
+    if (matchedProducts.length > 0) {
+      const firstProduct = matchedProducts[0];
       const details = getProductDetails(firstProduct.name);
       return {
         content: `I found some products matching "${userMessage}". ${details ? details : ''} Here are the results:`,
-        products
+        products: matchedProducts
       };
     }
 

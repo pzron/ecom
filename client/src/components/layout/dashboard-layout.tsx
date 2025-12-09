@@ -142,7 +142,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
         <div className="p-6 border-b border-white/10">
           <Link href="/">
             <div className="flex items-center gap-2 cursor-pointer">
-              <img src="/attached_assets/logo.png" alt="NexCommerce" className="h-8 w-8" />
+              <img src="/logo.png" alt="NexCommerce" className="h-8 w-8" />
               <span className="font-heading font-bold text-lg text-white">
                 Nex<span className="text-primary">Dashboard</span>
               </span>
