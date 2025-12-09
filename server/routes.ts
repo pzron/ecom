@@ -651,8 +651,8 @@ export async function registerRoutes(
         totalClicks: affiliate.totalClicks || 0,
         totalConversions: affiliate.totalConversions || 0,
         tier: affiliate.tier || 'bronze',
-        conversionRate: affiliate.totalClicks > 0 
-          ? ((affiliate.totalConversions || 0) / affiliate.totalClicks * 100).toFixed(1)
+        conversionRate: (affiliate.totalClicks || 0) > 0 
+          ? ((affiliate.totalConversions || 0) / (affiliate.totalClicks || 1) * 100).toFixed(1)
           : "0",
         campaigns: campaigns || [],
         earningsData: [
